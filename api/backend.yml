@@ -1,0 +1,243 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "CC To Git Service"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+paths:
+  /login:
+    post:
+      summary: 登录
+      description: ''
+      operationId: Login
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: userInfo
+          in: body
+          description: 用户信息
+          required: true
+          schema:
+            $ref: '#/definitions/UserModel'
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /users:
+    post:
+      summary: 开通账户
+      description: ''
+      operationId: CreateUser
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: userInfo
+          in: body
+          description: 用户信息
+          required: true
+          schema:
+            $ref: '#/definitions/UserModel'
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    get:
+      summary: 账户列表
+      description: ''
+      operationId: ListUser
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: 账户列表
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/UserInfoModel'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /tasks:
+    post:
+      summary: 新建任务
+      description: ''
+      operationId: CreateTask
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: userInfo
+          in: body
+          description: 任务信息
+          required: true
+          schema:
+            $ref: '#/definitions/TaskModel'
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    get:
+      summary: 任务列表
+      description: ''
+      operationId: ListTask
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: 任务列表
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TaskInfoModel'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /tasks/{taskID}:
+    get:
+      summary: 任务详情
+      description: ''
+      operationId: GetTask
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "taskID"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        '200':
+          description: 任务信息
+          schema:
+            $ref: '#/definitions/TaskDetail'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+definitions:
+  UserInfoModel:
+    type: object
+    properties:
+      userName:
+        type: string
+      password:
+        type: string
+      userID:
+        type: integer
+  UserModel:
+    type: object
+    properties:
+      userName:
+        type: string
+      password:
+        type: string
+  TaskInfoModel:
+    type: object
+    properties:
+      pvob:
+        type: string
+      component:
+        type: string
+      gitRepo:
+        type: string
+      status:
+        type: string
+      lastCompleteDateTime:
+        type: string
+      taskID:
+        type: integer
+  TaskMatchInfo:
+    type: object
+    properties:
+      stream:
+        type: string
+      gitBranch:
+        type: string
+  TaskModel:
+    type: object
+    properties:
+      pvob:
+        type: string
+      component:
+        type: string
+      ccUser:
+        type: string
+      ccPassword:
+        type: string
+      gitURL:
+        type: string
+      gitUser:
+        type: string
+      gitPassword:
+        type: string
+      matchInfo:
+        type: array
+        items:
+          $ref: '#/definitions/TaskMatchInfo'
+  TaskLogInfo:
+    type: object
+    properties:
+      logID:
+        type: string
+      status:
+        type: string
+      startTime:
+        type: string
+      endTime:
+        type: string
+      duration:
+        type: string
+  TaskDetail:
+    type: object
+    properties:
+      taskModel:
+        $ref: '#/definitions/TaskModel'
+      logList:
+        type: array
+        items:
+          $ref: '#/definitions/TaskLogInfo'
+  ErrorModel:
+    type: object
+    properties:
+      message:
+        type: string
+        example: error message
+      code:
+        type: integer
+        example: 400
+  OK:
+    type: object
+    properties:
+      message:
+        type: string
