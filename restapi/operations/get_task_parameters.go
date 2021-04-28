@@ -34,7 +34,7 @@ type GetTaskParams struct {
 	  Required: true
 	  In: path
 	*/
-	TaskID string
+	ID string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -46,8 +46,8 @@ func (o *GetTaskParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 
 	o.HTTPRequest = r
 
-	rTaskID, rhkTaskID, _ := route.Params.GetOK("taskID")
-	if err := o.bindTaskID(rTaskID, rhkTaskID, route.Formats); err != nil {
+	rID, rhkID, _ := route.Params.GetOK("id")
+	if err := o.bindID(rID, rhkID, route.Formats); err != nil {
 		res = append(res, err)
 	}
 	if len(res) > 0 {
@@ -56,8 +56,8 @@ func (o *GetTaskParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 	return nil
 }
 
-// bindTaskID binds and validates parameter TaskID from path.
-func (o *GetTaskParams) bindTaskID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+// bindID binds and validates parameter ID from path.
+func (o *GetTaskParams) bindID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
@@ -65,7 +65,7 @@ func (o *GetTaskParams) bindTaskID(rawData []string, hasKey bool, formats strfmt
 
 	// Required: true
 	// Parameter is provided by construction from the route
-	o.TaskID = raw
+	o.ID = raw
 
 	return nil
 }

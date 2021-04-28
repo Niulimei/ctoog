@@ -23,6 +23,9 @@ type TaskInfoModel struct {
 	// git repo
 	GitRepo string `json:"gitRepo,omitempty"`
 
+	// id
+	ID int64 `json:"id,omitempty"`
+
 	// last complete date time
 	LastCompleteDateTime string `json:"lastCompleteDateTime,omitempty"`
 
@@ -31,9 +34,6 @@ type TaskInfoModel struct {
 
 	// status
 	Status string `json:"status,omitempty"`
-
-	// task ID
-	TaskID int64 `json:"taskID,omitempty"`
 }
 
 // Validate validates this task info model

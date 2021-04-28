@@ -17,14 +17,14 @@ import (
 // swagger:model UserInfoModel
 type UserInfoModel struct {
 
+	// id
+	ID int64 `json:"id,omitempty"`
+
 	// password
 	Password string `json:"password,omitempty"`
 
-	// user ID
-	UserID int64 `json:"userID,omitempty"`
-
-	// user name
-	UserName string `json:"userName,omitempty"`
+	// username
+	Username string `json:"username,omitempty"`
 }
 
 // Validate validates this user info model

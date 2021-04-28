@@ -29,7 +29,7 @@ func NewGetTask(ctx *middleware.Context, handler GetTaskHandler) *GetTask {
 	return &GetTask{Context: ctx, Handler: handler}
 }
 
-/* GetTask swagger:route GET /tasks/{taskID} getTask
+/* GetTask swagger:route GET /tasks/{id} getTask
 
 任务详情
 

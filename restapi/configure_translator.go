@@ -13,13 +13,13 @@ import (
 	"ctgb/restapi/operations"
 )
 
-//go:generate swagger generate server --target ../../ctgb --name CCToGitService --spec ../api/backend.yml --principal interface{}
+//go:generate swagger generate server --target ../../ctgb --name Translator --spec ../api/backend.yml --principal interface{}
 
-func configureFlags(api *operations.CCToGitServiceAPI) {
+func configureFlags(api *operations.TranslatorAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
 }
 
-func configureAPI(api *operations.CCToGitServiceAPI) http.Handler {
+func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	// configure the api here
 	api.ServeError = errors.ServeError
 

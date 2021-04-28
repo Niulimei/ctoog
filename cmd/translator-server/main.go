@@ -23,12 +23,12 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	api := operations.NewCCToGitServiceAPI(swaggerSpec)
+	api := operations.NewTranslatorAPI(swaggerSpec)
 	server := restapi.NewServer(api)
 	defer server.Shutdown()
 
 	parser := flags.NewParser(server, flags.Default)
-	parser.ShortDescription = "CC To Git Service"
+	parser.ShortDescription = "translator"
 	parser.LongDescription = swaggerSpec.Spec().Info.Description
 	server.ConfigureFlags()
 	for _, optsGroup := range api.CommandLineOptionsGroups {

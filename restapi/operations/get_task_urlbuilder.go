@@ -14,7 +14,7 @@ import (
 
 // GetTaskURL generates an URL for the get task operation
 type GetTaskURL struct {
-	TaskID string
+	ID string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -40,16 +40,19 @@ func (o *GetTaskURL) SetBasePath(bp string) {
 func (o *GetTaskURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/tasks/{taskID}"
+	var _path = "/tasks/{id}"
 
-	taskID := o.TaskID
-	if taskID != "" {
-		_path = strings.Replace(_path, "{taskID}", taskID, -1)
+	id := o.ID
+	if id != "" {
+		_path = strings.Replace(_path, "{id}", id, -1)
 	} else {
-		return nil, errors.New("taskId is required on GetTaskURL")
+		return nil, errors.New("id is required on GetTaskURL")
 	}
 
 	_basePath := o._basePath
+	if _basePath == "" {
+		_basePath = "/api"
+	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
 	return &_result, nil

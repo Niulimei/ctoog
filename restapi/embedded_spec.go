@@ -20,7 +20,7 @@ func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
   "swagger": "2.0",
   "info": {
-    "title": "CC To Git Service",
+    "title": "translator",
     "termsOfService": "http://swagger.io/terms/",
     "contact": {
       "email": "apiteam@swagger.io"
@@ -31,6 +31,7 @@ func init() {
     },
     "version": "1.0.0"
   },
+  "basePath": "/api",
   "paths": {
     "/login": {
       "post": {
@@ -133,7 +134,7 @@ func init() {
         }
       }
     },
-    "/tasks/{taskID}": {
+    "/tasks/{id}": {
       "get": {
         "consumes": [
           "application/json"
@@ -146,7 +147,7 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "taskID",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -277,6 +278,9 @@ func init() {
         "gitRepo": {
           "type": "string"
         },
+        "id": {
+          "type": "integer"
+        },
         "lastCompleteDateTime": {
           "type": "string"
         },
@@ -285,9 +289,6 @@ func init() {
         },
         "status": {
           "type": "string"
-        },
-        "taskID": {
-          "type": "integer"
         }
       }
     },
@@ -357,13 +358,13 @@ func init() {
     "UserInfoModel": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "integer"
+        },
         "password": {
           "type": "string"
         },
-        "userID": {
-          "type": "integer"
-        },
-        "userName": {
+        "username": {
           "type": "string"
         }
       }
@@ -374,7 +375,7 @@ func init() {
         "password": {
           "type": "string"
         },
-        "userName": {
+        "username": {
           "type": "string"
         }
       }
@@ -384,7 +385,7 @@ func init() {
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
   "swagger": "2.0",
   "info": {
-    "title": "CC To Git Service",
+    "title": "translator",
     "termsOfService": "http://swagger.io/terms/",
     "contact": {
       "email": "apiteam@swagger.io"
@@ -395,6 +396,7 @@ func init() {
     },
     "version": "1.0.0"
   },
+  "basePath": "/api",
   "paths": {
     "/login": {
       "post": {
@@ -497,7 +499,7 @@ func init() {
         }
       }
     },
-    "/tasks/{taskID}": {
+    "/tasks/{id}": {
       "get": {
         "consumes": [
           "application/json"
@@ -510,7 +512,7 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "taskID",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -641,6 +643,9 @@ func init() {
         "gitRepo": {
           "type": "string"
         },
+        "id": {
+          "type": "integer"
+        },
         "lastCompleteDateTime": {
           "type": "string"
         },
@@ -649,9 +654,6 @@ func init() {
         },
         "status": {
           "type": "string"
-        },
-        "taskID": {
-          "type": "integer"
         }
       }
     },
@@ -721,13 +723,13 @@ func init() {
     "UserInfoModel": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "integer"
+        },
         "password": {
           "type": "string"
         },
-        "userID": {
-          "type": "integer"
-        },
-        "userName": {
+        "username": {
           "type": "string"
         }
       }
@@ -738,7 +740,7 @@ func init() {
         "password": {
           "type": "string"
         },
-        "userName": {
+        "username": {
           "type": "string"
         }
       }

@@ -1,13 +1,14 @@
 swagger: "2.0"
 info:
   version: "1.0.0"
-  title: "CC To Git Service"
+  title: "translator"
   termsOfService: "http://swagger.io/terms/"
   contact:
     email: "apiteam@swagger.io"
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+basePath: "/api"
 paths:
   /login:
     post:
@@ -122,7 +123,7 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
-  /tasks/{taskID}:
+  /tasks/{id}:
     get:
       summary: 任务详情
       description: ''
@@ -132,7 +133,7 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: "taskID"
+        - name: "id"
           in: "path"
           required: true
           type: "string"
@@ -149,16 +150,16 @@ definitions:
   UserInfoModel:
     type: object
     properties:
-      userName:
+      username:
         type: string
       password:
         type: string
-      userID:
+      id:
         type: integer
   UserModel:
     type: object
     properties:
-      userName:
+      username:
         type: string
       password:
         type: string
@@ -175,7 +176,7 @@ definitions:
         type: string
       lastCompleteDateTime:
         type: string
-      taskID:
+      id:
         type: integer
   TaskMatchInfo:
     type: object
