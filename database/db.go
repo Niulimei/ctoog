@@ -1,12 +1,10 @@
 package database
 
 import (
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 var DB *sqlx.DB
@@ -15,7 +13,7 @@ var schema = `
 CREATE TABLE user (
     id integer PRIMARY KEY autoincrement,
     username varchar (50),
-    password_hash varchar (32)
+    password varchar (32)
 );
 
 CREATE TABLE task (
@@ -51,15 +49,18 @@ CREATE TABLE task_log (
 
 func init() {
 	var err error
-	var isInitAlready bool
-	dbDirPath, _ := os.Getwd()
-	dbFilePath := filepath.Join(dbDirPath, "translator.db")
-	fmt.Println(dbFilePath)
-	_, err = os.Stat(dbFilePath) //os.Stat获取文件信息
-	if err == nil {
-		isInitAlready = true
+	var isInitAlready = true
+	_, err = os.Stat("translator.db")    //os.Stat获取文件信息
+	if err != nil {
+		if os.IsNotExist(err) {
+			isInitAlready = false
+		}
 	}
-	DB, err = sqlx.Connect("sqlite3", fmt.Sprintf("file:%s?cache=private&mode=rwc", dbFilePath))
+	DB, err = sqlx.Connect("sqlite3", "file:translator.db?cache=private&mode=rwc")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = DB.Ping()
 	if err != nil {
 		log.Fatalln(err)
 	}

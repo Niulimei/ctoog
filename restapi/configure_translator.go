@@ -38,23 +38,21 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	api.JSONProducer = runtime.JSONProducer()
 
 	api.CreateTaskHandler = operations.CreateTaskHandlerFunc(CreateTaskHandler)
-	if api.CreateUserHandler == nil {
-		api.CreateUserHandler = operations.CreateUserHandlerFunc(func(params operations.CreateUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.CreateUser has not yet been implemented")
-		})
-	}
+	api.CreateUserHandler = operations.CreateUserHandlerFunc(func(params operations.CreateUserParams) middleware.Responder {
+		//return middleware.NotImplemented("operation operations.CreateUser has not yet been implemented")
+		return CreateUser(params)
+	})
 	api.GetTaskHandler = operations.GetTaskHandlerFunc(GetTaskHandler)
 	api.ListTaskHandler = operations.ListTaskHandlerFunc(ListTaskHandler)
-	if api.ListUserHandler == nil {
-		api.ListUserHandler = operations.ListUserHandlerFunc(func(params operations.ListUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.ListUser has not yet been implemented")
-		})
-	}
-	if api.LoginHandler == nil {
-		api.LoginHandler = operations.LoginHandlerFunc(func(params operations.LoginParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.Login has not yet been implemented")
-		})
-	}
+	api.ListUserHandler = operations.ListUserHandlerFunc(func(params operations.ListUserParams) middleware.Responder {
+		//return middleware.NotImplemented("operation operations.ListUser has not yet been implemented")
+		return ListUsers()
+	})
+	api.LoginHandler = operations.LoginHandlerFunc(func(params operations.LoginParams) middleware.Responder {
+		//return middleware.NotImplemented("operation operations.Login has not yet been implemented")
+		return Login(params)
+	})
+
 
 	api.PreServerShutdown = func() {}
 
