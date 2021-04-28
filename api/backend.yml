@@ -1,4 +1,6 @@
 swagger: "2.0"
+schemes:
+  - http
 info:
   version: "1.0.0"
   title: "translator"
@@ -89,7 +91,7 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: userInfo
+        - name: taskInfo
           in: body
           description: 任务信息
           required: true

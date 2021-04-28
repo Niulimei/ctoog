@@ -39,7 +39,7 @@ type CreateTaskParams struct {
 	  Required: true
 	  In: body
 	*/
-	UserInfo *models.TaskModel
+	TaskInfo *models.TaskModel
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -56,9 +56,9 @@ func (o *CreateTaskParams) BindRequest(r *http.Request, route *middleware.Matche
 		var body models.TaskModel
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("userInfo", "body", ""))
+				res = append(res, errors.Required("taskInfo", "body", ""))
 			} else {
-				res = append(res, errors.NewParseError("userInfo", "body", "", err))
+				res = append(res, errors.NewParseError("taskInfo", "body", "", err))
 			}
 		} else {
 			// validate body object
@@ -72,11 +72,11 @@ func (o *CreateTaskParams) BindRequest(r *http.Request, route *middleware.Matche
 			}
 
 			if len(res) == 0 {
-				o.UserInfo = &body
+				o.TaskInfo = &body
 			}
 		}
 	} else {
-		res = append(res, errors.Required("userInfo", "body", ""))
+		res = append(res, errors.Required("taskInfo", "body", ""))
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

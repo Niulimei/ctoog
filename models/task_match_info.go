@@ -18,7 +18,7 @@ import (
 type TaskMatchInfo struct {
 
 	// git branch
-	GitBranch string `json:"gitBranch,omitempty"`
+	GitBranch string `json:"gitBranch,omitempty" db:"git_branch"`
 
 	// stream
 	Stream string `json:"stream,omitempty"`

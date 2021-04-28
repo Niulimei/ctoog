@@ -21,13 +21,13 @@ type TaskLogInfo struct {
 	Duration string `json:"duration,omitempty"`
 
 	// end time
-	EndTime string `json:"endTime,omitempty"`
+	EndTime string `json:"endTime,omitempty" db:"end_time"`
 
 	// log ID
-	LogID string `json:"logID,omitempty"`
+	LogID string `json:"logID,omitempty" db:"log_id"`
 
 	// start time
-	StartTime string `json:"startTime,omitempty"`
+	StartTime string `json:"startTime,omitempty" db:"start_time"`
 
 	// status
 	Status string `json:"status,omitempty"`

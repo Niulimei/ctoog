@@ -1,10 +1,12 @@
 package database
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 var DB *sqlx.DB
@@ -27,7 +29,7 @@ CREATE TABLE task (
     git_password varchar (256),
     git_repo varchar (256),
     status varchar (16),
-    last_completed_time varchar (64)
+    last_completed_date_time varchar (64)
 );
 
 CREATE TABLE match_info (
@@ -38,25 +40,26 @@ CREATE TABLE match_info (
 );
 
 CREATE TABLE task_log (
-    id integer PRIMARY KEY autoincrement,
+    log_id integer PRIMARY KEY autoincrement,
     task_id integer,
     status varchar (16),
     start_time varchar (64),
     end_time varchar (64),
-    duration integer ,
-)
+    duration integer
+);
 `
 
 func init() {
 	var err error
 	var isInitAlready bool
-	_, err = os.Stat("translator.db")    //os.Stat获取文件信息
-	if err != nil {
-		if os.IsExist(err) {
-			isInitAlready = true
-		}
+	dbDirPath, _ := os.Getwd()
+	dbFilePath := filepath.Join(dbDirPath, "translator.db")
+	fmt.Println(dbFilePath)
+	_, err = os.Stat(dbFilePath) //os.Stat获取文件信息
+	if err == nil {
+		isInitAlready = true
 	}
-	DB, err = sqlx.Connect("sqlite3", "file:translator.db?cache=private&mode=rwc")
+	DB, err = sqlx.Connect("sqlite3", fmt.Sprintf("file:%s?cache=private&mode=rwc", dbFilePath))
 	if err != nil {
 		log.Fatalln(err)
 	}

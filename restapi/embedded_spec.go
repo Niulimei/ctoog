@@ -31,6 +31,7 @@ func init() {
     },
     "version": "1.0.0"
   },
+  "host": "0.0.0.0:8991",
   "basePath": "/api",
   "paths": {
     "/login": {
@@ -110,7 +111,7 @@ func init() {
         "parameters": [
           {
             "description": "任务信息",
-            "name": "userInfo",
+            "name": "taskInfo",
             "in": "body",
             "required": true,
             "schema": {
@@ -396,6 +397,7 @@ func init() {
     },
     "version": "1.0.0"
   },
+  "host": "0.0.0.0:8991",
   "basePath": "/api",
   "paths": {
     "/login": {
@@ -475,7 +477,7 @@ func init() {
         "parameters": [
           {
             "description": "任务信息",
-            "name": "userInfo",
+            "name": "taskInfo",
             "in": "body",
             "required": true,
             "schema": {

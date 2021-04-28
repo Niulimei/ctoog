@@ -20,22 +20,22 @@ import (
 type TaskModel struct {
 
 	// cc password
-	CcPassword string `json:"ccPassword,omitempty"`
+	CcPassword string `json:"ccPassword,omitempty" db:"cc_password"`
 
 	// cc user
-	CcUser string `json:"ccUser,omitempty"`
+	CcUser string `json:"ccUser,omitempty" db:"cc_user"`
 
 	// component
 	Component string `json:"component,omitempty"`
 
 	// git password
-	GitPassword string `json:"gitPassword,omitempty"`
+	GitPassword string `json:"gitPassword,omitempty" db:"git_password"`
 
 	// git URL
-	GitURL string `json:"gitURL,omitempty"`
+	GitURL string `json:"gitURL,omitempty" db:"git_url"`
 
 	// git user
-	GitUser string `json:"gitUser,omitempty"`
+	GitUser string `json:"gitUser,omitempty" db:"git_user"`
 
 	// match info
 	MatchInfo []*TaskMatchInfo `json:"matchInfo"`

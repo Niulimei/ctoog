@@ -2,3 +2,4 @@
 main
 vendor
 *.sw*
+translator.db

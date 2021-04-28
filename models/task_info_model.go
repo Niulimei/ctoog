@@ -21,13 +21,13 @@ type TaskInfoModel struct {
 	Component string `json:"component,omitempty"`
 
 	// git repo
-	GitRepo string `json:"gitRepo,omitempty"`
+	GitRepo string `json:"gitRepo,omitempty" db:"git_repo"`
 
 	// id
 	ID int64 `json:"id,omitempty"`
 
 	// last complete date time
-	LastCompleteDateTime string `json:"lastCompleteDateTime,omitempty"`
+	LastCompleteDateTime string `json:"lastCompleteDateTime,omitempty" db:"last_completed_date_time"`
 
 	// pvob
 	Pvob string `json:"pvob,omitempty"`
