@@ -42,11 +42,10 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 			return middleware.NotImplemented("operation operations.CreateTask has not yet been implemented")
 		})
 	}
-	if api.CreateUserHandler == nil {
-		api.CreateUserHandler = operations.CreateUserHandlerFunc(func(params operations.CreateUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.CreateUser has not yet been implemented")
-		})
-	}
+	api.CreateUserHandler = operations.CreateUserHandlerFunc(func(params operations.CreateUserParams) middleware.Responder {
+		//return middleware.NotImplemented("operation operations.CreateUser has not yet been implemented")
+		return CreateUser(params)
+	})
 	if api.GetTaskHandler == nil {
 		api.GetTaskHandler = operations.GetTaskHandlerFunc(func(params operations.GetTaskParams) middleware.Responder {
 			return middleware.NotImplemented("operation operations.GetTask has not yet been implemented")
@@ -57,16 +56,14 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 			return middleware.NotImplemented("operation operations.ListTask has not yet been implemented")
 		})
 	}
-	if api.ListUserHandler == nil {
-		api.ListUserHandler = operations.ListUserHandlerFunc(func(params operations.ListUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.ListUser has not yet been implemented")
-		})
-	}
-	if api.LoginHandler == nil {
-		api.LoginHandler = operations.LoginHandlerFunc(func(params operations.LoginParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.Login has not yet been implemented")
-		})
-	}
+	api.ListUserHandler = operations.ListUserHandlerFunc(func(params operations.ListUserParams) middleware.Responder {
+		//return middleware.NotImplemented("operation operations.ListUser has not yet been implemented")
+		return ListUsers()
+	})
+	api.LoginHandler = operations.LoginHandlerFunc(func(params operations.LoginParams) middleware.Responder {
+		//return middleware.NotImplemented("operation operations.Login has not yet been implemented")
+		return Login(params)
+	})
 
 	api.PreServerShutdown = func() {}
 

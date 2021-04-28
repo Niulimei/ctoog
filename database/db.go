@@ -13,7 +13,7 @@ var schema = `
 CREATE TABLE user (
     id integer PRIMARY KEY autoincrement,
     username varchar (50),
-    password_hash varchar (32)
+    password varchar (32)
 );
 
 CREATE TABLE task (
@@ -43,20 +43,24 @@ CREATE TABLE task_log (
     status varchar (16),
     start_time varchar (64),
     end_time varchar (64),
-    duration integer ,
-)
+    duration integer (64)
+);
 `
 
 func init() {
 	var err error
-	var isInitAlready bool
+	var isInitAlready = true
 	_, err = os.Stat("translator.db")    //os.Stat获取文件信息
 	if err != nil {
-		if os.IsExist(err) {
-			isInitAlready = true
+		if os.IsNotExist(err) {
+			isInitAlready = false
 		}
 	}
 	DB, err = sqlx.Connect("sqlite3", "file:translator.db?cache=private&mode=rwc")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = DB.Ping()
 	if err != nil {
 		log.Fatalln(err)
 	}
