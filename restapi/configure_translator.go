@@ -6,11 +6,9 @@ import (
 	"crypto/tls"
 	"net/http"
 
+	"ctgb/restapi/operations"
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/runtime/middleware"
-
-	"ctgb/restapi/operations"
 )
 
 //go:generate swagger generate server --target ../../ctgb --name Translator --spec ../api/backend.yml --principal interface{}
@@ -38,10 +36,7 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	api.JSONProducer = runtime.JSONProducer()
 
 	api.CreateTaskHandler = operations.CreateTaskHandlerFunc(CreateTaskHandler)
-	api.CreateUserHandler = operations.CreateUserHandlerFunc(func(params operations.CreateUserParams) middleware.Responder {
-		//return middleware.NotImplemented("operation operations.CreateUser has not yet been implemented")
-		return CreateUser(params)
-	})
+	api.CreateUserHandler = operations.CreateUserHandlerFunc(CreateUser)
 	api.GetTaskHandler = operations.GetTaskHandlerFunc(GetTaskHandler)
 	api.ListTaskHandler = operations.ListTaskHandlerFunc(ListTaskHandler)
 	api.ListUserHandler = operations.ListUserHandlerFunc(ListUsers)
