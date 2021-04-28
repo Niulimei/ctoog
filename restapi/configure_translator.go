@@ -44,15 +44,8 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	})
 	api.GetTaskHandler = operations.GetTaskHandlerFunc(GetTaskHandler)
 	api.ListTaskHandler = operations.ListTaskHandlerFunc(ListTaskHandler)
-	api.ListUserHandler = operations.ListUserHandlerFunc(func(params operations.ListUserParams) middleware.Responder {
-		//return middleware.NotImplemented("operation operations.ListUser has not yet been implemented")
-		return ListUsers()
-	})
-	api.LoginHandler = operations.LoginHandlerFunc(func(params operations.LoginParams) middleware.Responder {
-		//return middleware.NotImplemented("operation operations.Login has not yet been implemented")
-		return Login(params)
-	})
-
+	api.ListUserHandler = operations.ListUserHandlerFunc(ListUsers)
+	api.LoginHandler = operations.LoginHandlerFunc(LoginHandler)
 
 	api.PreServerShutdown = func() {}
 

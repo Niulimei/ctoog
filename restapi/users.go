@@ -25,7 +25,7 @@ func CreateUser(params operations.CreateUserParams) middleware.Responder {
 	}
 }
 
-func ListUsers() middleware.Responder {
+func ListUsers(param operations.ListUserParams) middleware.Responder {
 	rows, err := database.DB.Query("SELECT username FROM user")
 	if err != nil {
 		return middleware.Error(http.StatusInternalServerError, "Sql Error")
@@ -42,7 +42,7 @@ func ListUsers() middleware.Responder {
 	return middleware.Error(http.StatusCreated, users)
 }
 
-func Login(params operations.LoginParams) middleware.Responder {
+func LoginHandler(params operations.LoginParams) middleware.Responder {
 	var passwordInDB string
 	row := database.DB.QueryRow("SELECT password FROM user WHERE username=?", params.UserInfo.Username)
 	err := row.Scan(&passwordInDB)
@@ -50,7 +50,7 @@ func Login(params operations.LoginParams) middleware.Responder {
 		return middleware.Error(http.StatusInternalServerError, "")
 	}
 	if passwordInDB == params.UserInfo.Password {
-		return middleware.Error(http.StatusCreated, "Login Success")
+		return middleware.Error(http.StatusCreated, "LoginHandler Success")
 	} else {
 		return middleware.Error(http.StatusInternalServerError, "User Does Not Exist Or Wrong Password")
 	}

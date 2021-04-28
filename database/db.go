@@ -50,7 +50,7 @@ CREATE TABLE task_log (
 func init() {
 	var err error
 	var isInitAlready = true
-	_, err = os.Stat("translator.db")    //os.Stat获取文件信息
+	_, err = os.Stat("translator.db") //os.Stat获取文件信息
 	if err != nil {
 		if os.IsNotExist(err) {
 			isInitAlready = false

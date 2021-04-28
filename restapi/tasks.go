@@ -30,8 +30,8 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 	}
 	tx, _ := database.DB.Begin()
 	for _, match := range taskInfo.MatchInfo {
-		tx.Exec("INSERT INTO " +
-			"match_info (task_id, stream, git_branch) " +
+		tx.Exec("INSERT INTO "+
+			"match_info (task_id, stream, git_branch) "+
 			"VALUES($1, $2, $3)",
 			taskId, match.Stream, match.GitBranch)
 	}
@@ -42,8 +42,8 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	taskID := params.ID
 	task := &models.TaskModel{}
-	database.DB.Get(task,"SELECT cc_password," +
-		" cc_user, component, git_password, git_url, git_user, pvob" +
+	database.DB.Get(task, "SELECT cc_password,"+
+		" cc_user, component, git_password, git_url, git_user, pvob"+
 		" FROM task WHERE id = $1", taskID)
 	var matchInfo []*models.TaskMatchInfo
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", taskID)
@@ -56,8 +56,8 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 
 func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	var tasks []*models.TaskInfoModel
-	database.DB.Select(&tasks, "SELECT pvob, component, git_repo, id, last_completed_date_time," +
-		" status" +
+	database.DB.Select(&tasks, "SELECT pvob, component, git_repo, id, last_completed_date_time,"+
+		" status"+
 		" FROM task;")
 	return operations.NewListTaskOK().WithPayload(tasks)
 }

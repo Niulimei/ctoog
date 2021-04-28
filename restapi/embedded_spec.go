@@ -43,7 +43,7 @@ func init() {
           "application/json"
         ],
         "summary": "登录",
-        "operationId": "Login",
+        "operationId": "LoginHandler",
         "parameters": [
           {
             "description": "用户信息",
@@ -409,7 +409,7 @@ func init() {
           "application/json"
         ],
         "summary": "登录",
-        "operationId": "Login",
+        "operationId": "LoginHandler",
         "parameters": [
           {
             "description": "用户信息",
