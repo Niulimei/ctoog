@@ -453,6 +453,40 @@ func init() {
         }
       }
     },
+    "/users/{token}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "账户",
+        "operationId": "GetUser",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "token",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "账户",
+            "schema": {
+              "$ref": "#/definitions/UserInfoModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/workers": {
       "post": {
         "consumes": [
@@ -1126,6 +1160,40 @@ func init() {
             "description": "成功",
             "schema": {
               "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/users/{token}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "账户",
+        "operationId": "GetUser",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "token",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "账户",
+            "schema": {
+              "$ref": "#/definitions/UserInfoModel"
             }
           },
           "500": {
