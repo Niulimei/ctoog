@@ -31,7 +31,8 @@ func startTask(taskID int64) {
 	}
 	workerUrl := worker.WorkerUrl
 	var matchInfo []*models.TaskMatchInfo
-	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", taskID)
+	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1 ORDER BY id",
+		taskID)
 
 	workerTaskModel := struct {
 		TaskId      int64
@@ -42,6 +43,8 @@ func startTask(taskID int64) {
 		GitURL      string
 		GitUser     string
 		Pvob        string
+		Stream      string
+		Branch      string
 	}{
 		TaskId:      taskID,
 		CcPassword:  task.CcPassword,
@@ -51,6 +54,8 @@ func startTask(taskID int64) {
 		GitURL:      task.GitURL,
 		GitUser:     task.GitUser,
 		Pvob:        task.Pvob,
+		Stream:      matchInfo[0].Stream,
+		Branch:      matchInfo[0].GitBranch,
 	}
 	workerTaskModelByte, _ := json.Marshal(workerTaskModel)
 	req, _ := http.NewRequest(http.MethodPost, "http://"+workerUrl+"/new_task", bytes.NewBuffer(workerTaskModelByte))

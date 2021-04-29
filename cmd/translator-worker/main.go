@@ -8,19 +8,26 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 )
 
 var (
-	portFlag int
+	hostFlag   string
+	portFlag   int
+	serverFlag string
 )
 
 func init() {
+	flag.StringVar(&hostFlag, "host", "127.0.0.1", "service listens on this IP")
 	flag.IntVar(&portFlag, "port", 8080, "service listens on this port")
+	flag.StringVar(&serverFlag, "serverAddr", "127.0.0.1", "translator server listens on this IP:port")
 }
 
-func infoServerTaskCompleted(task *Task) {
+func infoServerTaskCompleted(task *Task, server string, cmd *exec.Cmd) {
+
 	type Payload struct {
 		Logid     string `json:"logID"`
 		Status    string `json:"status"`
@@ -34,6 +41,15 @@ func infoServerTaskCompleted(task *Task) {
 		Endtime:  time.Now().Format("2006-01-02 15:04:05"),
 		Duration: "10",
 	}
+	start := time.Now()
+	if err := cmd.Start(); err != nil {
+		end := time.Now()
+		duration := end.Sub(start).Seconds()
+		d := strconv.FormatInt(int64(duration), 10)
+		data.Status = "failed"
+		data.Duration = d
+	}
+
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
 		// handle err
@@ -41,7 +57,7 @@ func infoServerTaskCompleted(task *Task) {
 	body := bytes.NewReader(payloadBytes)
 
 	req, err := http.NewRequest("PUT",
-		fmt.Sprintf("http://127.0.0.1:8993/api/tasks/%d?start=false", task.TaskId), body)
+		fmt.Sprintf("http://%s/api/tasks/%d?start=false", server, task.TaskId), body)
 	if err != nil {
 		// handle err
 	}
@@ -58,7 +74,7 @@ func infoServerTaskCompleted(task *Task) {
 	defer resp.Body.Close()
 }
 
-func pingServer() {
+func pingServer(host string, port int) {
 
 	type Payload struct {
 		Host string `json:"host"`
@@ -66,8 +82,8 @@ func pingServer() {
 	}
 
 	data := Payload{
-		Host: "127.0.0.1",
-		Port: 8995,
+		Host: host,
+		Port: port,
 	}
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
@@ -99,14 +115,29 @@ type Task struct {
 	GitURL      string
 	GitUser     string
 	Pvob        string
+	Stream      string
+	Branch      string
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	workerTaskModel := Task{}
+	gitUrl := workerTaskModel.GitURL
+	if strings.HasPrefix(gitUrl, "http://") {
+		gitUrl = strings.Replace(gitUrl, "http://", "", 1)
+		gitUrl = "http://" + workerTaskModel.GitUser + ":" + workerTaskModel.GitPassword + "@" + gitUrl
+	} else if strings.HasPrefix(gitUrl, "https://") {
+		gitUrl = strings.Replace(gitUrl, "https://", "", 1)
+		gitUrl = "https://" + workerTaskModel.GitUser + ":" + workerTaskModel.GitPassword + "@" + gitUrl
+	}
 	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
-		//TODO task process
+		cmd := exec.Command("/bin/bash", "-c",
+			fmt.Sprintf(`echo %s | sudo -S su - %s -c "/usr/bin/bash cc2git.sh" %s %s %s %s %s`,
+				workerTaskModel.CcPassword, workerTaskModel.CcUser, workerTaskModel.Pvob, workerTaskModel.Component,
+				workerTaskModel.Stream,
+				gitUrl, workerTaskModel.Branch))
+		go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmd)
 	} else {
 		fmt.Println(err)
 		w.WriteHeader(500)
@@ -115,12 +146,11 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(201)
 	w.Write([]byte("bye"))
-	go infoServerTaskCompleted(&workerTaskModel)
 }
 
 func main() {
 	flag.Parse()
-	go pingServer()
+	go pingServer(hostFlag, portFlag)
 	http.HandleFunc("/new_task", taskHandler) //	设置访问路由
 	log.Fatal(http.ListenAndServe(strconv.Itoa(portFlag), nil))
 }
