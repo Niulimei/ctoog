@@ -25,7 +25,7 @@ type ListTaskOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.TaskPageInfoModel `json:"body,omitempty"`
+	Payload *models.TaskPageInfoModel `json:"body,omitempty"`
 }
 
 // NewListTaskOK creates ListTaskOK with default headers values
@@ -35,13 +35,13 @@ func NewListTaskOK() *ListTaskOK {
 }
 
 // WithPayload adds the payload to the list task o k response
-func (o *ListTaskOK) WithPayload(payload []*models.TaskPageInfoModel) *ListTaskOK {
+func (o *ListTaskOK) WithPayload(payload *models.TaskPageInfoModel) *ListTaskOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the list task o k response
-func (o *ListTaskOK) SetPayload(payload []*models.TaskPageInfoModel) {
+func (o *ListTaskOK) SetPayload(payload *models.TaskPageInfoModel) {
 	o.Payload = payload
 }
 
@@ -49,14 +49,11 @@ func (o *ListTaskOK) SetPayload(payload []*models.TaskPageInfoModel) {
 func (o *ListTaskOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
-	payload := o.Payload
-	if payload == nil {
-		// return empty array
-		payload = make([]*models.TaskPageInfoModel, 0, 50)
-	}
-
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
 }
 

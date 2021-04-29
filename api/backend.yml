@@ -93,9 +93,7 @@ paths:
         '200':
           description: 账户列表
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/UserPageInfoModel'
+            $ref: '#/definitions/UserPageInfoModel'
         '500':
           description: 内部错误
           schema:
@@ -156,9 +154,7 @@ paths:
         '200':
           description: 任务列表
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/TaskPageInfoModel'
+            $ref: '#/definitions/TaskPageInfoModel'
         '500':
           description: 内部错误
           schema:
@@ -326,7 +322,9 @@ definitions:
     type: object
     properties:
       userInfo:
-        $ref: '#/definitions/UserInfoModel'
+        type: array
+        items:
+          $ref: '#/definitions/UserInfoModel'
       limit:
         type: integer
       offset:
@@ -353,7 +351,9 @@ definitions:
     type: object
     properties:
       taskInfo:
-        $ref: '#/definitions/TaskInfoModel'
+        type: array
+        items:
+          $ref: '#/definitions/TaskInfoModel'
       limit:
         type: integer
       offset:

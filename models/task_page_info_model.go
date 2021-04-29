@@ -7,6 +7,7 @@ package models
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -28,7 +29,7 @@ type TaskPageInfoModel struct {
 	Offset int64 `json:"offset,omitempty"`
 
 	// task info
-	TaskInfo *TaskInfoModel `json:"taskInfo,omitempty"`
+	TaskInfo []*TaskInfoModel `json:"taskInfo"`
 }
 
 // Validate validates this task page info model
@@ -50,13 +51,20 @@ func (m *TaskPageInfoModel) validateTaskInfo(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if m.TaskInfo != nil {
-		if err := m.TaskInfo.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("taskInfo")
-			}
-			return err
+	for i := 0; i < len(m.TaskInfo); i++ {
+		if swag.IsZero(m.TaskInfo[i]) { // not required
+			continue
 		}
+
+		if m.TaskInfo[i] != nil {
+			if err := m.TaskInfo[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("taskInfo" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -78,13 +86,17 @@ func (m *TaskPageInfoModel) ContextValidate(ctx context.Context, formats strfmt.
 
 func (m *TaskPageInfoModel) contextValidateTaskInfo(ctx context.Context, formats strfmt.Registry) error {
 
-	if m.TaskInfo != nil {
-		if err := m.TaskInfo.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("taskInfo")
+	for i := 0; i < len(m.TaskInfo); i++ {
+
+		if m.TaskInfo[i] != nil {
+			if err := m.TaskInfo[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("taskInfo" + "." + strconv.Itoa(i))
+				}
+				return err
 			}
-			return err
 		}
+
 	}
 
 	return nil

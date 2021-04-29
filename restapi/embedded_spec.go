@@ -218,10 +218,7 @@ func init() {
           "200": {
             "description": "任务列表",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/TaskPageInfoModel"
-              }
+              "$ref": "#/definitions/TaskPageInfoModel"
             }
           },
           "500": {
@@ -397,10 +394,7 @@ func init() {
           "200": {
             "description": "账户列表",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/UserPageInfoModel"
-              }
+              "$ref": "#/definitions/UserPageInfoModel"
             }
           },
           "500": {
@@ -634,7 +628,10 @@ func init() {
           "type": "integer"
         },
         "taskInfo": {
-          "$ref": "#/definitions/TaskInfoModel"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TaskInfoModel"
+          }
         }
       }
     },
@@ -676,7 +673,10 @@ func init() {
           "type": "integer"
         },
         "userInfo": {
-          "$ref": "#/definitions/UserInfoModel"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserInfoModel"
+          }
         }
       }
     },
@@ -896,10 +896,7 @@ func init() {
           "200": {
             "description": "任务列表",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/TaskPageInfoModel"
-              }
+              "$ref": "#/definitions/TaskPageInfoModel"
             }
           },
           "500": {
@@ -1075,10 +1072,7 @@ func init() {
           "200": {
             "description": "账户列表",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/UserPageInfoModel"
-              }
+              "$ref": "#/definitions/UserPageInfoModel"
             }
           },
           "500": {
@@ -1312,7 +1306,10 @@ func init() {
           "type": "integer"
         },
         "taskInfo": {
-          "$ref": "#/definitions/TaskInfoModel"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TaskInfoModel"
+          }
         }
       }
     },
@@ -1354,7 +1351,10 @@ func init() {
           "type": "integer"
         },
         "userInfo": {
-          "$ref": "#/definitions/UserInfoModel"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserInfoModel"
+          }
         }
       }
     },

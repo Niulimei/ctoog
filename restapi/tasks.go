@@ -27,9 +27,10 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		repo = ""
 	}
 	r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
-		"git_user, git_password, git_repo, status, last_completed_date_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, '')",
+		"git_user, git_password, git_repo, status, last_completed_date_time, creator)"+
+		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, '', $10)",
 		taskInfo.Pvob, taskInfo.Component, taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL,
-		taskInfo.GitUser, taskInfo.GitPassword, repo, "init")
+		taskInfo.GitUser, taskInfo.GitPassword, repo, "init", username)
 	taskId, err := r.LastInsertId()
 	if err != nil {
 		return operations.NewCreateTaskInternalServerError().WithPayload(
@@ -75,7 +76,8 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 		" FROM task WHERE creator = $1 ORDER BY id OFFSET $2 LIMIT 10;", username, offset)
 	var tasksPage []*models.TaskPageInfoModel
 	for _, task := range tasks {
-		tasksPage = append(tasksPage, &models.TaskPageInfoModel{TaskInfo: task, Offset: offset + count, Limit: 10, Count: count})
+		tasksPage = append(tasksPage,
+			&models.TaskPageInfoModel{TaskInfo: task, Offset: offset + count, Limit: 10, Count: count})
 	}
 	return operations.NewListTaskOK().WithPayload(tasksPage)
 }

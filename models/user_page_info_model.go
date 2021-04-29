@@ -7,6 +7,7 @@ package models
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -28,7 +29,7 @@ type UserPageInfoModel struct {
 	Offset int64 `json:"offset,omitempty"`
 
 	// user info
-	UserInfo *UserInfoModel `json:"userInfo,omitempty"`
+	UserInfo []*UserInfoModel `json:"userInfo"`
 }
 
 // Validate validates this user page info model
@@ -50,13 +51,20 @@ func (m *UserPageInfoModel) validateUserInfo(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if m.UserInfo != nil {
-		if err := m.UserInfo.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("userInfo")
-			}
-			return err
+	for i := 0; i < len(m.UserInfo); i++ {
+		if swag.IsZero(m.UserInfo[i]) { // not required
+			continue
 		}
+
+		if m.UserInfo[i] != nil {
+			if err := m.UserInfo[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("userInfo" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -78,13 +86,17 @@ func (m *UserPageInfoModel) ContextValidate(ctx context.Context, formats strfmt.
 
 func (m *UserPageInfoModel) contextValidateUserInfo(ctx context.Context, formats strfmt.Registry) error {
 
-	if m.UserInfo != nil {
-		if err := m.UserInfo.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("userInfo")
+	for i := 0; i < len(m.UserInfo); i++ {
+
+		if m.UserInfo[i] != nil {
+			if err := m.UserInfo[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("userInfo" + "." + strconv.Itoa(i))
+				}
+				return err
 			}
-			return err
 		}
+
 	}
 
 	return nil

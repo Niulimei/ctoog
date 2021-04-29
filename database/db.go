@@ -56,6 +56,13 @@ CREATE TABLE worker (
 );
 `
 
+type WorkerModel struct {
+	id        int64
+	workerUrl string `db:"worker_url"`
+	status    string
+	taskCount int64 `db:"task_count"`
+}
+
 func init() {
 	var err error
 	var isInitAlready = true

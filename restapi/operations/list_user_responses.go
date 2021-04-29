@@ -25,7 +25,7 @@ type ListUserOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.UserPageInfoModel `json:"body,omitempty"`
+	Payload *models.UserPageInfoModel `json:"body,omitempty"`
 }
 
 // NewListUserOK creates ListUserOK with default headers values
@@ -35,13 +35,13 @@ func NewListUserOK() *ListUserOK {
 }
 
 // WithPayload adds the payload to the list user o k response
-func (o *ListUserOK) WithPayload(payload []*models.UserPageInfoModel) *ListUserOK {
+func (o *ListUserOK) WithPayload(payload *models.UserPageInfoModel) *ListUserOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the list user o k response
-func (o *ListUserOK) SetPayload(payload []*models.UserPageInfoModel) {
+func (o *ListUserOK) SetPayload(payload *models.UserPageInfoModel) {
 	o.Payload = payload
 }
 
@@ -49,14 +49,11 @@ func (o *ListUserOK) SetPayload(payload []*models.UserPageInfoModel) {
 func (o *ListUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
-	payload := o.Payload
-	if payload == nil {
-		// return empty array
-		payload = make([]*models.UserPageInfoModel, 0, 50)
-	}
-
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
 }
 
