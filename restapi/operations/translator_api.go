@@ -72,6 +72,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		PingWorkerHandler: PingWorkerHandlerFunc(func(params PingWorkerParams) middleware.Responder {
 			return middleware.NotImplemented("operation PingWorker has not yet been implemented")
 		}),
+		UpdateTaskHandler: UpdateTaskHandlerFunc(func(params UpdateTaskParams) middleware.Responder {
+			return middleware.NotImplemented("operation UpdateTask has not yet been implemented")
+		}),
 	}
 }
 
@@ -128,6 +131,8 @@ type TranslatorAPI struct {
 	LoginHandler LoginHandler
 	// PingWorkerHandler sets the operation handler for the ping worker operation
 	PingWorkerHandler PingWorkerHandler
+	// UpdateTaskHandler sets the operation handler for the update task operation
+	UpdateTaskHandler UpdateTaskHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -234,6 +239,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.PingWorkerHandler == nil {
 		unregistered = append(unregistered, "PingWorkerHandler")
+	}
+	if o.UpdateTaskHandler == nil {
+		unregistered = append(unregistered, "UpdateTaskHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -363,6 +371,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/workers"] = NewPingWorker(o.context, o.PingWorkerHandler)
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/tasks/{id}"] = NewUpdateTask(o.context, o.UpdateTaskHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

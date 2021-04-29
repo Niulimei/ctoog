@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/swag"
 
 	"ctgb/models"
 )
@@ -22,15 +21,11 @@ const ListTaskOKCode int = 200
 swagger:response listTaskOK
 */
 type ListTaskOK struct {
-	/*
-
-	 */
-	XTotalCount int64 `json:"X-Total-Count"`
 
 	/*
 	  In: Body
 	*/
-	Payload []*models.TaskInfoModel `json:"body,omitempty"`
+	Payload []*models.TaskPageInfoModel `json:"body,omitempty"`
 }
 
 // NewListTaskOK creates ListTaskOK with default headers values
@@ -39,43 +34,25 @@ func NewListTaskOK() *ListTaskOK {
 	return &ListTaskOK{}
 }
 
-// WithXTotalCount adds the xTotalCount to the list task o k response
-func (o *ListTaskOK) WithXTotalCount(xTotalCount int64) *ListTaskOK {
-	o.XTotalCount = xTotalCount
-	return o
-}
-
-// SetXTotalCount sets the xTotalCount to the list task o k response
-func (o *ListTaskOK) SetXTotalCount(xTotalCount int64) {
-	o.XTotalCount = xTotalCount
-}
-
 // WithPayload adds the payload to the list task o k response
-func (o *ListTaskOK) WithPayload(payload []*models.TaskInfoModel) *ListTaskOK {
+func (o *ListTaskOK) WithPayload(payload []*models.TaskPageInfoModel) *ListTaskOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the list task o k response
-func (o *ListTaskOK) SetPayload(payload []*models.TaskInfoModel) {
+func (o *ListTaskOK) SetPayload(payload []*models.TaskPageInfoModel) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
 func (o *ListTaskOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	// response header X-Total-Count
-
-	xTotalCount := swag.FormatInt64(o.XTotalCount)
-	if xTotalCount != "" {
-		rw.Header().Set("X-Total-Count", xTotalCount)
-	}
-
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
 		// return empty array
-		payload = make([]*models.TaskInfoModel, 0, 50)
+		payload = make([]*models.TaskPageInfoModel, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {

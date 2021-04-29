@@ -4,12 +4,19 @@ import (
 	"ctgb/database"
 	"ctgb/models"
 	"ctgb/restapi/operations"
+	"ctgb/utils"
 	"fmt"
 	"github.com/go-openapi/runtime/middleware"
 	"strings"
 )
 
 func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder {
+	userToken := params.Authorization
+	username, verified := utils.Verify(userToken)
+	if !verified {
+		return middleware.Error(403, "无访问权限")
+	}
+	fmt.Println(username)
 	taskInfo := params.TaskInfo
 	urls := strings.Split(taskInfo.GitURL, "/")
 	var repo string
@@ -55,9 +62,20 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 }
 
 func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
+	username, verified := utils.Verify(params.Authorization)
+	if !verified {
+		return middleware.Error(403, "没有权限")
+	}
+	offset := params.Offset
 	var tasks []*models.TaskInfoModel
+	var count int64
+	database.DB.Get(count, "SELECT COUNT(id) FROM task WHERE creator = $1", username)
 	database.DB.Select(&tasks, "SELECT pvob, component, git_repo, id, last_completed_date_time,"+
 		" status"+
-		" FROM task;")
-	return operations.NewListTaskOK().WithPayload(tasks)
+		" FROM task WHERE creator = $1 ORDER BY id OFFSET $2 LIMIT 10;", username, offset)
+	var tasksPage []*models.TaskPageInfoModel
+	for _, task := range tasks {
+		tasksPage = append(tasksPage, &models.TaskPageInfoModel{TaskInfo: task, Offset: offset + count, Limit: 10, Count: count})
+	}
+	return operations.NewListTaskOK().WithPayload(tasksPage)
 }

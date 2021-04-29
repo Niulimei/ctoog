@@ -23,11 +23,14 @@ func NewListTaskParams() ListTaskParams {
 	var (
 		// initialize parameters with default values
 
-		pageDefault = int64(0)
+		limitDefault  = int64(0)
+		offsetDefault = int64(0)
 	)
 
 	return ListTaskParams{
-		Page: pageDefault,
+		Limit: limitDefault,
+
+		Offset: offsetDefault,
 	}
 }
 
@@ -50,7 +53,13 @@ type ListTaskParams struct {
 	  In: query
 	  Default: 0
 	*/
-	Page int64
+	Limit int64
+	/*
+	  Required: true
+	  In: query
+	  Default: 0
+	*/
+	Offset int64
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -68,8 +77,13 @@ func (o *ListTaskParams) BindRequest(r *http.Request, route *middleware.MatchedR
 		res = append(res, err)
 	}
 
-	qPage, qhkPage, _ := qs.GetOK("page")
-	if err := o.bindPage(qPage, qhkPage, route.Formats); err != nil {
+	qLimit, qhkLimit, _ := qs.GetOK("limit")
+	if err := o.bindLimit(qLimit, qhkLimit, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qOffset, qhkOffset, _ := qs.GetOK("offset")
+	if err := o.bindOffset(qOffset, qhkOffset, route.Formats); err != nil {
 		res = append(res, err)
 	}
 	if len(res) > 0 {
@@ -98,10 +112,10 @@ func (o *ListTaskParams) bindAuthorization(rawData []string, hasKey bool, format
 	return nil
 }
 
-// bindPage binds and validates parameter Page from query.
-func (o *ListTaskParams) bindPage(rawData []string, hasKey bool, formats strfmt.Registry) error {
+// bindLimit binds and validates parameter Limit from query.
+func (o *ListTaskParams) bindLimit(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
-		return errors.Required("page", "query", rawData)
+		return errors.Required("limit", "query", rawData)
 	}
 	var raw string
 	if len(rawData) > 0 {
@@ -111,15 +125,41 @@ func (o *ListTaskParams) bindPage(rawData []string, hasKey bool, formats strfmt.
 	// Required: true
 	// AllowEmptyValue: false
 
-	if err := validate.RequiredString("page", "query", raw); err != nil {
+	if err := validate.RequiredString("limit", "query", raw); err != nil {
 		return err
 	}
 
 	value, err := swag.ConvertInt64(raw)
 	if err != nil {
-		return errors.InvalidType("page", "query", "int64", raw)
+		return errors.InvalidType("limit", "query", "int64", raw)
 	}
-	o.Page = value
+	o.Limit = value
+
+	return nil
+}
+
+// bindOffset binds and validates parameter Offset from query.
+func (o *ListTaskParams) bindOffset(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("offset", "query", rawData)
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+	// AllowEmptyValue: false
+
+	if err := validate.RequiredString("offset", "query", raw); err != nil {
+		return err
+	}
+
+	value, err := swag.ConvertInt64(raw)
+	if err != nil {
+		return errors.InvalidType("offset", "query", "int64", raw)
+	}
+	o.Offset = value
 
 	return nil
 }

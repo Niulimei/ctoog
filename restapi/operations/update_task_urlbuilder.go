@@ -9,14 +9,12 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-
-	"github.com/go-openapi/swag"
+	"strings"
 )
 
-// ListTaskURL generates an URL for the list task operation
-type ListTaskURL struct {
-	Limit  int64
-	Offset int64
+// UpdateTaskURL generates an URL for the update task operation
+type UpdateTaskURL struct {
+	ID string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -26,7 +24,7 @@ type ListTaskURL struct {
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ListTaskURL) WithBasePath(bp string) *ListTaskURL {
+func (o *UpdateTaskURL) WithBasePath(bp string) *UpdateTaskURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -34,15 +32,22 @@ func (o *ListTaskURL) WithBasePath(bp string) *ListTaskURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ListTaskURL) SetBasePath(bp string) {
+func (o *UpdateTaskURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *ListTaskURL) Build() (*url.URL, error) {
+func (o *UpdateTaskURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/tasks"
+	var _path = "/tasks/{id}"
+
+	id := o.ID
+	if id != "" {
+		_path = strings.Replace(_path, "{id}", id, -1)
+	} else {
+		return nil, errors.New("id is required on UpdateTaskURL")
+	}
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -50,25 +55,11 @@ func (o *ListTaskURL) Build() (*url.URL, error) {
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
-	qs := make(url.Values)
-
-	limitQ := swag.FormatInt64(o.Limit)
-	if limitQ != "" {
-		qs.Set("limit", limitQ)
-	}
-
-	offsetQ := swag.FormatInt64(o.Offset)
-	if offsetQ != "" {
-		qs.Set("offset", offsetQ)
-	}
-
-	_result.RawQuery = qs.Encode()
-
 	return &_result, nil
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *ListTaskURL) Must(u *url.URL, err error) *url.URL {
+func (o *UpdateTaskURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -79,17 +70,17 @@ func (o *ListTaskURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *ListTaskURL) String() string {
+func (o *UpdateTaskURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *ListTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *UpdateTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on ListTaskURL")
+		return nil, errors.New("scheme is required for a full url on UpdateTaskURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on ListTaskURL")
+		return nil, errors.New("host is required for a full url on UpdateTaskURL")
 	}
 
 	base, err := o.Build()
@@ -103,6 +94,6 @@ func (o *ListTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *ListTaskURL) StringFull(scheme, host string) string {
+func (o *UpdateTaskURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

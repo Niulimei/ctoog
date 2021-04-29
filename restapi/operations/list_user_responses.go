@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/swag"
 
 	"ctgb/models"
 )
@@ -22,15 +21,11 @@ const ListUserOKCode int = 200
 swagger:response listUserOK
 */
 type ListUserOK struct {
-	/*
-
-	 */
-	XTotalCount int64 `json:"X-Total-Count"`
 
 	/*
 	  In: Body
 	*/
-	Payload []*models.UserInfoModel `json:"body,omitempty"`
+	Payload []*models.UserPageInfoModel `json:"body,omitempty"`
 }
 
 // NewListUserOK creates ListUserOK with default headers values
@@ -39,43 +34,25 @@ func NewListUserOK() *ListUserOK {
 	return &ListUserOK{}
 }
 
-// WithXTotalCount adds the xTotalCount to the list user o k response
-func (o *ListUserOK) WithXTotalCount(xTotalCount int64) *ListUserOK {
-	o.XTotalCount = xTotalCount
-	return o
-}
-
-// SetXTotalCount sets the xTotalCount to the list user o k response
-func (o *ListUserOK) SetXTotalCount(xTotalCount int64) {
-	o.XTotalCount = xTotalCount
-}
-
 // WithPayload adds the payload to the list user o k response
-func (o *ListUserOK) WithPayload(payload []*models.UserInfoModel) *ListUserOK {
+func (o *ListUserOK) WithPayload(payload []*models.UserPageInfoModel) *ListUserOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the list user o k response
-func (o *ListUserOK) SetPayload(payload []*models.UserInfoModel) {
+func (o *ListUserOK) SetPayload(payload []*models.UserPageInfoModel) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
 func (o *ListUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	// response header X-Total-Count
-
-	xTotalCount := swag.FormatInt64(o.XTotalCount)
-	if xTotalCount != "" {
-		rw.Header().Set("X-Total-Count", xTotalCount)
-	}
-
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
 		// return empty array
-		payload = make([]*models.UserInfoModel, 0, 50)
+		payload = make([]*models.UserPageInfoModel, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {

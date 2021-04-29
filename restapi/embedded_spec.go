@@ -196,7 +196,14 @@ func init() {
           {
             "type": "integer",
             "default": 0,
-            "name": "page",
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "offset",
             "in": "query",
             "required": true
           },
@@ -213,12 +220,7 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/TaskInfoModel"
-              }
-            },
-            "headers": {
-              "X-Total-Count": {
-                "type": "integer"
+                "$ref": "#/definitions/TaskPageInfoModel"
               }
             }
           },
@@ -310,6 +312,53 @@ func init() {
             }
           }
         }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "更新任务",
+        "operationId": "UpdateTask",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "description": "任务信息",
+            "name": "taskLog",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TaskLogInfo"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
       }
     },
     "/users": {
@@ -326,7 +375,14 @@ func init() {
           {
             "type": "integer",
             "default": 0,
-            "name": "page",
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "offset",
             "in": "query",
             "required": true
           },
@@ -343,12 +399,7 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/UserInfoModel"
-              }
-            },
-            "headers": {
-              "X-Total-Count": {
-                "type": "integer"
+                "$ref": "#/definitions/UserPageInfoModel"
               }
             }
           },
@@ -368,7 +419,7 @@ func init() {
           "application/json"
         ],
         "summary": "开通账户",
-        "operationId": "CreateUserHandler",
+        "operationId": "CreateUser",
         "parameters": [
           {
             "description": "用户信息",
@@ -570,6 +621,23 @@ func init() {
         }
       }
     },
+    "TaskPageInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "taskInfo": {
+          "$ref": "#/definitions/TaskInfoModel"
+        }
+      }
+    },
     "UserInfoModel": {
       "type": "object",
       "properties": {
@@ -592,6 +660,23 @@ func init() {
         },
         "username": {
           "type": "string"
+        }
+      }
+    },
+    "UserPageInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "userInfo": {
+          "$ref": "#/definitions/UserInfoModel"
         }
       }
     },
@@ -789,7 +874,14 @@ func init() {
           {
             "type": "integer",
             "default": 0,
-            "name": "page",
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "offset",
             "in": "query",
             "required": true
           },
@@ -806,12 +898,7 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/TaskInfoModel"
-              }
-            },
-            "headers": {
-              "X-Total-Count": {
-                "type": "integer"
+                "$ref": "#/definitions/TaskPageInfoModel"
               }
             }
           },
@@ -903,6 +990,53 @@ func init() {
             }
           }
         }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "更新任务",
+        "operationId": "UpdateTask",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "description": "任务信息",
+            "name": "taskLog",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TaskLogInfo"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
       }
     },
     "/users": {
@@ -919,7 +1053,14 @@ func init() {
           {
             "type": "integer",
             "default": 0,
-            "name": "page",
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "offset",
             "in": "query",
             "required": true
           },
@@ -936,12 +1077,7 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/UserInfoModel"
-              }
-            },
-            "headers": {
-              "X-Total-Count": {
-                "type": "integer"
+                "$ref": "#/definitions/UserPageInfoModel"
               }
             }
           },
@@ -961,7 +1097,7 @@ func init() {
           "application/json"
         ],
         "summary": "开通账户",
-        "operationId": "CreateUserHandler",
+        "operationId": "CreateUser",
         "parameters": [
           {
             "description": "用户信息",
@@ -1163,6 +1299,23 @@ func init() {
         }
       }
     },
+    "TaskPageInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "taskInfo": {
+          "$ref": "#/definitions/TaskInfoModel"
+        }
+      }
+    },
     "UserInfoModel": {
       "type": "object",
       "properties": {
@@ -1185,6 +1338,23 @@ func init() {
         },
         "username": {
           "type": "string"
+        }
+      }
+    },
+    "UserPageInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "userInfo": {
+          "$ref": "#/definitions/UserInfoModel"
         }
       }
     },

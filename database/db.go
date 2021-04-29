@@ -12,7 +12,7 @@ var DB *sqlx.DB
 var schema = `
 CREATE TABLE user (
     id integer PRIMARY KEY autoincrement,
-    username varchar (50),
+    username varchar (128),
     password varchar (32)
 );
 
@@ -27,7 +27,9 @@ CREATE TABLE task (
     git_password varchar (256),
     git_repo varchar (256),
     status varchar (16),
-    last_completed_date_time varchar (64)
+    last_completed_date_time varchar (64),
+    creator varchar(128),
+    worker_id integer
 );
 
 CREATE TABLE match_info (
@@ -44,6 +46,13 @@ CREATE TABLE task_log (
     start_time varchar (64),
     end_time varchar (64),
     duration integer
+);
+
+CREATE TABLE worker (
+    id integer PRIMARY KEY autoincrement,
+    worker_url varchar (256),
+    status varchar (16),
+    task_count integer
 );
 `
 

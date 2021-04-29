@@ -15,7 +15,8 @@ import (
 
 // ListUserURL generates an URL for the list user operation
 type ListUserURL struct {
-	Page int64
+	Limit  int64
+	Offset int64
 
 	_basePath string
 	// avoid unkeyed usage
@@ -51,9 +52,14 @@ func (o *ListUserURL) Build() (*url.URL, error) {
 
 	qs := make(url.Values)
 
-	pageQ := swag.FormatInt64(o.Page)
-	if pageQ != "" {
-		qs.Set("page", pageQ)
+	limitQ := swag.FormatInt64(o.Limit)
+	if limitQ != "" {
+		qs.Set("limit", limitQ)
+	}
+
+	offsetQ := swag.FormatInt64(o.Offset)
+	if offsetQ != "" {
+		qs.Set("offset", offsetQ)
 	}
 
 	_result.RawQuery = qs.Encode()

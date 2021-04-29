@@ -75,7 +75,12 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: page
+        - name: limit
+          in: query
+          required: true
+          default: 0
+          type: integer
+        - name: offset
           in: query
           required: true
           default: 0
@@ -90,10 +95,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/UserInfoModel'
-          headers:
-            X-Total-Count:
-              type: integer
+              $ref: '#/definitions/UserPageInfoModel'
         '500':
           description: 内部错误
           schema:
@@ -136,7 +138,12 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: page
+        - name: limit
+          in: query
+          required: true
+          default: 0
+          type: integer
+        - name: offset
           in: query
           required: true
           default: 0
@@ -151,10 +158,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/TaskInfoModel'
-          headers:
-            X-Total-Count:
-              type: integer
+              $ref: '#/definitions/TaskPageInfoModel'
         '500':
           description: 内部错误
           schema:
@@ -182,6 +186,38 @@ paths:
           description: 任务信息
           schema:
             $ref: '#/definitions/TaskDetail'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      summary: 更新任务
+      description: ''
+      operationId: UpdateTask
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+        - name: taskLog
+          in: body
+          description: 任务信息
+          required: true
+          schema:
+            $ref: '#/definitions/TaskLogInfo'
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
         '500':
           description: 内部错误
           schema:
@@ -286,6 +322,17 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
 definitions:
+  UserPageInfoModel:
+    type: object
+    properties:
+      userInfo:
+        $ref: '#/definitions/UserInfoModel'
+      limit:
+        type: integer
+      offset:
+        type: integer
+      count:
+        type: integer
   UserInfoModel:
     type: object
     properties:
@@ -302,6 +349,17 @@ definitions:
         type: string
       password:
         type: string
+  TaskPageInfoModel:
+    type: object
+    properties:
+      taskInfo:
+        $ref: '#/definitions/TaskInfoModel'
+      limit:
+        type: integer
+      offset:
+        type: integer
+      count:
+        type: integer
   TaskInfoModel:
     type: object
     properties:
