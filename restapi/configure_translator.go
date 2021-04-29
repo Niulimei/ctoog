@@ -43,6 +43,9 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	api.ListTaskHandler = operations.ListTaskHandlerFunc(ListTaskHandler)
 	api.UpdateTaskHandler = operations.UpdateTaskHandlerFunc(UpdateTaskHandler)
 	api.PingWorkerHandler = operations.PingWorkerHandlerFunc(PingWorkerHandler)
+	api.ListPvobHandler = operations.ListPvobHandlerFunc(ListPvobHandler)
+	api.ListPvobComponentHandler = operations.ListPvobComponentHandlerFunc(ListPvobComponentHandler)
+	api.ListPvobComponentStreamHandler = operations.ListPvobComponentStreamHandlerFunc(ListPvobComponentStreamHandler)
 
 	api.PreServerShutdown = func() {}
 
