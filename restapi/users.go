@@ -53,6 +53,17 @@ func checkPermission(token string) middleware.Responder {
 	return nil
 }
 
+func GetUserHandler(param operations.GetUserParams) middleware.Responder {
+	username, valid := utils.Verify(param.Token)
+	if !valid {
+		return operations.NewGetUserInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusUnauthorized,
+			Message: "",
+		})
+	}
+	return operations.NewGetUserOK().WithPayload(&models.UserInfoModel{Username: username})
+}
+
 func ListUsersHandler(param operations.ListUserParams) middleware.Responder {
 	checkRet := checkPermission(param.Authorization)
 	if checkRet != nil {

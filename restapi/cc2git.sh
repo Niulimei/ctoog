@@ -9,7 +9,6 @@ initGitRepo(){
   repoUrl=$1
   branchName=$2
   tmpGitDir=$3
-
   masterBranchName="origin/init_master"
   mkdir -p ${tmpGitDir}
   cd ${tmpGitDir}
@@ -20,10 +19,10 @@ initGitRepo(){
   branchExist=false
   branchMasterExist=false
   for br in ${remoteBrList}; do
-    if [[ $(basename ${br}) == ${branchName} ]]; then
+    if [[ $(basename ${br}) == "${branchName}" ]]; then
       branchExist=true
     fi
-    if [[ ${br} == ${masterBranchName} ]]; then
+    if [[ ${br} == "${masterBranchName}" ]]; then
       branchMasterExist=true
     fi
   done
@@ -48,54 +47,52 @@ initGitRepo(){
 }
 
 pullCCAndPush(){
-  repoUrl=$1
-  branchName=$2
-  taskID=$3
+  pvobName=$1
+  componentName=$2
+  streamName=$3
+  gitRepoUrl=$4
+  gitBranchName=$5
+  taskID=$6
   local tmpGitDir="${gitTmpRootPath}/${taskID}"
   local tmpCCDir="${ccTmpRootPath}/${taskID}"
-  pvobList=$(cleartool lsvob -s | grep pvob)
-  for pv in ${pvobList}; do
-    streamList=$(cleartool lsstream -s -invob ${pv})
-    for sm in ${streamList}; do
-      compList=$(cleartool lsstream -fmt %[components]p ${sm}@${pv})
-      for comp in ${compList}; do
-        local tmpCCDirExist=false
-        local tmpGitDir=false
-        if [[ -d ${tmpCCDir} ]]; then
-          tmpCCDirExist=true
-          cd ${tmpCCDir}
-          cleartool update .
-        else
-          mkdir -p ${tmpCCDir}
-          cleartool mkview -snapshot -tag ${pv}_${sm}_${comp}_${taskID} -stgloc -auto -stream ${sm}@${pv} ${tmpCCDir}
-          cd ${tmpCCDir}
-          cleartool update -add_loadrules ${comp}
-        fi
-        if [[ -d ${tmpGitDir} ]]; then
-          tmpGitDirExist=true
-        else
-          initGitRepo ${repoUrl} ${branchName} ${tmpGitDir}
-        fi
-        if $tmpCCDirExist && $tmpGitDirExist; then
-          continue
-        fi
-        cp -rf ${tmpCCDir}/* ${tmpGitDir}/*
-        git add .
-        git commit -m "import from cc,first commit $(date '+%Y%m%d%H%M%S')"
-        git push origin ${branchName}
-      done
-    done
+  local tmpCCDirExist=false
+  local tmpGitDir=false
+  if [[ -d ${tmpCCDir} ]]; then
+    tmpCCDirExist=true
+    cd ${tmpCCDir}
+    cleartool update .
+  else
+    mkdir -p ${tmpCCDir}
+    cleartool mkview -snapshot -tag ${pvobName}_${streamName}_${componentName}_${taskID} -stgloc -auto -stream ${streamName}@${pvobName} ${tmpCCDir}
+    cd ${tmpCCDir}
+    cleartool update -add_loadrules ${componentName}
+  fi
+  if [[ -d ${tmpGitDir} ]]; then
+    tmpGitDirExist=true
+  else
+    initGitRepo ${gitRepoUrl} ${gitBranchName} ${tmpGitDir}
+  fi
+  if $tmpCCDirExist && $tmpGitDirExist; then
+    return
+  fi
+  cp -rf ${tmpCCDir}/* ${tmpGitDir}/*
+  git add .
+  git commit -m "import from cc,first commit $(date '+%Y%m%d%H%M%S')"
+  git push origin ${branchName}
+}
+
+postClean(){
+  rm -rf ${gitTmpRootPath:?}/*
+  views=$(ls ${ccTmpRootPath})
+  for view in ${views}; do
+    cleartool rmview ${ccTmpRootPath}/${view}
   done
+  rm -rf ${ccTmpRootPath:?}/*
 }
 
 main(){
-  pullCCAndPush $1 $2 $3
-#  rm -rf ${gitTmpRootPath}/*
-#  views=$(ls ${ccTmpRootPath})
-#  for view in ${views}; do
-#    cleartool rmview ${ccTmpRootPath}/${view}
-#  done
-#  rm -rf ${ccTmpRootPath}/*
+  pullCCAndPush $1 $2 $3 $4 $5 $6
+  #postClean
 }
 
-main $1 $2 $3
+main $1 $2 $3 $4 $5 $6
