@@ -98,6 +98,29 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /users/{token}:
+    get:
+      summary: 账户
+      description: ''
+      operationId: GetUser
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: token
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 账户
+          schema:
+            $ref: '#/definitions/UserInfoModel'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /tasks:
     post:
       summary: 新建任务

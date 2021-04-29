@@ -2,6 +2,9 @@
 
 set -e
 
+ccTmpRootPath="/home/tmp/pvobs_view"
+gitTmpRootPath="/home/tmp/git"
+
 initGitRepo(){
   repoUrl=$1
   branchName=$2
@@ -47,26 +50,52 @@ initGitRepo(){
 pullCCAndPush(){
   repoUrl=$1
   branchName=$2
-  random=$(cat /proc/sys/kernel/random/uuid)
-  local tmpGitDir="/home/tmp/git/${random}"
-  local tmpCCDir="/home/tmp/pvobs_view/${random}"
+  taskID=$3
+  local tmpGitDir="${gitTmpRootPath}/${taskID}"
+  local tmpCCDir="${ccTmpRootPath}/${taskID}"
   pvobList=$(cleartool lsvob -s | grep pvob)
   for pv in ${pvobList}; do
     streamList=$(cleartool lsstream -s -invob ${pv})
     for sm in ${streamList}; do
       compList=$(cleartool lsstream -fmt %[components]p ${sm}@${pv})
       for comp in ${compList}; do
-        mkdir -p ${tmpCCDir}
-        cleartool mkview -snapshot -tag ${pv}_${sm}_${comp} -stgloc -auto -stream ${sm}@${pv} ${tmpDir}
-        cd ${tmpCCDir}
-        cleartool update -add_loadrules ${comp}
-        initGitRepo ${repoUrl} ${branchName} ${tmpGitDir}
+        local tmpCCDirExist=false
+        local tmpGitDir=false
+        if [[ -d ${tmpCCDir} ]]; then
+          tmpCCDirExist=true
+          cd ${tmpCCDir}
+          cleartool update .
+        else
+          mkdir -p ${tmpCCDir}
+          cleartool mkview -snapshot -tag ${pv}_${sm}_${comp}_${taskID} -stgloc -auto -stream ${sm}@${pv} ${tmpCCDir}
+          cd ${tmpCCDir}
+          cleartool update -add_loadrules ${comp}
+        fi
+        if [[ -d ${tmpGitDir} ]]; then
+          tmpGitDirExist=true
+        else
+          initGitRepo ${repoUrl} ${branchName} ${tmpGitDir}
+        fi
+        if $tmpCCDirExist && $tmpGitDirExist; then
+          continue
+        fi
         cp -rf ${tmpCCDir}/* ${tmpGitDir}/*
         git add .
         git commit -m "import from cc,first commit $(date '+%Y%m%d%H%M%S')"
         git push origin ${branchName}
-#        cleartool rmview ${tmpCCDir}
       done
     done
   done
 }
+
+main(){
+  pullCCAndPush $1 $2 $3
+#  rm -rf ${gitTmpRootPath}/*
+#  views=$(ls ${ccTmpRootPath})
+#  for view in ${views}; do
+#    cleartool rmview ${ccTmpRootPath}/${view}
+#  done
+#  rm -rf ${ccTmpRootPath}/*
+}
+
+main $1 $2 $3
