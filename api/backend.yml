@@ -32,7 +32,7 @@ paths:
         '201':
           description: 成功
           schema:
-            $ref: '#/definitions/OK'
+            $ref: '#/definitions/Authorization'
         '500':
           description: 内部错误
           schema:
@@ -53,6 +53,10 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/UserModel'
+        - name: Authorization
+          in: header
+          required: true
+          type: string
       responses:
         '201':
           description: 成功
@@ -70,6 +74,16 @@ paths:
         - application/json
       produces:
         - application/json
+      parameters:
+        - name: page
+          in: query
+          required: true
+          default: 0
+          type: integer
+        - name: Authorization
+          in: header
+          required: true
+          type: string
       responses:
         '200':
           description: 账户列表
@@ -77,6 +91,9 @@ paths:
             type: array
             items:
               $ref: '#/definitions/UserInfoModel'
+          headers:
+            X-Total-Count:
+              type: integer
         '500':
           description: 内部错误
           schema:
@@ -97,6 +114,10 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/TaskModel'
+        - name: Authorization
+          in: header
+          required: true
+          type: string
       responses:
         '201':
           description: 成功
@@ -114,6 +135,16 @@ paths:
         - application/json
       produces:
         - application/json
+      parameters:
+        - name: page
+          in: query
+          required: true
+          default: 0
+          type: integer
+        - name: Authorization
+          in: header
+          required: true
+          type: string
       responses:
         '200':
           description: 任务列表
@@ -121,6 +152,9 @@ paths:
             type: array
             items:
               $ref: '#/definitions/TaskInfoModel'
+          headers:
+            X-Total-Count:
+              type: integer
         '500':
           description: 内部错误
           schema:
@@ -139,11 +173,114 @@ paths:
           in: "path"
           required: true
           type: "string"
+        - name: Authorization
+          in: header
+          required: true
+          type: string
       responses:
         '200':
           description: 任务信息
           schema:
             $ref: '#/definitions/TaskDetail'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /pvobs:
+    get:
+      summary: pvob列表
+      description: ''
+      operationId: ListPvob
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: PVOB列表
+          schema:
+            type: array
+            items:
+              type: string
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /pvobs/{id}/components:
+    get:
+      summary: 组件列表
+      description: ''
+      operationId: ListPvobComponent
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        '200':
+          description: 组件列表
+          schema:
+            type: array
+            items:
+              type: string
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /pvobs/{pvob_id}/components/{component_id}:
+    get:
+      summary: 流列表
+      description: ''
+      operationId: ListPvobComponentStream
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "pvob_id"
+          in: "path"
+          required: true
+          type: "string"
+        - name: "component_id"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        '200':
+          description: 流列表
+          schema:
+            type: array
+            items:
+              type: string
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /workers:
+    post:
+      summary: worker注册和心跳
+      description: ''
+      operationId: PingWorker
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: workerInfo
+          in: body
+          description: worker信息
+          required: true
+          schema:
+            $ref: '#/definitions/WorkerModel'
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
         '500':
           description: 内部错误
           schema:
@@ -239,8 +376,22 @@ definitions:
       code:
         type: integer
         example: 400
+  WorkerModel:
+    type: object
+    properties:
+      host:
+        type: string
+        example: 192.168.1.1
+      port:
+        type: integer
+        example: 80
   OK:
     type: object
     properties:
       message:
+        type: string
+  Authorization:
+    type: object
+    properties:
+      token:
         type: string

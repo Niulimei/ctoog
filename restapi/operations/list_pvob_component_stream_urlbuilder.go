@@ -9,13 +9,13 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-
-	"github.com/go-openapi/swag"
+	"strings"
 )
 
-// ListTaskURL generates an URL for the list task operation
-type ListTaskURL struct {
-	Page int64
+// ListPvobComponentStreamURL generates an URL for the list pvob component stream operation
+type ListPvobComponentStreamURL struct {
+	ComponentID string
+	PvobID      string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -25,7 +25,7 @@ type ListTaskURL struct {
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ListTaskURL) WithBasePath(bp string) *ListTaskURL {
+func (o *ListPvobComponentStreamURL) WithBasePath(bp string) *ListPvobComponentStreamURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -33,15 +33,29 @@ func (o *ListTaskURL) WithBasePath(bp string) *ListTaskURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ListTaskURL) SetBasePath(bp string) {
+func (o *ListPvobComponentStreamURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *ListTaskURL) Build() (*url.URL, error) {
+func (o *ListPvobComponentStreamURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/tasks"
+	var _path = "/pvobs/{pvob_id}/components/{component_id}"
+
+	componentID := o.ComponentID
+	if componentID != "" {
+		_path = strings.Replace(_path, "{component_id}", componentID, -1)
+	} else {
+		return nil, errors.New("componentId is required on ListPvobComponentStreamURL")
+	}
+
+	pvobID := o.PvobID
+	if pvobID != "" {
+		_path = strings.Replace(_path, "{pvob_id}", pvobID, -1)
+	} else {
+		return nil, errors.New("pvobId is required on ListPvobComponentStreamURL")
+	}
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -49,20 +63,11 @@ func (o *ListTaskURL) Build() (*url.URL, error) {
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
-	qs := make(url.Values)
-
-	pageQ := swag.FormatInt64(o.Page)
-	if pageQ != "" {
-		qs.Set("page", pageQ)
-	}
-
-	_result.RawQuery = qs.Encode()
-
 	return &_result, nil
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *ListTaskURL) Must(u *url.URL, err error) *url.URL {
+func (o *ListPvobComponentStreamURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -73,17 +78,17 @@ func (o *ListTaskURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *ListTaskURL) String() string {
+func (o *ListPvobComponentStreamURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *ListTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *ListPvobComponentStreamURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on ListTaskURL")
+		return nil, errors.New("scheme is required for a full url on ListPvobComponentStreamURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on ListTaskURL")
+		return nil, errors.New("host is required for a full url on ListPvobComponentStreamURL")
 	}
 
 	base, err := o.Build()
@@ -97,6 +102,6 @@ func (o *ListTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *ListTaskURL) StringFull(scheme, host string) string {
+func (o *ListPvobComponentStreamURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

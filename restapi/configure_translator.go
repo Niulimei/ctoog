@@ -36,10 +36,10 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	api.JSONProducer = runtime.JSONProducer()
 
 	api.CreateTaskHandler = operations.CreateTaskHandlerFunc(CreateTaskHandler)
-	api.CreateUserHandler = operations.CreateUserHandlerFunc(CreateUser)
+	api.CreateUserHandler = operations.CreateUserHandlerFunc(CreateUserHandler)
 	api.GetTaskHandler = operations.GetTaskHandlerFunc(GetTaskHandler)
 	api.ListTaskHandler = operations.ListTaskHandlerFunc(ListTaskHandler)
-	api.ListUserHandler = operations.ListUserHandlerFunc(ListUsers)
+	api.ListUserHandler = operations.ListUserHandlerFunc(ListUsersHandler)
 	api.LoginHandler = operations.LoginHandlerFunc(LoginHandler)
 
 	api.PreServerShutdown = func() {}

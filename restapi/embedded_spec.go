@@ -18,6 +18,9 @@ var (
 
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
+  "schemes": [
+    "http"
+  ],
   "swagger": "2.0",
   "info": {
     "title": "translator",
@@ -31,7 +34,6 @@ func init() {
     },
     "version": "1.0.0"
   },
-  "host": "0.0.0.0:8991",
   "basePath": "/api",
   "paths": {
     "/login": {
@@ -43,7 +45,7 @@ func init() {
           "application/json"
         ],
         "summary": "登录",
-        "operationId": "LoginHandler",
+        "operationId": "Login",
         "parameters": [
           {
             "description": "用户信息",
@@ -59,7 +61,116 @@ func init() {
           "201": {
             "description": "成功",
             "schema": {
-              "$ref": "#/definitions/OK"
+              "$ref": "#/definitions/Authorization"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/pvobs": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "pvob列表",
+        "operationId": "ListPvob",
+        "responses": {
+          "200": {
+            "description": "PVOB列表",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/pvobs/{id}/components": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "组件列表",
+        "operationId": "ListPvobComponent",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "组件列表",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/pvobs/{pvob_id}/components/{component_id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "流列表",
+        "operationId": "ListPvobComponentStream",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "pvob_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "component_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "流列表",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           "500": {
@@ -81,6 +192,21 @@ func init() {
         ],
         "summary": "任务列表",
         "operationId": "ListTask",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "任务列表",
@@ -88,6 +214,11 @@ func init() {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/TaskInfoModel"
+              }
+            },
+            "headers": {
+              "X-Total-Count": {
+                "type": "integer"
               }
             }
           },
@@ -117,6 +248,12 @@ func init() {
             "schema": {
               "$ref": "#/definitions/TaskModel"
             }
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
           }
         ],
         "responses": {
@@ -151,6 +288,12 @@ func init() {
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
           }
         ],
         "responses": {
@@ -179,6 +322,21 @@ func init() {
         ],
         "summary": "账户列表",
         "operationId": "ListUser",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "账户列表",
@@ -186,6 +344,11 @@ func init() {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/UserInfoModel"
+              }
+            },
+            "headers": {
+              "X-Total-Count": {
+                "type": "integer"
               }
             }
           },
@@ -205,7 +368,7 @@ func init() {
           "application/json"
         ],
         "summary": "开通账户",
-        "operationId": "CreateUser",
+        "operationId": "CreateUserHandler",
         "parameters": [
           {
             "description": "用户信息",
@@ -214,6 +377,49 @@ func init() {
             "required": true,
             "schema": {
               "$ref": "#/definitions/UserModel"
+            }
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/workers": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "worker注册和心跳",
+        "operationId": "PingWorker",
+        "parameters": [
+          {
+            "description": "worker信息",
+            "name": "workerInfo",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/WorkerModel"
             }
           }
         ],
@@ -235,6 +441,14 @@ func init() {
     }
   },
   "definitions": {
+    "Authorization": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      }
+    },
     "ErrorModel": {
       "type": "object",
       "properties": {
@@ -378,12 +592,28 @@ func init() {
         },
         "username": {
           "type": "string"
+        }
+      }
+    },
+    "WorkerModel": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "example": "192.168.1.1"
+        },
+        "port": {
+          "type": "integer",
+          "example": 80
         }
       }
     }
   }
 }`))
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
+  "schemes": [
+    "http"
+  ],
   "swagger": "2.0",
   "info": {
     "title": "translator",
@@ -397,7 +627,6 @@ func init() {
     },
     "version": "1.0.0"
   },
-  "host": "0.0.0.0:8991",
   "basePath": "/api",
   "paths": {
     "/login": {
@@ -409,7 +638,7 @@ func init() {
           "application/json"
         ],
         "summary": "登录",
-        "operationId": "LoginHandler",
+        "operationId": "Login",
         "parameters": [
           {
             "description": "用户信息",
@@ -425,7 +654,116 @@ func init() {
           "201": {
             "description": "成功",
             "schema": {
-              "$ref": "#/definitions/OK"
+              "$ref": "#/definitions/Authorization"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/pvobs": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "pvob列表",
+        "operationId": "ListPvob",
+        "responses": {
+          "200": {
+            "description": "PVOB列表",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/pvobs/{id}/components": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "组件列表",
+        "operationId": "ListPvobComponent",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "组件列表",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/pvobs/{pvob_id}/components/{component_id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "流列表",
+        "operationId": "ListPvobComponentStream",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "pvob_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "component_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "流列表",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           "500": {
@@ -447,6 +785,21 @@ func init() {
         ],
         "summary": "任务列表",
         "operationId": "ListTask",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "任务列表",
@@ -454,6 +807,11 @@ func init() {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/TaskInfoModel"
+              }
+            },
+            "headers": {
+              "X-Total-Count": {
+                "type": "integer"
               }
             }
           },
@@ -483,6 +841,12 @@ func init() {
             "schema": {
               "$ref": "#/definitions/TaskModel"
             }
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
           }
         ],
         "responses": {
@@ -517,6 +881,12 @@ func init() {
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
           }
         ],
         "responses": {
@@ -545,6 +915,21 @@ func init() {
         ],
         "summary": "账户列表",
         "operationId": "ListUser",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "账户列表",
@@ -552,6 +937,11 @@ func init() {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/UserInfoModel"
+              }
+            },
+            "headers": {
+              "X-Total-Count": {
+                "type": "integer"
               }
             }
           },
@@ -571,7 +961,7 @@ func init() {
           "application/json"
         ],
         "summary": "开通账户",
-        "operationId": "CreateUser",
+        "operationId": "CreateUserHandler",
         "parameters": [
           {
             "description": "用户信息",
@@ -580,6 +970,49 @@ func init() {
             "required": true,
             "schema": {
               "$ref": "#/definitions/UserModel"
+            }
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/workers": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "worker注册和心跳",
+        "operationId": "PingWorker",
+        "parameters": [
+          {
+            "description": "worker信息",
+            "name": "workerInfo",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/WorkerModel"
             }
           }
         ],
@@ -601,6 +1034,14 @@ func init() {
     }
   },
   "definitions": {
+    "Authorization": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      }
+    },
     "ErrorModel": {
       "type": "object",
       "properties": {
@@ -744,6 +1185,19 @@ func init() {
         },
         "username": {
           "type": "string"
+        }
+      }
+    },
+    "WorkerModel": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "example": "192.168.1.1"
+        },
+        "port": {
+          "type": "integer",
+          "example": 80
         }
       }
     }

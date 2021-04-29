@@ -6,7 +6,7 @@
 //    http://swagger.io/terms/
 //  Schemes:
 //    http
-//  Host: 0.0.0.0:8991
+//  Host: localhost
 //  BasePath: /api
 //  Version: 1.0.0
 //  License: Apache 2.0 http://www.apache.org/licenses/LICENSE-2.0.html

@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/swag"
 
 	"ctgb/models"
 )
@@ -21,6 +22,10 @@ const ListUserOKCode int = 200
 swagger:response listUserOK
 */
 type ListUserOK struct {
+	/*
+
+	 */
+	XTotalCount int64 `json:"X-Total-Count"`
 
 	/*
 	  In: Body
@@ -32,6 +37,17 @@ type ListUserOK struct {
 func NewListUserOK() *ListUserOK {
 
 	return &ListUserOK{}
+}
+
+// WithXTotalCount adds the xTotalCount to the list user o k response
+func (o *ListUserOK) WithXTotalCount(xTotalCount int64) *ListUserOK {
+	o.XTotalCount = xTotalCount
+	return o
+}
+
+// SetXTotalCount sets the xTotalCount to the list user o k response
+func (o *ListUserOK) SetXTotalCount(xTotalCount int64) {
+	o.XTotalCount = xTotalCount
 }
 
 // WithPayload adds the payload to the list user o k response
@@ -47,6 +63,13 @@ func (o *ListUserOK) SetPayload(payload []*models.UserInfoModel) {
 
 // WriteResponse to the client
 func (o *ListUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	// response header X-Total-Count
+
+	xTotalCount := swag.FormatInt64(o.XTotalCount)
+	if xTotalCount != "" {
+		rw.Header().Set("X-Total-Count", xTotalCount)
+	}
 
 	rw.WriteHeader(200)
 	payload := o.Payload

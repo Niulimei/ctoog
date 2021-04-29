@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func CreateUser(params operations.CreateUserParams) middleware.Responder {
+func CreateUserHandler(params operations.CreateUserParams) middleware.Responder {
 	var id int
 	row := database.DB.QueryRow("SELECT id FROM user WHERE username=?", params.UserInfo.Username)
 	err := row.Scan(&id)
@@ -25,7 +25,7 @@ func CreateUser(params operations.CreateUserParams) middleware.Responder {
 	}
 }
 
-func ListUsers(param operations.ListUserParams) middleware.Responder {
+func ListUsersHandler(param operations.ListUserParams) middleware.Responder {
 	rows, err := database.DB.Query("SELECT username FROM user")
 	if err != nil {
 		return middleware.Error(http.StatusInternalServerError, "Sql Error")

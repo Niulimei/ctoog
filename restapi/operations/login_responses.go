@@ -25,7 +25,7 @@ type LoginCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.OK `json:"body,omitempty"`
+	Payload *models.Authorization `json:"body,omitempty"`
 }
 
 // NewLoginCreated creates LoginCreated with default headers values
@@ -35,13 +35,13 @@ func NewLoginCreated() *LoginCreated {
 }
 
 // WithPayload adds the payload to the login created response
-func (o *LoginCreated) WithPayload(payload *models.OK) *LoginCreated {
+func (o *LoginCreated) WithPayload(payload *models.Authorization) *LoginCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the login created response
-func (o *LoginCreated) SetPayload(payload *models.OK) {
+func (o *LoginCreated) SetPayload(payload *models.Authorization) {
 	o.Payload = payload
 }
 

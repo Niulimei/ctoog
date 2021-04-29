@@ -9,23 +9,17 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-
-	"github.com/go-openapi/swag"
 )
 
-// ListTaskURL generates an URL for the list task operation
-type ListTaskURL struct {
-	Page int64
-
+// PingWorkerURL generates an URL for the ping worker operation
+type PingWorkerURL struct {
 	_basePath string
-	// avoid unkeyed usage
-	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ListTaskURL) WithBasePath(bp string) *ListTaskURL {
+func (o *PingWorkerURL) WithBasePath(bp string) *PingWorkerURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -33,15 +27,15 @@ func (o *ListTaskURL) WithBasePath(bp string) *ListTaskURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ListTaskURL) SetBasePath(bp string) {
+func (o *PingWorkerURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *ListTaskURL) Build() (*url.URL, error) {
+func (o *PingWorkerURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/tasks"
+	var _path = "/workers"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -49,20 +43,11 @@ func (o *ListTaskURL) Build() (*url.URL, error) {
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
-	qs := make(url.Values)
-
-	pageQ := swag.FormatInt64(o.Page)
-	if pageQ != "" {
-		qs.Set("page", pageQ)
-	}
-
-	_result.RawQuery = qs.Encode()
-
 	return &_result, nil
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *ListTaskURL) Must(u *url.URL, err error) *url.URL {
+func (o *PingWorkerURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -73,17 +58,17 @@ func (o *ListTaskURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *ListTaskURL) String() string {
+func (o *PingWorkerURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *ListTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *PingWorkerURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on ListTaskURL")
+		return nil, errors.New("scheme is required for a full url on PingWorkerURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on ListTaskURL")
+		return nil, errors.New("host is required for a full url on PingWorkerURL")
 	}
 
 	base, err := o.Build()
@@ -97,6 +82,6 @@ func (o *ListTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *ListTaskURL) StringFull(scheme, host string) string {
+func (o *PingWorkerURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

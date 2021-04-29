@@ -51,6 +51,15 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		GetTaskHandler: GetTaskHandlerFunc(func(params GetTaskParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetTask has not yet been implemented")
 		}),
+		ListPvobHandler: ListPvobHandlerFunc(func(params ListPvobParams) middleware.Responder {
+			return middleware.NotImplemented("operation ListPvob has not yet been implemented")
+		}),
+		ListPvobComponentHandler: ListPvobComponentHandlerFunc(func(params ListPvobComponentParams) middleware.Responder {
+			return middleware.NotImplemented("operation ListPvobComponent has not yet been implemented")
+		}),
+		ListPvobComponentStreamHandler: ListPvobComponentStreamHandlerFunc(func(params ListPvobComponentStreamParams) middleware.Responder {
+			return middleware.NotImplemented("operation ListPvobComponentStream has not yet been implemented")
+		}),
 		ListTaskHandler: ListTaskHandlerFunc(func(params ListTaskParams) middleware.Responder {
 			return middleware.NotImplemented("operation ListTask has not yet been implemented")
 		}),
@@ -59,6 +68,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		}),
 		LoginHandler: LoginHandlerFunc(func(params LoginParams) middleware.Responder {
 			return middleware.NotImplemented("operation Login has not yet been implemented")
+		}),
+		PingWorkerHandler: PingWorkerHandlerFunc(func(params PingWorkerParams) middleware.Responder {
+			return middleware.NotImplemented("operation PingWorker has not yet been implemented")
 		}),
 	}
 }
@@ -102,12 +114,20 @@ type TranslatorAPI struct {
 	CreateUserHandler CreateUserHandler
 	// GetTaskHandler sets the operation handler for the get task operation
 	GetTaskHandler GetTaskHandler
+	// ListPvobHandler sets the operation handler for the list pvob operation
+	ListPvobHandler ListPvobHandler
+	// ListPvobComponentHandler sets the operation handler for the list pvob component operation
+	ListPvobComponentHandler ListPvobComponentHandler
+	// ListPvobComponentStreamHandler sets the operation handler for the list pvob component stream operation
+	ListPvobComponentStreamHandler ListPvobComponentStreamHandler
 	// ListTaskHandler sets the operation handler for the list task operation
 	ListTaskHandler ListTaskHandler
 	// ListUserHandler sets the operation handler for the list user operation
 	ListUserHandler ListUserHandler
 	// LoginHandler sets the operation handler for the login operation
 	LoginHandler LoginHandler
+	// PingWorkerHandler sets the operation handler for the ping worker operation
+	PingWorkerHandler PingWorkerHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -194,6 +214,15 @@ func (o *TranslatorAPI) Validate() error {
 	if o.GetTaskHandler == nil {
 		unregistered = append(unregistered, "GetTaskHandler")
 	}
+	if o.ListPvobHandler == nil {
+		unregistered = append(unregistered, "ListPvobHandler")
+	}
+	if o.ListPvobComponentHandler == nil {
+		unregistered = append(unregistered, "ListPvobComponentHandler")
+	}
+	if o.ListPvobComponentStreamHandler == nil {
+		unregistered = append(unregistered, "ListPvobComponentStreamHandler")
+	}
 	if o.ListTaskHandler == nil {
 		unregistered = append(unregistered, "ListTaskHandler")
 	}
@@ -202,6 +231,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.LoginHandler == nil {
 		unregistered = append(unregistered, "LoginHandler")
+	}
+	if o.PingWorkerHandler == nil {
+		unregistered = append(unregistered, "PingWorkerHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -306,6 +338,18 @@ func (o *TranslatorAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/pvobs"] = NewListPvob(o.context, o.ListPvobHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/pvobs/{id}/components"] = NewListPvobComponent(o.context, o.ListPvobComponentHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/pvobs/{pvob_id}/components/{component_id}"] = NewListPvobComponentStream(o.context, o.ListPvobComponentStreamHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/tasks"] = NewListTask(o.context, o.ListTaskHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -315,6 +359,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/login"] = NewLogin(o.context, o.LoginHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/workers"] = NewPingWorker(o.context, o.PingWorkerHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP
