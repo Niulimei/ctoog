@@ -25,7 +25,6 @@ CREATE TABLE task (
     git_url varchar (256),
     git_user varchar (256),
     git_password varchar (256),
-    git_repo varchar (256),
     status varchar (16),
     last_completed_date_time varchar (64),
     creator varchar(128),
@@ -64,22 +63,19 @@ type TaskModel struct {
 	CcPassword string `db:"cc_password"`
 
 	// cc user
-	CcUser string `json:"db:"cc_user"`
+	CcUser string `db:"cc_user"`
 
 	// component
 	Component string
 
 	// git password
-	GitPassword string `json:"db:"git_password"`
+	GitPassword string `db:"git_password"`
 
 	// git URL
 	GitURL string `db:"git_url"`
 
 	// git user
 	GitUser string `db:"git_user"`
-
-	// git repo
-	GitRepo string `db:"git_repo"`
 
 	// status
 	Status string
@@ -108,6 +104,13 @@ type TaskLog struct {
 	StartTime string `db:"start_time"`
 	EndTime   string `db:"end_time"`
 	Duration  int
+}
+
+type MatchInfo struct {
+	Id        string `db:"id"`
+	TaskId    string `db:"task_id"`
+	Stream    string `db:"stream"`
+	GitBranch string `db:"git_branch"`
 }
 
 func init() {

@@ -1,5 +1,7 @@
 .idea
 main
+worker
+server
 vendor
 *.sw*
 translator.db
