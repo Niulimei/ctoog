@@ -10,11 +10,29 @@ import (
 	"strings"
 )
 
+func startTask(taskID string) error {
+	task := &database.TaskModel{}
+	err := database.DB.Get(task, "SELECT cc_password,"+
+		" cc_user, component, git_password, git_url, git_user, pvob"+
+		" FROM task WHERE id = $1", taskID)
+	if err != nil {
+		return nil
+	}
+	worker := &database.WorkerModel{}
+	if task.WorkerId != 0 {
+		database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1", task.WorkerId)
+	} else {
+		database.DB.Select(worker, "SELECT * FROM worker ORDER BY task_count DESC limit 1")
+	}
+	_ = worker.WorkerUrl
+	return nil
+}
+
 func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder {
 	userToken := params.Authorization
 	username, verified := utils.Verify(userToken)
 	if !verified {
-		return middleware.Error(403, "无访问权限")
+		return middleware.Error(401, "鉴权失败")
 	}
 	fmt.Println(username)
 	taskInfo := params.TaskInfo
@@ -65,19 +83,39 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	username, verified := utils.Verify(params.Authorization)
 	if !verified {
-		return middleware.Error(403, "没有权限")
+		return middleware.Error(401, "鉴权失败")
+	}
+	var query string
+	if username == "admin" {
+		query = "SELECT pvob, component, git_repo, id, last_completed_date_time," +
+			" status" +
+			" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id OFFSET $2 LIMIT 10;"
+	} else {
+		query = "SELECT pvob, component, git_repo, id, last_completed_date_time," +
+			" status" +
+			" FROM task WHERE creator = $1 ORDER BY id OFFSET $2 LIMIT 10;"
 	}
 	offset := params.Offset
 	var tasks []*models.TaskInfoModel
 	var count int64
-	database.DB.Get(count, "SELECT COUNT(id) FROM task WHERE creator = $1", username)
-	database.DB.Select(&tasks, "SELECT pvob, component, git_repo, id, last_completed_date_time,"+
-		" status"+
-		" FROM task WHERE creator = $1 ORDER BY id OFFSET $2 LIMIT 10;", username, offset)
-	var tasksPage []*models.TaskPageInfoModel
-	for _, task := range tasks {
-		tasksPage = append(tasksPage,
-			&models.TaskPageInfoModel{TaskInfo: task, Offset: offset + count, Limit: 10, Count: count})
-	}
+	database.DB.Get(count, query, username, offset)
+	tasksPage := &models.TaskPageInfoModel{}
+	tasksPage.TaskInfo = tasks
 	return operations.NewListTaskOK().WithPayload(tasksPage)
+}
+
+func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder {
+	//username, verified := utils.Verify(params.Authorization)
+	taskId := params.ID
+	taskLogInfo := params.TaskLog
+	taskLog := &database.TaskLog{}
+	err := database.DB.Get(taskLog, "SELECT * FROM task_log WHERE task_id = $1 AND status = 'running'", taskId)
+	if err != nil {
+		return middleware.Error(404, "没发现任务")
+	}
+	database.DB.Exec("UPDATE task SET status = $1, end_time = $2, duration = $3 WHERE id = $4",
+		taskLogInfo.Status, taskLogInfo.EndTime, taskLogInfo.Duration, taskLog.LogId)
+	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
+		Message: "ok",
+	})
 }

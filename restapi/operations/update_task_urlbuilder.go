@@ -10,11 +10,15 @@ import (
 	"net/url"
 	golangswaggerpaths "path"
 	"strings"
+
+	"github.com/go-openapi/swag"
 )
 
 // UpdateTaskURL generates an URL for the update task operation
 type UpdateTaskURL struct {
 	ID string
+
+	Start *bool
 
 	_basePath string
 	// avoid unkeyed usage
@@ -54,6 +58,18 @@ func (o *UpdateTaskURL) Build() (*url.URL, error) {
 		_basePath = "/api"
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	var startQ string
+	if o.Start != nil {
+		startQ = swag.FormatBool(*o.Start)
+	}
+	if startQ != "" {
+		qs.Set("start", startQ)
+	}
+
+	_result.RawQuery = qs.Encode()
 
 	return &_result, nil
 }

@@ -340,6 +340,12 @@ func init() {
             "schema": {
               "$ref": "#/definitions/TaskLogInfo"
             }
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "start",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1018,6 +1024,12 @@ func init() {
             "schema": {
               "$ref": "#/definitions/TaskLogInfo"
             }
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "name": "start",
+            "in": "query"
           }
         ],
         "responses": {

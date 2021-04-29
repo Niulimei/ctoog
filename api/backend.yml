@@ -209,6 +209,10 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/TaskLogInfo'
+        - name: start
+          in: query
+          type: boolean
+          default: false
       responses:
         '201':
           description: 成功
