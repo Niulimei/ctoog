@@ -9,16 +9,11 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-	"strings"
 )
 
 // GetUserURL generates an URL for the get user operation
 type GetUserURL struct {
-	Token string
-
 	_basePath string
-	// avoid unkeyed usage
-	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -40,14 +35,7 @@ func (o *GetUserURL) SetBasePath(bp string) {
 func (o *GetUserURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/users/{token}"
-
-	token := o.Token
-	if token != "" {
-		_path = strings.Replace(_path, "{token}", token, -1)
-	} else {
-		return nil, errors.New("token is required on GetUserURL")
-	}
+	var _path = "/users/self"
 
 	_basePath := o._basePath
 	if _basePath == "" {

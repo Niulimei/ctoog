@@ -21,7 +21,7 @@ type TaskInfoModel struct {
 	Component string `json:"component,omitempty"`
 
 	// git repo
-	GitRepo string `json:"gitRepo,omitempty" db:"git_repo"`
+	GitRepo string `json:"gitRepo,omitempty" db:"git_url"`
 
 	// id
 	ID int64 `json:"id,omitempty"`

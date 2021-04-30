@@ -29,7 +29,7 @@ func NewGetUser(ctx *middleware.Context, handler GetUserHandler) *GetUser {
 	return &GetUser{Context: ctx, Handler: handler}
 }
 
-/* GetUser swagger:route GET /users/{token} getUser
+/* GetUser swagger:route GET /users/self getUser
 
 账户
 
@@ -42,7 +42,7 @@ type GetUser struct {
 func (o *GetUser) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
-		r = rCtx
+		*r = *rCtx
 	}
 	var Params = NewGetUserParams()
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

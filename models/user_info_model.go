@@ -23,6 +23,9 @@ type UserInfoModel struct {
 	// password
 	Password string `json:"password,omitempty"`
 
+	// role id
+	RoleID int64 `json:"role_id,omitempty"`
+
 	// username
 	Username string `json:"username,omitempty"`
 }

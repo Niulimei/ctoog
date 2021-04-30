@@ -9,6 +9,13 @@ import (
 	"net/http"
 )
 
+type ROLE int
+
+const (
+	AdminRole  ROLE = 1
+	NormalRole ROLE = 2
+)
+
 func CreateUserHandler(params operations.CreateUserParams) middleware.Responder {
 	checkRet := checkPermission(params.Authorization)
 	if checkRet != nil {
@@ -23,8 +30,11 @@ func CreateUserHandler(params operations.CreateUserParams) middleware.Responder 
 			Message: "User Already Exist",
 		})
 	}
-	sqlStr := "INSERT INTO user (username,password) VALUES (?,?)"
-	ret := database.DB.MustExec(sqlStr, params.UserInfo.Username, params.UserInfo.Password)
+	sqlStr := "INSERT INTO user (username,password,role_id) VALUES (?,?,?)"
+	if params.UserInfo.RoleID == 0 {
+		params.UserInfo.RoleID = int64(NormalRole)
+	}
+	ret := database.DB.MustExec(sqlStr, params.UserInfo.Username, params.UserInfo.Password, params.UserInfo.RoleID)
 	_, err = ret.RowsAffected()
 	if err != nil {
 		return operations.NewCreateUserInternalServerError().WithPayload(&models.ErrorModel{
@@ -36,6 +46,16 @@ func CreateUserHandler(params operations.CreateUserParams) middleware.Responder 
 	}
 }
 
+func getUserInfo(username string) *models.UserInfoModel {
+	user := &models.UserInfoModel{}
+	row := database.DB.QueryRow("SELECT username,role_id FROM user WHERE username=?", username)
+	err := row.Scan(&user.Username, &user.RoleID)
+	if err != nil {
+		return user
+	}
+	return user
+}
+
 func checkPermission(token string) middleware.Responder {
 	username, valid := utils.Verify(token)
 	if !valid {
@@ -44,7 +64,8 @@ func checkPermission(token string) middleware.Responder {
 			Message: "",
 		})
 	}
-	if username != "admin" {
+	userInfo := getUserInfo(username)
+	if userInfo.RoleID != int64(AdminRole) {
 		return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusForbidden,
 			Message: "",
@@ -54,14 +75,15 @@ func checkPermission(token string) middleware.Responder {
 }
 
 func GetUserHandler(param operations.GetUserParams) middleware.Responder {
-	username, valid := utils.Verify(param.Token)
+	username, valid := utils.Verify(param.Authorization)
 	if !valid {
 		return operations.NewGetUserInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusUnauthorized,
 			Message: "",
 		})
 	}
-	return operations.NewGetUserOK().WithPayload(&models.UserInfoModel{Username: username})
+	userInfo := getUserInfo(username)
+	return operations.NewGetUserOK().WithPayload(&models.UserInfoModel{Username: username, RoleID: userInfo.RoleID})
 }
 
 func ListUsersHandler(param operations.ListUserParams) middleware.Responder {
@@ -69,7 +91,7 @@ func ListUsersHandler(param operations.ListUserParams) middleware.Responder {
 	if checkRet != nil {
 		return checkRet
 	}
-	rows, err := database.DB.Query("SELECT count(1) over() AS total_rows,username FROM user ORDER BY id LIMIT ? OFFSET ?", param.Limit, param.Offset)
+	rows, err := database.DB.Query("SELECT count(1) over() AS total_rows,username,role_id FROM user ORDER BY id LIMIT ? OFFSET ?", param.Limit, param.Offset)
 	if err != nil {
 		return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
@@ -81,7 +103,7 @@ func ListUsersHandler(param operations.ListUserParams) middleware.Responder {
 	var count int64
 	for rows.Next() {
 		tmp := &models.UserInfoModel{}
-		if err := rows.Scan(&count, &tmp.Username); err != nil {
+		if err := rows.Scan(&count, &tmp.Username, &tmp.RoleID); err != nil {
 			return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
 				Code:    http.StatusInternalServerError,
 				Message: "Sql Error",
