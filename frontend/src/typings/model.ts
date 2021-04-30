@@ -30,10 +30,9 @@ export namespace Task {
   } & Base;
 
   export type Detail = {
-    matchInfo?: MatchInfo[];
-    logList?: Log[];
-  } & Base;
-
+    taskModel: Base & { matchInfo: MatchInfo[] };
+    logList: Log[];
+  };
   export type MatchInfo = { stream: string; gitBranch: string };
 
   export type Log = {

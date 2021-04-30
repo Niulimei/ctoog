@@ -1,4 +1,5 @@
 import React from 'react';
+import moment from 'moment';
 import { Button, message } from 'antd';
 import Table from '@ant-design/pro-table';
 import type { Task } from '@/typings/model';
@@ -13,38 +14,54 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
     {
       title: '任务编号',
       dataIndex: 'id',
+      width: 80,
     },
     {
       title: 'CC PVOB',
-      dataIndex: 'ccPvob',
+      dataIndex: 'pvob',
+      ellipsis: true,
+      width: 120,
     },
     {
       title: 'CC Component',
-      dataIndex: 'ccComponent',
+      dataIndex: 'component',
+      ellipsis: true,
+      width: 120,
     },
     {
       title: 'Git Repo',
       dataIndex: 'gitRepo',
+      ellipsis: true,
+      width: 180,
     },
     {
       title: '当前状态',
+      width: 100,
       renderText(item: Task.Item) {
         return item.status;
       },
     },
     {
       title: '最后一次完成时间',
+      ellipsis: true,
+      width: 130,
       renderText(item: Task.Item) {
-        return item.lastCompleteDateTime;
+        return moment(item.lastCompleteDateTime).format('MM-DD HH:mm');
       },
     },
     {
       title: '操作',
+      width: 100,
+      // @ts-ignore
       render(item: Task.Item) {
         return (
           <>
-            <Button onClick={() => actions.displayDetail(item.id)}>查看详情</Button>
-            <Button onClick={() => actions.refreshTask(item.id)}>刷新迁移任务</Button>
+            <Button size="small" type="link" onClick={() => actions.displayDetail(item.id)}>
+              查看详情
+            </Button>
+            <Button size="small" type="link" onClick={() => actions.refreshTask(item.id)}>
+              刷新任务
+            </Button>
           </>
         );
       },
@@ -54,6 +71,7 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
 
 const TaskList: React.FC = () => {
   const tableRef = React.useRef<any>(null);
+  const detailModalRef = React.useRef<any>(null);
   const [taskDetail, setTaskDetail] = React.useState<Task.Detail>();
 
   const refreshTask = async (id: number) => {
@@ -67,7 +85,10 @@ const TaskList: React.FC = () => {
   const displayDetail = async (id: number) => {
     const res = await taskService.getTaskDetail(id);
     setTaskDetail(res);
+    detailModalRef.current.openModal();
   };
+
+  const actions = { displayDetail, refreshTask };
 
   return (
     <>
@@ -86,10 +107,7 @@ const TaskList: React.FC = () => {
           };
         }}
         headerTitle="任务列表"
-        columns={getColumns({
-          refreshTask,
-          displayDetail,
-        })}
+        columns={getColumns(actions)}
         toolBarRender={() => [
           <ModalCreator
             onCreateSuccess={() => {
@@ -99,7 +117,7 @@ const TaskList: React.FC = () => {
         ]}
         search={false}
       />
-      <ModalDetail data={taskDetail} />
+      <ModalDetail actionRef={detailModalRef} data={taskDetail} />
     </>
   );
 };

@@ -6,6 +6,7 @@ export const login = async (params: User.Base) => {
   const res = await request.post('/login', {
     data: params,
   });
+
   if (res.token) {
     authTokenAction.set(res.token);
   }

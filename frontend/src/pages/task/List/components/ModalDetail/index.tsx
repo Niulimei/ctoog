@@ -5,12 +5,13 @@ import { useToggle } from 'react-use';
 import type { Task } from '@/typings/model';
 import type { ProColumns } from '@ant-design/pro-table';
 import Table from '@ant-design/pro-table';
+import { guid } from '@/utils/utils';
 
 import styles from './style.less';
 
-const EmptyColSpace = <li className={styles.emptyCol} />;
+const EmptyColSpace = <li key="emptyCol" className={styles.emptyCol} />;
 
-const descriptionsGenerator = (fieldKeys: string[], data: Task.Detail) => {
+const descriptionsGenerator = (fieldKeys: string[], data: any) => {
   const taskKeyLabel: Record<string, string> = {
     pvob: 'PVOB',
     component: 'Component',
@@ -25,7 +26,7 @@ const descriptionsGenerator = (fieldKeys: string[], data: Task.Detail) => {
   return fieldKeys.map((key) => {
     if (key === 'EmptyColSpace') return EmptyColSpace;
     return (
-      <li key={key}>
+      <li key={guid()}>
         <span>{taskKeyLabel[key]}：</span>
         {data[key]}
       </li>
@@ -64,31 +65,61 @@ const TableColumns: ProColumns<Task.Log>[] = [
   },
 ];
 
-const ModalDetail: React.FC<{ data?: Task.Detail }> = ({ data = {} as any }) => {
+const ModalDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, actionRef }) => {
   const [visible, toggleVisible] = useToggle(false);
 
-  return data ? (
-    <Modal title="任务详情" width="700px" visible={visible} onCancel={() => toggleVisible(false)}>
-      <div className={styles.gutter}>
-        <div className={styles.row}>
-          <h6>ClearCase</h6>
-          <ul className={styles.list}>
-            {descriptionsGenerator(['pvob', 'component', 'ccUser'], data)}
-          </ul>
-        </div>
-        <div className={styles.row}>
-          <h6>Git</h6>
-          <ul className={styles.list}>
-            {descriptionsGenerator(['gitURL', 'EmptyColSpace', 'gitUser'], data)}
-          </ul>
-        </div>
-      </div>
-      {EmptyColSpace}
-      <ProCard title="执行历史记录">
-        <Table dataSource={data.logList} columns={TableColumns} />
-      </ProCard>
-    </Modal>
-  ) : null;
+  React.useImperativeHandle(actionRef, () => ({
+    openModal() {
+      toggleVisible(true);
+    },
+  }));
+
+  return (
+    <div>
+      {data ? (
+        <Modal
+          title="任务详情"
+          width="700px"
+          visible={visible}
+          cancelButtonProps={{ style: { display: 'none' } }}
+          onOk={() => toggleVisible(false)}
+          onCancel={() => toggleVisible(false)}
+        >
+          <div className={styles.gutter}>
+            <div className={styles.row}>
+              <h6>ClearCase</h6>
+              <ul className={styles.list}>
+                {descriptionsGenerator(['pvob', 'component', 'ccUser'], data.taskModel)}
+                <div className={styles.pipe} />
+                {data.taskModel.matchInfo.map(({ stream }) =>
+                  descriptionsGenerator(['stream'], { stream }),
+                )}
+              </ul>
+            </div>
+            <div className={styles.row}>
+              <h6>Git</h6>
+              <ul className={styles.list}>
+                {descriptionsGenerator(['gitURL', 'EmptyColSpace', 'gitUser'], data.taskModel)}
+                <div className={styles.pipe} />
+                {data.taskModel.matchInfo.map(({ gitBranch }) =>
+                  descriptionsGenerator(['gitBranch'], { gitBranch }),
+                )}
+              </ul>
+            </div>
+          </div>
+          {EmptyColSpace}
+          <ProCard title="执行历史记录" style={{ marginTop: 22 }}>
+            <Table
+              search={false}
+              toolBarRender={false}
+              dataSource={data.logList}
+              columns={TableColumns}
+            />
+          </ProCard>
+        </Modal>
+      ) : null}
+    </div>
+  );
 };
 
 export default ModalDetail;
