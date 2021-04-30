@@ -1,0 +1,28 @@
+.gutter {
+  display: flex;
+  flex-direction: row;
+  .row {
+    flex: 1;
+    padding: 0 25px;
+    + .row {
+      border-left: 1px solid #f0f0f0;
+    }
+    > h6 {
+      font-size: 16px;
+      text-align: center;
+    }
+  }
+}
+
+.list {
+  padding: 0;
+  font-size: 14px;
+  > li {
+    height: 28px;
+    margin-bottom: 8px;
+    line-height: 28px;
+    &.emptyCol {
+      height: 22px;
+    }
+  }
+}
