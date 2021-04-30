@@ -133,10 +133,10 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
 		cmd := exec.Command("/bin/bash", "-c",
-			fmt.Sprintf(`echo %s | sudo -S su - %s -c "/usr/bin/bash cc2git.sh" %s %s %s %s %s`,
+			fmt.Sprintf(`echo %s | sudo -S su - %s -c "/usr/bin/bash cc2git.sh" %s %s %s %s %s %d`,
 				workerTaskModel.CcPassword, workerTaskModel.CcUser, workerTaskModel.Pvob, workerTaskModel.Component,
 				workerTaskModel.Stream,
-				gitUrl, workerTaskModel.Branch))
+				gitUrl, workerTaskModel.Branch, workerTaskModel.TaskId))
 		go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmd)
 	} else {
 		fmt.Println(err)
