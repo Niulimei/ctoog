@@ -90,8 +90,7 @@ func pingServer(host string, port int) {
 		// handle err
 	}
 	body := bytes.NewReader(payloadBytes)
-
-	req, err := http.NewRequest("POST", "http://127.0.0.1:8993/api/workers", body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/api/workers", serverFlag), body)
 	if err != nil {
 		// handle err
 	}
@@ -152,5 +151,5 @@ func main() {
 	flag.Parse()
 	go pingServer(hostFlag, portFlag)
 	http.HandleFunc("/new_task", taskHandler) //	设置访问路由
-	log.Fatal(http.ListenAndServe(strconv.Itoa(portFlag), nil))
+	log.Fatal(http.ListenAndServe(hostFlag+":"+strconv.Itoa(portFlag), nil))
 }

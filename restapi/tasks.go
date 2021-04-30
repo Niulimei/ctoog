@@ -129,24 +129,34 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	username, verified := utils.Verify(params.Authorization)
 	if !verified {
-		return middleware.Error(401, "鉴权失败")
+		return middleware.Error(http.StatusUnauthorized, "鉴权失败")
 	}
-	var query string
-	if username == "admin" {
-		query = "SELECT pvob, component, git_repo, id, last_completed_date_time," +
+	var query,queryCount string
+	user := getUserInfo(username)
+	if user.RoleID == int64(AdminRole) {
+		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
 			" status" +
-			" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id OFFSET $2 LIMIT 10;"
+			" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
+		queryCount = "SELECT count(1) over() AS total_rows FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
 	} else {
-		query = "SELECT pvob, component, git_repo, id, last_completed_date_time," +
+		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
 			" status" +
-			" FROM task WHERE creator = $1 ORDER BY id OFFSET $2 LIMIT 10;"
+			" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
+		queryCount = "SELECT count(1) over() AS total_rows FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
 	}
-	offset := params.Offset
 	var tasks []*models.TaskInfoModel
 	var count int64
-	database.DB.Get(count, query, username, offset)
+	err := database.DB.Select(&tasks, query, username, params.Limit, params.Offset)
+	if err != nil {
+		return middleware.Error(http.StatusInternalServerError, "Sql Error")
+	}
+	err = database.DB.Get(&count, queryCount, username, params.Limit, params.Offset)
+	if err != nil {
+		return middleware.Error(http.StatusInternalServerError, "Sql Error")
+	}
 	tasksPage := &models.TaskPageInfoModel{}
 	tasksPage.TaskInfo = tasks
+	tasksPage.Count = count
 	return operations.NewListTaskOK().WithPayload(tasksPage)
 }
 

@@ -98,7 +98,7 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
-  /users/{token}:
+  /users/self:
     get:
       summary: 账户
       description: ''
@@ -108,8 +108,8 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: token
-          in: path
+        - name: Authorization
+          in: header
           required: true
           type: string
       responses:
@@ -367,6 +367,8 @@ definitions:
         type: string
       id:
         type: integer
+      role_id:
+        type: integer
   UserModel:
     type: object
     properties:
@@ -374,6 +376,8 @@ definitions:
         type: string
       password:
         type: string
+      role_id:
+        type: integer
   TaskPageInfoModel:
     type: object
     properties:

@@ -453,7 +453,7 @@ func init() {
         }
       }
     },
-    "/users/{token}": {
+    "/users/self": {
       "get": {
         "consumes": [
           "application/json"
@@ -466,8 +466,8 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "token",
-            "in": "path",
+            "name": "Authorization",
+            "in": "header",
             "required": true
           }
         ],
@@ -684,6 +684,9 @@ func init() {
         "password": {
           "type": "string"
         },
+        "role_id": {
+          "type": "integer"
+        },
         "username": {
           "type": "string"
         }
@@ -694,6 +697,9 @@ func init() {
       "properties": {
         "password": {
           "type": "string"
+        },
+        "role_id": {
+          "type": "integer"
         },
         "username": {
           "type": "string"
@@ -1171,7 +1177,7 @@ func init() {
         }
       }
     },
-    "/users/{token}": {
+    "/users/self": {
       "get": {
         "consumes": [
           "application/json"
@@ -1184,8 +1190,8 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "token",
-            "in": "path",
+            "name": "Authorization",
+            "in": "header",
             "required": true
           }
         ],
@@ -1402,6 +1408,9 @@ func init() {
         "password": {
           "type": "string"
         },
+        "role_id": {
+          "type": "integer"
+        },
         "username": {
           "type": "string"
         }
@@ -1412,6 +1421,9 @@ func init() {
       "properties": {
         "password": {
           "type": "string"
+        },
+        "role_id": {
+          "type": "integer"
         },
         "username": {
           "type": "string"

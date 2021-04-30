@@ -354,7 +354,7 @@ func (o *TranslatorAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/users/{token}"] = NewGetUser(o.context, o.GetUserHandler)
+	o.handlers["GET"]["/users/self"] = NewGetUser(o.context, o.GetUserHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

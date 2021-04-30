@@ -13,7 +13,8 @@ var schema = `
 CREATE TABLE user (
     id integer PRIMARY KEY autoincrement,
     username varchar (128),
-    password varchar (32)
+    password varchar (32),
+    role_id integer
 );
 
 CREATE TABLE task (
@@ -54,7 +55,7 @@ CREATE TABLE worker (
     task_count integer
 );
 
-INSERT INTO user (username,password) VALUES("admin", "21232f297a57a5a743894a0e4a801fc3");
+INSERT INTO user (username,password,role_id) VALUES("admin", "b17eccdc6c06bd8e15928d583503adf9", 1);
 `
 
 type TaskModel struct {
