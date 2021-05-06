@@ -24,7 +24,7 @@ export namespace Task {
   };
 
   export type Item = {
-    id: number;
+    id: string;
     lastCompleteDateTime: string;
     status: string;
   } & Base;

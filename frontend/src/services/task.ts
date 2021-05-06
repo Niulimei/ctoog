@@ -8,7 +8,7 @@ export const getTasks = (params: API.PaginationRequestParams) => {
 };
 
 /** 获取任务详情 */
-export const getTaskDetail = (id: number) => {
+export const getTaskDetail = (id: string) => {
   return request.get(`/tasks/${id}`);
 };
 
@@ -20,8 +20,12 @@ export const createTask = (data: any) => {
 };
 
 /** 刷新迁移任务 */
-export const refreshTask = (id: number) => {
-  return request.put(`/tasks/${id}`);
+export const refreshTask = (id: string) => {
+  return request.post('/tasks/restart', {
+    data: {
+      id,
+    },
+  });
 };
 
 /** 获取 pvob 列表 */

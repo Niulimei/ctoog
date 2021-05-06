@@ -8,7 +8,7 @@ import ModalDetail from './components/ModalDetail';
 import ModalCreator from './components/ModalCreator';
 import type { ProColumns } from '@ant-design/pro-table';
 
-type Actions = Record<'refreshTask' | 'displayDetail', (id: number) => void>;
+type Actions = Record<'refreshTask' | 'displayDetail', (id: string) => void>;
 const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
   return [
     {
@@ -74,7 +74,7 @@ const TaskList: React.FC = () => {
   const detailModalRef = React.useRef<any>(null);
   const [taskDetail, setTaskDetail] = React.useState<Task.Detail>();
 
-  const refreshTask = async (id: number) => {
+  const refreshTask = async (id: string) => {
     try {
       await taskService.refreshTask(id);
       message.success('迁移任务刷新成功');
@@ -82,7 +82,7 @@ const TaskList: React.FC = () => {
       message.error('迁移任务刷新出现异常');
     }
   };
-  const displayDetail = async (id: number) => {
+  const displayDetail = async (id: string) => {
     const res = await taskService.getTaskDetail(id);
     setTaskDetail(res);
     detailModalRef.current.openModal();

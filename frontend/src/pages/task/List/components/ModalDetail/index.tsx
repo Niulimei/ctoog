@@ -6,6 +6,7 @@ import type { Task } from '@/typings/model';
 import type { ProColumns } from '@ant-design/pro-table';
 import Table from '@ant-design/pro-table';
 import { guid } from '@/utils/utils';
+import { humanizeDuration } from '../../helper';
 
 import styles from './style.less';
 
@@ -37,30 +38,30 @@ const descriptionsGenerator = (fieldKeys: string[], data: any) => {
 const TableColumns: ProColumns<Task.Log>[] = [
   {
     title: '任务序号',
-    dataIndex: 'id',
+    dataIndex: 'logID',
   },
   {
-    dataIndex: '任务状态',
+    title: '任务状态',
     renderText(item: Task.Log) {
       return item.status;
     },
   },
   {
-    dataIndex: '开始事件',
+    title: '开始时间',
     renderText(item: Task.Log) {
       return item.startTime;
     },
   },
   {
-    dataIndex: '开始事件',
+    title: '结束时间',
     renderText(item: Task.Log) {
       return item.endTime;
     },
   },
   {
-    dataIndex: '历时时长',
+    title: '历时时长',
     renderText(item: Task.Log) {
-      return item.duration;
+      return item.duration ? '-' : humanizeDuration(Number(item.duration));
     },
   },
 ];
@@ -90,7 +91,7 @@ const ModalDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, a
               <h6>ClearCase</h6>
               <ul className={styles.list}>
                 {descriptionsGenerator(['pvob', 'component', 'ccUser'], data.taskModel)}
-                <div className={styles.pipe} />
+                <div className={styles.divider} />
                 {data.taskModel.matchInfo.map(({ stream }) =>
                   descriptionsGenerator(['stream'], { stream }),
                 )}
@@ -100,7 +101,7 @@ const ModalDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, a
               <h6>Git</h6>
               <ul className={styles.list}>
                 {descriptionsGenerator(['gitURL', 'EmptyColSpace', 'gitUser'], data.taskModel)}
-                <div className={styles.pipe} />
+                <div className={styles.divider} />
                 {data.taskModel.matchInfo.map(({ gitBranch }) =>
                   descriptionsGenerator(['gitBranch'], { gitBranch }),
                 )}
@@ -112,8 +113,8 @@ const ModalDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, a
             <Table
               search={false}
               toolBarRender={false}
-              dataSource={data.logList}
               columns={TableColumns}
+              dataSource={data.logList}
             />
           </ProCard>
         </Modal>

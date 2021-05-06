@@ -37,20 +37,16 @@ const Login: React.FC = () => {
 
   const handleSubmit = async ({ password, username }: User.Base) => {
     setSubmitting(true);
-    try {
-      // 登录
-      const msg = await UserService.login({
-        username,
-        password: md5(password),
-      });
-      if (msg.token) {
-        message.success('登录成功！');
-        await fetchUserInfo();
-        goto();
-        return;
-      }
-    } catch (error) {
-      message.error('登录失败，请重试！');
+    // 登录
+    const msg = await UserService.login({
+      username,
+      password: md5(password),
+    });
+    if (msg.token) {
+      message.success('登录成功！');
+      await fetchUserInfo();
+      goto();
+      return;
     }
     setSubmitting(false);
   };
@@ -100,7 +96,7 @@ const Login: React.FC = () => {
                     size: 'large',
                     prefix: <UserOutlined className={styles.prefixIcon} />,
                   }}
-                  placeholder="用户名: admin or user"
+                  placeholder="请输入用户名"
                   rules={[
                     {
                       required: true,
@@ -114,7 +110,7 @@ const Login: React.FC = () => {
                     size: 'large',
                     prefix: <LockOutlined className={styles.prefixIcon} />,
                   }}
-                  placeholder="密码: ant.design"
+                  placeholder="请输入密码"
                   rules={[
                     {
                       required: true,

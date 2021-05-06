@@ -1,4 +1,5 @@
 import { extend } from 'umi-request';
+import { message } from 'antd';
 
 /** token 存储操作 */
 export const authTokenAction = {
@@ -17,17 +18,29 @@ export const authTokenAction = {
 const request = extend({
   prefix: '/api',
   timeout: 10000,
-  headers: {
-    Authorization: authTokenAction.get(),
-  },
 });
 
-request.interceptors.response.use((res, options) => {
+request.interceptors.request.use((url, { headers, ...restOpts }) => {
+  return {
+    url,
+    options: {
+      ...restOpts,
+      headers: {
+        ...headers,
+        Authorization: authTokenAction.get(),
+      },
+    },
+  };
+});
+
+request.interceptors.response.use(async (res) => {
+  const responseBody = await res.json();
+
   if (res.status === 401) {
     // TODO: 登陆信息过期，跳转到 login
   }
-  if (res.status === 500 && res.body) {
-    // TODO: 登陆失败
+  if (res.status === 500 && responseBody) {
+    message.error(responseBody.message);
   }
   return res;
 });

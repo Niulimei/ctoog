@@ -26,6 +26,8 @@ const loginOut = async () => {
         redirect: pathname,
       }),
     });
+    // eslint-disable-next-line no-restricted-globals
+    location.reload();
   }
 };
 
