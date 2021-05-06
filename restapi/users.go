@@ -125,7 +125,7 @@ func LoginHandler(params operations.LoginParams) middleware.Responder {
 	err := row.Scan(&passwordInDB)
 	if err != nil {
 		return operations.NewLoginInternalServerError().WithPayload(&models.ErrorModel{
-			Code:    http.StatusInternalServerError,
+			Code:    http.StatusNotFound,
 			Message: "User Does Not Exist",
 		})
 	}
@@ -136,7 +136,7 @@ func LoginHandler(params operations.LoginParams) middleware.Responder {
 		})
 	} else {
 		return operations.NewLoginInternalServerError().WithPayload(&models.ErrorModel{
-			Code:    http.StatusInternalServerError,
+			Code:    http.StatusUnauthorized,
 			Message: "Wrong Password",
 		})
 	}
