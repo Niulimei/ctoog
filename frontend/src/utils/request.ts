@@ -34,7 +34,7 @@ request.interceptors.request.use((url, { headers, ...restOpts }) => {
 });
 
 request.interceptors.response.use(async (res) => {
-  const responseBody = await res.json();
+  const responseBody = await res.clone().json();
 
   if (res.status === 401) {
     // TODO: 登陆信息过期，跳转到 login
