@@ -117,8 +117,12 @@ const ModalCreator: React.FC<{ onCreateSuccess?: () => void }> = (props) => {
 
   const deleteBranch = (pos: number) => {
     setBranchFieldNum((num) => num - 1);
-    // TODO:
-    console.log(pos);
+    const { matchInfo } = form.getFieldsValue(['matchInfo']);
+    // remove item
+    matchInfo.splice(pos, 1);
+    form.setFieldsValue({
+      matchInfo,
+    });
   };
 
   const onFormValuesChange = (values: Partial<IFormFields>) => {

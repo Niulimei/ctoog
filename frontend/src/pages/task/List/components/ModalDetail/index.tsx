@@ -111,6 +111,7 @@ const ModalDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, a
           {EmptyColSpace}
           <ProCard title="执行历史记录" style={{ marginTop: 22 }}>
             <Table
+              rowKey="logID"
               search={false}
               toolBarRender={false}
               columns={TableColumns}
