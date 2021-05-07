@@ -99,7 +99,7 @@ pullCCAndPush(){
   else
     git commit -m "import from cc,first commit $(date '+%Y%m%d%H%M%S')"
   fi
-  git push origin ${branchName}
+  git push origin ${gitBranchName}
 }
 
 postClean(){
