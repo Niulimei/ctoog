@@ -28,6 +28,9 @@ type TaskModel struct {
 	// component
 	Component string `json:"component,omitempty"`
 
+	// git email
+	GitEmail string `json:"gitEmail,omitempty" db:"git_email"`
+
 	// git password
 	GitPassword string `json:"gitPassword,omitempty" db:"git_password"`
 

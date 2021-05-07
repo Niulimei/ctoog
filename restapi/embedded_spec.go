@@ -612,6 +612,9 @@ func init() {
         "component": {
           "type": "string"
         },
+        "gitEmail": {
+          "type": "string"
+        },
         "gitRepo": {
           "type": "string"
         },
@@ -642,6 +645,9 @@ func init() {
           "type": "string"
         },
         "endTime": {
+          "type": "string"
+        },
+        "gitEmail": {
           "type": "string"
         },
         "gitRepo": {
@@ -714,6 +720,9 @@ func init() {
           "type": "string"
         },
         "component": {
+          "type": "string"
+        },
+        "gitEmail": {
           "type": "string"
         },
         "gitPassword": {
@@ -1428,6 +1437,9 @@ func init() {
         "component": {
           "type": "string"
         },
+        "gitEmail": {
+          "type": "string"
+        },
         "gitRepo": {
           "type": "string"
         },
@@ -1458,6 +1470,9 @@ func init() {
           "type": "string"
         },
         "endTime": {
+          "type": "string"
+        },
+        "gitEmail": {
           "type": "string"
         },
         "gitRepo": {
@@ -1530,6 +1545,9 @@ func init() {
           "type": "string"
         },
         "component": {
+          "type": "string"
+        },
+        "gitEmail": {
           "type": "string"
         },
         "gitPassword": {

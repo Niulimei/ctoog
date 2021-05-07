@@ -28,6 +28,9 @@ type TaskInfoUpdateModel struct {
 	// end time
 	EndTime string `json:"endTime,omitempty"`
 
+	// git email
+	GitEmail string `json:"gitEmail,omitempty"`
+
 	// git repo
 	GitRepo string `json:"gitRepo,omitempty"`
 

@@ -20,6 +20,9 @@ type TaskInfoModel struct {
 	// component
 	Component string `json:"component,omitempty"`
 
+	// git email
+	GitEmail string `json:"gitEmail,omitempty" db:"git_email"`
+
 	// git repo
 	GitRepo string `json:"gitRepo,omitempty" db:"git_url"`
 

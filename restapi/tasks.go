@@ -17,7 +17,7 @@ import (
 func startTask(taskID int64) {
 	task := &database.TaskModel{}
 	err := database.DB.Get(task, "SELECT cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, pvob, include_empty"+
+		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty"+
 		" FROM task WHERE id = $1", taskID)
 	if err != nil {
 		fmt.Println(err)
@@ -45,6 +45,7 @@ func startTask(taskID int64) {
 		GitPassword  string
 		GitURL       string
 		GitUser      string
+		GitEmail     string
 		Pvob         string
 		Stream       string
 		Branch       string
@@ -57,6 +58,7 @@ func startTask(taskID int64) {
 		GitPassword:  task.GitPassword,
 		GitURL:       task.GitURL,
 		GitUser:      task.GitUser,
+		GitEmail:     task.GitEmail,
 		Pvob:         task.Pvob,
 		Stream:       matchInfo[0].Stream,
 		Branch:       matchInfo[0].GitBranch,
@@ -95,10 +97,11 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 	}
 	taskInfo := params.TaskInfo
 	r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
-		"git_user, git_password, git_url, status, last_completed_date_time, creator, include_empty)"+
-		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, '', $10)",
+		"git_user, git_password, git_url, status, last_completed_date_time, creator, include_empty, git_email)"+
+		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, '', $10, $11)",
 		taskInfo.Pvob, taskInfo.Component, taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL,
-		taskInfo.GitUser, taskInfo.GitPassword, taskInfo.GitURL, "init", username, taskInfo.IncludeEmpty)
+		taskInfo.GitUser, taskInfo.GitPassword, taskInfo.GitURL, "init", username,
+		taskInfo.IncludeEmpty, taskInfo.GitEmail)
 	taskId, err := r.LastInsertId()
 	if err != nil {
 		return operations.NewCreateTaskInternalServerError().WithPayload(
@@ -120,7 +123,7 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	taskID := params.ID
 	task := &models.TaskModel{}
 	database.DB.Get(task, "SELECT cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, pvob, include_empty"+
+		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email"+
 		" FROM task WHERE id = $1", taskID)
 	var matchInfo []*models.TaskMatchInfo
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", taskID)
@@ -140,12 +143,12 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	user := getUserInfo(username)
 	if user.RoleID == int64(AdminRole) {
 		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-			" status, include_empty" +
+			" status, include_empty, git_email" +
 			" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
 		queryCount = "SELECT count(id) FROM task;"
 	} else {
 		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-			" status, include_empty" +
+			" status, include_empty, git_email" +
 			" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
 		queryCount = "SELECT count(id) FROM task WHERE creator = $1;"
 	}

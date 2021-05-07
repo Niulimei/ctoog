@@ -113,6 +113,7 @@ type Task struct {
 	GitPassword  string
 	GitURL       string
 	GitUser      string
+	GitEmail     string
 	Pvob         string
 	Stream       string
 	Branch       string
@@ -133,10 +134,10 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
 		cmd := exec.Command("/bin/bash", "-c",
-			fmt.Sprintf(`echo %s | sudo -S su - %s -c "/usr/bin/bash cc2git.sh" %s %s %s %s %s %d %t`,
+			fmt.Sprintf(`echo %s | sudo -S su - %s -c "/usr/bin/bash cc2git.sh" %s %s %s %s %s %d %t %s %s`,
 				workerTaskModel.CcPassword, workerTaskModel.CcUser, workerTaskModel.Pvob, workerTaskModel.Component,
-				workerTaskModel.Stream,
-				gitUrl, workerTaskModel.Branch, workerTaskModel.TaskId, workerTaskModel.IncludeEmpty))
+				workerTaskModel.Stream, gitUrl, workerTaskModel.Branch, workerTaskModel.TaskId,
+				workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail))
 		go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmd)
 	} else {
 		fmt.Println(err)

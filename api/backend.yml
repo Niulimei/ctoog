@@ -425,6 +425,8 @@ definitions:
         type: string
       gitRepo:
         type: string
+      gitEmail:
+        type: string
       status:
         type: string
       lastCompleteDateTime:
@@ -441,6 +443,8 @@ definitions:
       component:
         type: string
       gitRepo:
+        type: string
+      gitEmail:
         type: string
       status:
         type: string
@@ -483,6 +487,8 @@ definitions:
       gitUser:
         type: string
       gitPassword:
+        type: string
+      gitEmail:
         type: string
       matchInfo:
         type: array
