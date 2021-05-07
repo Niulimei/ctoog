@@ -61,8 +61,9 @@ pullCCAndPush(){
   gitBranchName=$5
   taskID=$6
   containEmptyDir=$7
-  local tmpGitDir="${gitTmpRootPath}/${taskID}"
-  local tmpCCDir="${ccTmpRootPath}/${taskID}"
+  combainNameAdapt=$(echo -n ${pvobName}_${streamName}_${componentName} | sed 's/\//_/g')
+  local tmpGitDir="${gitTmpRootPath}/${combainNameAdapt}_${taskID}"
+  local tmpCCDir="${ccTmpRootPath}/${combainNameAdapt}_${taskID}"
   local tmpCCDirExist=false
   local tmpGitDir=false
   if [[ -d ${tmpCCDir} ]]; then
@@ -70,8 +71,7 @@ pullCCAndPush(){
     cd ${tmpCCDir}
     cleartool update .
   else
-    mkdir -p ${tmpCCDir}
-    cleartool mkview -snapshot -tag ${pvobName}_${streamName}_${componentName}_${taskID} -stgloc -auto -stream ${streamName}@${pvobName} ${tmpCCDir}
+    cleartool mkview -snapshot -tag ${combainNameAdapt}_${taskID} -stgloc -auto -stream ${streamName}@${pvobName} ${tmpCCDir}
     cd ${tmpCCDir}
     cleartool update -add_loadrules ${componentName}
   fi
