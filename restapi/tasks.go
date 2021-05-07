@@ -205,6 +205,10 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		}
 	}
 	tx.Commit()
+	taskIdInt, err := strconv.ParseInt(taskId, 10, 64)
+	if err != nil {
+		go startTask(taskIdInt)
+	}
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
 		Message: "ok",
 	})
