@@ -42,6 +42,7 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	api.GetTaskHandler = operations.GetTaskHandlerFunc(GetTaskHandler)
 	api.ListTaskHandler = operations.ListTaskHandlerFunc(ListTaskHandler)
 	api.UpdateTaskHandler = operations.UpdateTaskHandlerFunc(UpdateTaskHandler)
+	api.RestartTaskHandler = operations.RestartTaskHandlerFunc(RestartTaskHandler)
 	api.PingWorkerHandler = operations.PingWorkerHandlerFunc(PingWorkerHandler)
 	api.ListPvobHandler = operations.ListPvobHandlerFunc(ListPvobHandler)
 	api.ListPvobComponentHandler = operations.ListPvobComponentHandlerFunc(ListPvobComponentHandler)

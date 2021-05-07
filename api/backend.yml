@@ -182,6 +182,35 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /tasks/restart:
+    post:
+      summary: 任务重启
+      description: ''
+      operationId: RestartTask
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+        - name: restartTrigger
+          in: body
+          description: 任务重启
+          required: true
+          schema:
+            $ref: '#/definitions/TaskRestart'
+      responses:
+        '200':
+          description: 任务列表
+          schema:
+            $ref: '#/definitions/TaskPageInfoModel'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /tasks/{id}:
     get:
       summary: 任务详情
@@ -231,11 +260,7 @@ paths:
           description: 任务信息
           required: true
           schema:
-            $ref: '#/definitions/TaskLogInfo'
-        - name: start
-          in: query
-          type: boolean
-          default: false
+            $ref: '#/definitions/TaskInfoUpdateModel'
       responses:
         '201':
           description: 成功
@@ -400,12 +425,45 @@ definitions:
         type: string
       gitRepo:
         type: string
+      gitEmail:
+        type: string
       status:
         type: string
       lastCompleteDateTime:
         type: string
       id:
         type: integer
+      includeEmpty:
+        type: boolean
+  TaskInfoUpdateModel:
+    type: object
+    properties:
+      pvob:
+        type: string
+      component:
+        type: string
+      gitRepo:
+        type: string
+      gitEmail:
+        type: string
+      status:
+        type: string
+      lastCompleteDateTime:
+        type: string
+      logID:
+        type: string
+      startTime:
+        type: string
+      endTime:
+        type: string
+      duration:
+        type: string
+      includeEmpty:
+        type: boolean
+      matchInfo:
+        type: array
+        items:
+          $ref: '#/definitions/TaskMatchInfo'
   TaskMatchInfo:
     type: object
     properties:
@@ -430,10 +488,19 @@ definitions:
         type: string
       gitPassword:
         type: string
+      gitEmail:
+        type: string
       matchInfo:
         type: array
         items:
           $ref: '#/definitions/TaskMatchInfo'
+      includeEmpty:
+        type: boolean
+  TaskRestart:
+    type: object
+    properties:
+      id:
+        type: string
   TaskLogInfo:
     type: object
     properties:

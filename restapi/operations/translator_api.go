@@ -75,6 +75,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		PingWorkerHandler: PingWorkerHandlerFunc(func(params PingWorkerParams) middleware.Responder {
 			return middleware.NotImplemented("operation PingWorker has not yet been implemented")
 		}),
+		RestartTaskHandler: RestartTaskHandlerFunc(func(params RestartTaskParams) middleware.Responder {
+			return middleware.NotImplemented("operation RestartTask has not yet been implemented")
+		}),
 		UpdateTaskHandler: UpdateTaskHandlerFunc(func(params UpdateTaskParams) middleware.Responder {
 			return middleware.NotImplemented("operation UpdateTask has not yet been implemented")
 		}),
@@ -136,6 +139,8 @@ type TranslatorAPI struct {
 	LoginHandler LoginHandler
 	// PingWorkerHandler sets the operation handler for the ping worker operation
 	PingWorkerHandler PingWorkerHandler
+	// RestartTaskHandler sets the operation handler for the restart task operation
+	RestartTaskHandler RestartTaskHandler
 	// UpdateTaskHandler sets the operation handler for the update task operation
 	UpdateTaskHandler UpdateTaskHandler
 
@@ -247,6 +252,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.PingWorkerHandler == nil {
 		unregistered = append(unregistered, "PingWorkerHandler")
+	}
+	if o.RestartTaskHandler == nil {
+		unregistered = append(unregistered, "RestartTaskHandler")
 	}
 	if o.UpdateTaskHandler == nil {
 		unregistered = append(unregistered, "UpdateTaskHandler")
@@ -383,6 +391,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/workers"] = NewPingWorker(o.context, o.PingWorkerHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/tasks/restart"] = NewRestartTask(o.context, o.RestartTaskHandler)
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}

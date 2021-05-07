@@ -271,6 +271,49 @@ func init() {
         }
       }
     },
+    "/tasks/restart": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "任务重启",
+        "operationId": "RestartTask",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "description": "任务重启",
+            "name": "restartTrigger",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TaskRestart"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务列表",
+            "schema": {
+              "$ref": "#/definitions/TaskPageInfoModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/tasks/{id}": {
       "get": {
         "consumes": [
@@ -338,14 +381,8 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/TaskLogInfo"
+              "$ref": "#/definitions/TaskInfoUpdateModel"
             }
-          },
-          {
-            "type": "boolean",
-            "default": false,
-            "name": "start",
-            "in": "query"
           }
         ],
         "responses": {
@@ -575,16 +612,66 @@ func init() {
         "component": {
           "type": "string"
         },
+        "gitEmail": {
+          "type": "string"
+        },
         "gitRepo": {
           "type": "string"
         },
         "id": {
           "type": "integer"
         },
+        "includeEmpty": {
+          "type": "boolean"
+        },
         "lastCompleteDateTime": {
           "type": "string"
         },
         "pvob": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "TaskInfoUpdateModel": {
+      "type": "object",
+      "properties": {
+        "component": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "endTime": {
+          "type": "string"
+        },
+        "gitEmail": {
+          "type": "string"
+        },
+        "gitRepo": {
+          "type": "string"
+        },
+        "includeEmpty": {
+          "type": "boolean"
+        },
+        "lastCompleteDateTime": {
+          "type": "string"
+        },
+        "logID": {
+          "type": "string"
+        },
+        "matchInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TaskMatchInfo"
+          }
+        },
+        "pvob": {
+          "type": "string"
+        },
+        "startTime": {
           "type": "string"
         },
         "status": {
@@ -635,6 +722,9 @@ func init() {
         "component": {
           "type": "string"
         },
+        "gitEmail": {
+          "type": "string"
+        },
         "gitPassword": {
           "type": "string"
         },
@@ -643,6 +733,9 @@ func init() {
         },
         "gitUser": {
           "type": "string"
+        },
+        "includeEmpty": {
+          "type": "boolean"
         },
         "matchInfo": {
           "type": "array",
@@ -672,6 +765,14 @@ func init() {
           "items": {
             "$ref": "#/definitions/TaskInfoModel"
           }
+        }
+      }
+    },
+    "TaskRestart": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
         }
       }
     },
@@ -995,6 +1096,49 @@ func init() {
         }
       }
     },
+    "/tasks/restart": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "任务重启",
+        "operationId": "RestartTask",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "description": "任务重启",
+            "name": "restartTrigger",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TaskRestart"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务列表",
+            "schema": {
+              "$ref": "#/definitions/TaskPageInfoModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/tasks/{id}": {
       "get": {
         "consumes": [
@@ -1062,14 +1206,8 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/TaskLogInfo"
+              "$ref": "#/definitions/TaskInfoUpdateModel"
             }
-          },
-          {
-            "type": "boolean",
-            "default": false,
-            "name": "start",
-            "in": "query"
           }
         ],
         "responses": {
@@ -1299,16 +1437,66 @@ func init() {
         "component": {
           "type": "string"
         },
+        "gitEmail": {
+          "type": "string"
+        },
         "gitRepo": {
           "type": "string"
         },
         "id": {
           "type": "integer"
         },
+        "includeEmpty": {
+          "type": "boolean"
+        },
         "lastCompleteDateTime": {
           "type": "string"
         },
         "pvob": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "TaskInfoUpdateModel": {
+      "type": "object",
+      "properties": {
+        "component": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "endTime": {
+          "type": "string"
+        },
+        "gitEmail": {
+          "type": "string"
+        },
+        "gitRepo": {
+          "type": "string"
+        },
+        "includeEmpty": {
+          "type": "boolean"
+        },
+        "lastCompleteDateTime": {
+          "type": "string"
+        },
+        "logID": {
+          "type": "string"
+        },
+        "matchInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TaskMatchInfo"
+          }
+        },
+        "pvob": {
+          "type": "string"
+        },
+        "startTime": {
           "type": "string"
         },
         "status": {
@@ -1359,6 +1547,9 @@ func init() {
         "component": {
           "type": "string"
         },
+        "gitEmail": {
+          "type": "string"
+        },
         "gitPassword": {
           "type": "string"
         },
@@ -1367,6 +1558,9 @@ func init() {
         },
         "gitUser": {
           "type": "string"
+        },
+        "includeEmpty": {
+          "type": "boolean"
         },
         "matchInfo": {
           "type": "array",
@@ -1396,6 +1590,14 @@ func init() {
           "items": {
             "$ref": "#/definitions/TaskInfoModel"
           }
+        }
+      }
+    },
+    "TaskRestart": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
         }
       }
     },

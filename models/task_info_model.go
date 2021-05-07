@@ -20,11 +20,17 @@ type TaskInfoModel struct {
 	// component
 	Component string `json:"component,omitempty"`
 
+	// git email
+	GitEmail string `json:"gitEmail,omitempty" db:"git_email"`
+
 	// git repo
 	GitRepo string `json:"gitRepo,omitempty" db:"git_url"`
 
 	// id
 	ID int64 `json:"id,omitempty"`
+
+	// include empty
+	IncludeEmpty bool `json:"includeEmpty,omitempty" db:"include_empty"`
 
 	// last complete date time
 	LastCompleteDateTime string `json:"lastCompleteDateTime,omitempty" db:"last_completed_date_time"`

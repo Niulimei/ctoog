@@ -14,44 +14,50 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// TaskModel task model
+// TaskInfoUpdateModel task info update model
 //
-// swagger:model TaskModel
-type TaskModel struct {
-
-	// cc password
-	CcPassword string `json:"ccPassword,omitempty" db:"cc_password"`
-
-	// cc user
-	CcUser string `json:"ccUser,omitempty" db:"cc_user"`
+// swagger:model TaskInfoUpdateModel
+type TaskInfoUpdateModel struct {
 
 	// component
 	Component string `json:"component,omitempty"`
 
+	// duration
+	Duration string `json:"duration,omitempty"`
+
+	// end time
+	EndTime string `json:"endTime,omitempty"`
+
 	// git email
-	GitEmail string `json:"gitEmail,omitempty" db:"git_email"`
+	GitEmail string `json:"gitEmail,omitempty"`
 
-	// git password
-	GitPassword string `json:"gitPassword,omitempty" db:"git_password"`
-
-	// git URL
-	GitURL string `json:"gitURL,omitempty" db:"git_url"`
-
-	// git user
-	GitUser string `json:"gitUser,omitempty" db:"git_user"`
+	// git repo
+	GitRepo string `json:"gitRepo,omitempty"`
 
 	// include empty
-	IncludeEmpty bool `json:"includeEmpty,omitempty" db:"include_empty"`
+	IncludeEmpty bool `json:"includeEmpty,omitempty"`
+
+	// last complete date time
+	LastCompleteDateTime string `json:"lastCompleteDateTime,omitempty"`
+
+	// log ID
+	LogID string `json:"logID,omitempty"`
 
 	// match info
 	MatchInfo []*TaskMatchInfo `json:"matchInfo"`
 
 	// pvob
 	Pvob string `json:"pvob,omitempty"`
+
+	// start time
+	StartTime string `json:"startTime,omitempty"`
+
+	// status
+	Status string `json:"status,omitempty"`
 }
 
-// Validate validates this task model
-func (m *TaskModel) Validate(formats strfmt.Registry) error {
+// Validate validates this task info update model
+func (m *TaskInfoUpdateModel) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateMatchInfo(formats); err != nil {
@@ -64,7 +70,7 @@ func (m *TaskModel) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *TaskModel) validateMatchInfo(formats strfmt.Registry) error {
+func (m *TaskInfoUpdateModel) validateMatchInfo(formats strfmt.Registry) error {
 	if swag.IsZero(m.MatchInfo) { // not required
 		return nil
 	}
@@ -88,8 +94,8 @@ func (m *TaskModel) validateMatchInfo(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validate this task model based on the context it is used
-func (m *TaskModel) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+// ContextValidate validate this task info update model based on the context it is used
+func (m *TaskInfoUpdateModel) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.contextValidateMatchInfo(ctx, formats); err != nil {
@@ -102,7 +108,7 @@ func (m *TaskModel) ContextValidate(ctx context.Context, formats strfmt.Registry
 	return nil
 }
 
-func (m *TaskModel) contextValidateMatchInfo(ctx context.Context, formats strfmt.Registry) error {
+func (m *TaskInfoUpdateModel) contextValidateMatchInfo(ctx context.Context, formats strfmt.Registry) error {
 
 	for i := 0; i < len(m.MatchInfo); i++ {
 
@@ -121,7 +127,7 @@ func (m *TaskModel) contextValidateMatchInfo(ctx context.Context, formats strfmt
 }
 
 // MarshalBinary interface implementation
-func (m *TaskModel) MarshalBinary() ([]byte, error) {
+func (m *TaskInfoUpdateModel) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -129,8 +135,8 @@ func (m *TaskModel) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *TaskModel) UnmarshalBinary(b []byte) error {
-	var res TaskModel
+func (m *TaskInfoUpdateModel) UnmarshalBinary(b []byte) error {
+	var res TaskInfoUpdateModel
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

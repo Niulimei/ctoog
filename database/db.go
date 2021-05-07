@@ -26,10 +26,12 @@ CREATE TABLE task (
     git_url varchar (256),
     git_user varchar (256),
     git_password varchar (256),
+    git_email varchar (256),
     status varchar (16),
     last_completed_date_time varchar (64),
     creator varchar(128),
-    worker_id integer
+    worker_id integer,
+    include_empty boolean
 );
 
 CREATE TABLE match_info (
@@ -91,6 +93,12 @@ type TaskModel struct {
 
 	// pvob
 	Pvob string
+
+	// include empty dir
+	IncludeEmpty bool
+
+	// git email
+	GitEmail string
 }
 
 type WorkerModel struct {
