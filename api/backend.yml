@@ -260,7 +260,7 @@ paths:
           description: 任务信息
           required: true
           schema:
-            $ref: '#/definitions/TaskLogInfo'
+            $ref: '#/definitions/TaskInfoUpdateModel'
       responses:
         '201':
           description: 成功
@@ -431,6 +431,35 @@ definitions:
         type: string
       id:
         type: integer
+      includeEmpty:
+        type: boolean
+  TaskInfoUpdateModel:
+    type: object
+    properties:
+      pvob:
+        type: string
+      component:
+        type: string
+      gitRepo:
+        type: string
+      status:
+        type: string
+      lastCompleteDateTime:
+        type: string
+      logID:
+        type: string
+      startTime:
+        type: string
+      endTime:
+        type: string
+      duration:
+        type: string
+      includeEmpty:
+        type: boolean
+      matchInfo:
+        type: array
+        items:
+          $ref: '#/definitions/TaskMatchInfo'
   TaskMatchInfo:
     type: object
     properties:
@@ -459,6 +488,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/TaskMatchInfo'
+      includeEmpty:
+        type: boolean
   TaskRestart:
     type: object
     properties:

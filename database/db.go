@@ -29,7 +29,8 @@ CREATE TABLE task (
     status varchar (16),
     last_completed_date_time varchar (64),
     creator varchar(128),
-    worker_id integer
+    worker_id integer,
+    include_empty boolean
 );
 
 CREATE TABLE match_info (
@@ -91,6 +92,9 @@ type TaskModel struct {
 
 	// pvob
 	Pvob string
+
+	// include empty dir
+	IncludeEmpty bool
 }
 
 type WorkerModel struct {

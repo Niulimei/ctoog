@@ -381,7 +381,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/TaskLogInfo"
+              "$ref": "#/definitions/TaskInfoUpdateModel"
             }
           }
         ],
@@ -618,10 +618,54 @@ func init() {
         "id": {
           "type": "integer"
         },
+        "includeEmpty": {
+          "type": "boolean"
+        },
         "lastCompleteDateTime": {
           "type": "string"
         },
         "pvob": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "TaskInfoUpdateModel": {
+      "type": "object",
+      "properties": {
+        "component": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "endTime": {
+          "type": "string"
+        },
+        "gitRepo": {
+          "type": "string"
+        },
+        "includeEmpty": {
+          "type": "boolean"
+        },
+        "lastCompleteDateTime": {
+          "type": "string"
+        },
+        "logID": {
+          "type": "string"
+        },
+        "matchInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TaskMatchInfo"
+          }
+        },
+        "pvob": {
+          "type": "string"
+        },
+        "startTime": {
           "type": "string"
         },
         "status": {
@@ -680,6 +724,9 @@ func init() {
         },
         "gitUser": {
           "type": "string"
+        },
+        "includeEmpty": {
+          "type": "boolean"
         },
         "matchInfo": {
           "type": "array",
@@ -1150,7 +1197,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/TaskLogInfo"
+              "$ref": "#/definitions/TaskInfoUpdateModel"
             }
           }
         ],
@@ -1387,10 +1434,54 @@ func init() {
         "id": {
           "type": "integer"
         },
+        "includeEmpty": {
+          "type": "boolean"
+        },
         "lastCompleteDateTime": {
           "type": "string"
         },
         "pvob": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "TaskInfoUpdateModel": {
+      "type": "object",
+      "properties": {
+        "component": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "endTime": {
+          "type": "string"
+        },
+        "gitRepo": {
+          "type": "string"
+        },
+        "includeEmpty": {
+          "type": "boolean"
+        },
+        "lastCompleteDateTime": {
+          "type": "string"
+        },
+        "logID": {
+          "type": "string"
+        },
+        "matchInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TaskMatchInfo"
+          }
+        },
+        "pvob": {
+          "type": "string"
+        },
+        "startTime": {
           "type": "string"
         },
         "status": {
@@ -1449,6 +1540,9 @@ func init() {
         },
         "gitUser": {
           "type": "string"
+        },
+        "includeEmpty": {
+          "type": "boolean"
         },
         "matchInfo": {
           "type": "array",
