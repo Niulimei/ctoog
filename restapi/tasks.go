@@ -30,6 +30,9 @@ func startTask(taskID int64) {
 		err = database.DB.Get(worker, "SELECT * FROM worker ORDER BY task_count DESC limit 1")
 	}
 	workerUrl := worker.WorkerUrl
+	if worker.WorkerUrl == "" {
+		return
+	}
 	var matchInfo []*models.TaskMatchInfo
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1 ORDER BY id",
 		taskID)
