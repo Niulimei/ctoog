@@ -73,22 +73,23 @@ pullCCAndPush(){
   else
     cleartool mkview -snapshot -tag ${combainNameAdapt}_${taskID} -stgloc -auto -stream ${streamName}@${pvobName} ${tmpCCDir}
     cd ${tmpCCDir}
-    cleartool update -add_loadrules ${componentName}
+    cleartool update -add_loadrules .${componentName}
   fi
   if [[ -d ${tmpGitDir} ]]; then
     tmpGitDirExist=true
   else
     initGitRepo ${gitRepoUrl} ${gitBranchName} ${tmpGitDir}
   fi
-  if $tmpCCDirExist && $tmpGitDirExist; then
-    return
-  fi
   cp -rf ${tmpCCDir}/* ${tmpGitDir}/*
   if [[ ${containEmptyDir} == "true" ]]; then
     find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/.gitkeep \;
   fi
   git add .
-  git commit -m "import from cc,first commit $(date '+%Y%m%d%H%M%S')"
+  if $tmpCCDirExist && $tmpGitDirExist; then
+    git commit -m "import from cc,update commit $(date '+%Y%m%d%H%M%S')"
+  else
+    git commit -m "import from cc,first commit $(date '+%Y%m%d%H%M%S')"
+  fi
   git push origin ${branchName}
 }
 
