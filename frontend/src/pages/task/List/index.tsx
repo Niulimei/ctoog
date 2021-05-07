@@ -4,11 +4,11 @@ import { Button, message } from 'antd';
 import Table from '@ant-design/pro-table';
 import type { Task } from '@/typings/model';
 import { task as taskService } from '@/services';
-import ModalDetail from './components/ModalDetail';
-import ModalCreator from './components/ModalCreator';
+import TaskDetail from './components/TaskDetail';
+import TaskCreator from './components/TaskCreator';
 import type { ProColumns } from '@ant-design/pro-table';
 
-type Actions = Record<'refreshTask' | 'displayDetail', (id: string) => void>;
+type Actions = Record<'refreshTask' | 'displayDetail' | 'updateTask' | 'createTask', (id: string) => void>;
 const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
   return [
     {
@@ -51,13 +51,17 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
     },
     {
       title: '操作',
-      width: 100,
+      width: 80,
+      align: 'center',
       // @ts-ignore
       render(item: Task.Item) {
         return (
           <>
             <Button size="small" type="link" onClick={() => actions.displayDetail(item.id)}>
-              查看详情
+              查看任务
+            </Button>
+            <Button size="small" type="link" onClick={() => actions.updateTask(item.id)}>
+              修改任务
             </Button>
             <Button size="small" type="link" onClick={() => actions.refreshTask(item.id)}>
               刷新任务
@@ -72,23 +76,35 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
 const TaskList: React.FC = () => {
   const tableRef = React.useRef<any>(null);
   const detailModalRef = React.useRef<any>(null);
+  const creatorModalRef = React.useRef<any>(null);
+
   const [taskDetail, setTaskDetail] = React.useState<Task.Detail>();
 
-  const refreshTask = async (id: string) => {
-    try {
-      await taskService.refreshTask(id);
-      message.success('迁移任务刷新成功');
-    } catch (err) {
-      message.error('迁移任务刷新出现异常');
-    }
+  const actions: Actions = {
+    /** 查看任务详情 */
+    async displayDetail(id: string) {
+      const res = await taskService.getTaskDetail(id);
+      setTaskDetail(res);
+      detailModalRef.current.openModal();
+    },
+    /** 刷新任务 */
+    async refreshTask(id: string) {
+      try {
+        await taskService.refreshTask(id);
+        message.success('迁移任务刷新成功');
+      } catch (err) {
+        message.error('迁移任务刷新出现异常');
+      }
+    },
+    /** 更新任务 */
+    async updateTask(id: string) {
+      creatorModalRef.current.openModal('update', id);
+    },
+    /** 创建任务 */
+    async createTask() {
+      creatorModalRef.current.openModal('create');
+    },
   };
-  const displayDetail = async (id: string) => {
-    const res = await taskService.getTaskDetail(id);
-    setTaskDetail(res);
-    detailModalRef.current.openModal();
-  };
-
-  const actions = { displayDetail, refreshTask };
 
   return (
     <>
@@ -109,15 +125,26 @@ const TaskList: React.FC = () => {
         headerTitle="任务列表"
         columns={getColumns(actions)}
         toolBarRender={() => [
-          <ModalCreator
-            onCreateSuccess={() => {
-              tableRef.current.reload();
+          <Button
+            size="small"
+            type="primary"
+            onClick={() => {
+              creatorModalRef.current.openModal();
             }}
-          />,
+          >
+            新建迁移任务
+          </Button>,
         ]}
         search={false}
       />
-      <ModalDetail actionRef={detailModalRef} data={taskDetail} />
+      <TaskDetail actionRef={detailModalRef} data={taskDetail} />
+      <TaskCreator
+        actionRef={creatorModalRef}
+        onSuccess={() => {
+          tableRef.current.reload();
+        }}
+      />
+      ,
     </>
   );
 };
