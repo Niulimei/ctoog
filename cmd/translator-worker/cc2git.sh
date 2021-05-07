@@ -1,5 +1,12 @@
 #!/bin/bash
 
+######
+#脚本名称：cc2git.sh
+#作用：完成CC代码的拉取，git仓库的初始化，代码向git的推送
+#传参说明：共需7个参数，依次分别为：
+#pvob名称，component名称，stream名称，gitRepoURL，git目标分支代码，任务ID，是否保留空目录(是：true，否：false)
+######
+
 set -e
 
 ccTmpRootPath="/home/tmp/pvobs_view"
@@ -53,6 +60,7 @@ pullCCAndPush(){
   gitRepoUrl=$4
   gitBranchName=$5
   taskID=$6
+  containEmptyDir=$7
   local tmpGitDir="${gitTmpRootPath}/${taskID}"
   local tmpCCDir="${ccTmpRootPath}/${taskID}"
   local tmpCCDirExist=false
@@ -76,6 +84,9 @@ pullCCAndPush(){
     return
   fi
   cp -rf ${tmpCCDir}/* ${tmpGitDir}/*
+  if [[ ${containEmptyDir} == "true" ]]; then
+    find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/.gitkeep \;
+  fi
   git add .
   git commit -m "import from cc,first commit $(date '+%Y%m%d%H%M%S')"
   git push origin ${branchName}
@@ -91,8 +102,10 @@ postClean(){
 }
 
 main(){
-  pullCCAndPush $1 $2 $3 $4 $5 $6
+  mkdir -p ${ccTmpRootPath}
+  mkdir -p ${gitTmpRootPath}
+  pullCCAndPush $1 $2 $3 $4 $5 $6 $7
   #postClean
 }
 
-main $1 $2 $3 $4 $5 $6
+main $1 $2 $3 $4 $5 $6 $7
