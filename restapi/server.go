@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -150,6 +151,21 @@ func (s *Server) hasScheme(scheme string) bool {
 	return false
 }
 
+type FileServerHandler struct {
+	h http.Handler
+}
+
+func (f *FileServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if !strings.HasPrefix(r.URL.Path, "/api") {
+		if !strings.HasPrefix(r.URL.Path, "/frontend/dist") {
+			r.URL.Path = "/frontend/dist" + r.URL.Path
+		}
+		http.FileServer(http.Dir("./")).ServeHTTP(w, r)
+		return
+	}
+	f.h.ServeHTTP(w, r)
+}
+
 // Serve the api
 func (s *Server) Serve() (err error) {
 	if !s.hasListeners {
@@ -210,7 +226,8 @@ func (s *Server) Serve() (err error) {
 			httpServer.IdleTimeout = s.CleanupTimeout
 		}
 
-		httpServer.Handler = s.handler
+		fileWrapper := &FileServerHandler{h: s.handler}
+		httpServer.Handler = fileWrapper
 
 		configureServer(httpServer, "http", s.httpServerL.Addr().String())
 
