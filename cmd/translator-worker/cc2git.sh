@@ -88,7 +88,7 @@ pullCCAndPush(){
   else
     initGitRepo ${gitRepoUrl} ${gitBranchName} ${tmpGitDir} ${username} ${email}
   fi
-  $cp -rf ${tmpCCDir}/* ${tmpGitDir}/
+  $cp -rf ${tmpCCDir}${componentName}/* ${tmpGitDir}/
   if [[ ${containEmptyDir} == "true" ]]; then
     find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/.gitkeep \;
   fi
@@ -99,7 +99,7 @@ pullCCAndPush(){
   else
     git commit -m "import from cc,first commit $(date '+%Y%m%d%H%M%S')"
   fi
-  git push origin ${branchName}
+  git push origin ${gitBranchName}
 }
 
 postClean(){
