@@ -9,22 +9,17 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-	"strings"
 )
 
-// UpdateTaskURL generates an URL for the update task operation
-type UpdateTaskURL struct {
-	ID string
-
+// RestartTaskURL generates an URL for the restart task operation
+type RestartTaskURL struct {
 	_basePath string
-	// avoid unkeyed usage
-	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *UpdateTaskURL) WithBasePath(bp string) *UpdateTaskURL {
+func (o *RestartTaskURL) WithBasePath(bp string) *RestartTaskURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -32,22 +27,15 @@ func (o *UpdateTaskURL) WithBasePath(bp string) *UpdateTaskURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *UpdateTaskURL) SetBasePath(bp string) {
+func (o *RestartTaskURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *UpdateTaskURL) Build() (*url.URL, error) {
+func (o *RestartTaskURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/tasks/{id}"
-
-	id := o.ID
-	if id != "" {
-		_path = strings.Replace(_path, "{id}", id, -1)
-	} else {
-		return nil, errors.New("id is required on UpdateTaskURL")
-	}
+	var _path = "/tasks/restart"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -59,7 +47,7 @@ func (o *UpdateTaskURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *UpdateTaskURL) Must(u *url.URL, err error) *url.URL {
+func (o *RestartTaskURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -70,17 +58,17 @@ func (o *UpdateTaskURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *UpdateTaskURL) String() string {
+func (o *RestartTaskURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *UpdateTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *RestartTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on UpdateTaskURL")
+		return nil, errors.New("scheme is required for a full url on RestartTaskURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on UpdateTaskURL")
+		return nil, errors.New("host is required for a full url on RestartTaskURL")
 	}
 
 	base, err := o.Build()
@@ -94,6 +82,6 @@ func (o *UpdateTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *UpdateTaskURL) StringFull(scheme, host string) string {
+func (o *RestartTaskURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

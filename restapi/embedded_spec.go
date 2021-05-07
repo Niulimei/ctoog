@@ -271,6 +271,49 @@ func init() {
         }
       }
     },
+    "/tasks/restart": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "任务重启",
+        "operationId": "RestartTask",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "description": "任务重启",
+            "name": "restartTrigger",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TaskRestart"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务列表",
+            "schema": {
+              "$ref": "#/definitions/TaskPageInfoModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/tasks/{id}": {
       "get": {
         "consumes": [
@@ -340,12 +383,6 @@ func init() {
             "schema": {
               "$ref": "#/definitions/TaskLogInfo"
             }
-          },
-          {
-            "type": "boolean",
-            "default": false,
-            "name": "start",
-            "in": "query"
           }
         ],
         "responses": {
@@ -672,6 +709,14 @@ func init() {
           "items": {
             "$ref": "#/definitions/TaskInfoModel"
           }
+        }
+      }
+    },
+    "TaskRestart": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
         }
       }
     },
@@ -995,6 +1040,49 @@ func init() {
         }
       }
     },
+    "/tasks/restart": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "任务重启",
+        "operationId": "RestartTask",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "description": "任务重启",
+            "name": "restartTrigger",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TaskRestart"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务列表",
+            "schema": {
+              "$ref": "#/definitions/TaskPageInfoModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/tasks/{id}": {
       "get": {
         "consumes": [
@@ -1064,12 +1152,6 @@ func init() {
             "schema": {
               "$ref": "#/definitions/TaskLogInfo"
             }
-          },
-          {
-            "type": "boolean",
-            "default": false,
-            "name": "start",
-            "in": "query"
           }
         ],
         "responses": {
@@ -1396,6 +1478,14 @@ func init() {
           "items": {
             "$ref": "#/definitions/TaskInfoModel"
           }
+        }
+      }
+    },
+    "TaskRestart": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
         }
       }
     },

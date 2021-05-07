@@ -19,19 +19,19 @@ import (
 	"ctgb/models"
 )
 
-// NewUpdateTaskParams creates a new UpdateTaskParams object
+// NewRestartTaskParams creates a new RestartTaskParams object
 //
 // There are no default values defined in the spec.
-func NewUpdateTaskParams() UpdateTaskParams {
+func NewRestartTaskParams() RestartTaskParams {
 
-	return UpdateTaskParams{}
+	return RestartTaskParams{}
 }
 
-// UpdateTaskParams contains all the bound params for the update task operation
+// RestartTaskParams contains all the bound params for the restart task operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters UpdateTask
-type UpdateTaskParams struct {
+// swagger:parameters RestartTask
+type RestartTaskParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
@@ -41,23 +41,18 @@ type UpdateTaskParams struct {
 	  In: header
 	*/
 	Authorization string
-	/*
-	  Required: true
-	  In: path
-	*/
-	ID string
-	/*任务信息
+	/*任务重启
 	  Required: true
 	  In: body
 	*/
-	TaskLog *models.TaskLogInfo
+	RestartTrigger *models.TaskRestart
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls.
 //
-// To ensure default values, the struct must have been initialized with NewUpdateTaskParams() beforehand.
-func (o *UpdateTaskParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
+// To ensure default values, the struct must have been initialized with NewRestartTaskParams() beforehand.
+func (o *RestartTaskParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 
 	o.HTTPRequest = r
@@ -66,19 +61,14 @@ func (o *UpdateTaskParams) BindRequest(r *http.Request, route *middleware.Matche
 		res = append(res, err)
 	}
 
-	rID, rhkID, _ := route.Params.GetOK("id")
-	if err := o.bindID(rID, rhkID, route.Formats); err != nil {
-		res = append(res, err)
-	}
-
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.TaskLogInfo
+		var body models.TaskRestart
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("taskLog", "body", ""))
+				res = append(res, errors.Required("restartTrigger", "body", ""))
 			} else {
-				res = append(res, errors.NewParseError("taskLog", "body", "", err))
+				res = append(res, errors.NewParseError("restartTrigger", "body", "", err))
 			}
 		} else {
 			// validate body object
@@ -92,11 +82,11 @@ func (o *UpdateTaskParams) BindRequest(r *http.Request, route *middleware.Matche
 			}
 
 			if len(res) == 0 {
-				o.TaskLog = &body
+				o.RestartTrigger = &body
 			}
 		}
 	} else {
-		res = append(res, errors.Required("taskLog", "body", ""))
+		res = append(res, errors.Required("restartTrigger", "body", ""))
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
@@ -105,7 +95,7 @@ func (o *UpdateTaskParams) BindRequest(r *http.Request, route *middleware.Matche
 }
 
 // bindAuthorization binds and validates parameter Authorization from header.
-func (o *UpdateTaskParams) bindAuthorization(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *RestartTaskParams) bindAuthorization(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	if !hasKey {
 		return errors.Required("Authorization", "header", rawData)
 	}
@@ -120,20 +110,6 @@ func (o *UpdateTaskParams) bindAuthorization(rawData []string, hasKey bool, form
 		return err
 	}
 	o.Authorization = raw
-
-	return nil
-}
-
-// bindID binds and validates parameter ID from path.
-func (o *UpdateTaskParams) bindID(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: true
-	// Parameter is provided by construction from the route
-	o.ID = raw
 
 	return nil
 }

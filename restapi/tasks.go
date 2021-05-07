@@ -131,18 +131,18 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	if !verified {
 		return middleware.Error(http.StatusUnauthorized, "鉴权失败")
 	}
-	var query,queryCount string
+	var query, queryCount string
 	user := getUserInfo(username)
 	if user.RoleID == int64(AdminRole) {
 		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
 			" status" +
 			" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
-		queryCount = "SELECT count(1) over() AS total_rows FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
+		queryCount = "SELECT count(id) FROM task;"
 	} else {
 		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
 			" status" +
 			" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
-		queryCount = "SELECT count(1) over() AS total_rows FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
+		queryCount = "SELECT count(id) FROM task WHERE creator = $1;"
 	}
 	var tasks []*models.TaskInfoModel
 	var count int64
@@ -150,7 +150,7 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	if err != nil {
 		return middleware.Error(http.StatusInternalServerError, "Sql Error")
 	}
-	err = database.DB.Get(&count, queryCount, username, params.Limit, params.Offset)
+	err = database.DB.Get(&count, queryCount, username)
 	if err != nil {
 		return middleware.Error(http.StatusInternalServerError, "Sql Error")
 	}
@@ -165,14 +165,6 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 	taskId := params.ID
 	task := &database.TaskModel{}
 	database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
-	start := params.Start
-	if *start && (task.Status == "completed" || task.Status == "init") {
-		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
-		go startTask(taskIdInt)
-		return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
-			Message: "ok",
-		})
-	}
 	taskLogInfo := params.TaskLog
 	taskLog := &database.TaskLog{}
 	err := database.DB.Get(taskLog, "SELECT * FROM task_log WHERE task_id = $1 AND status = 'running'", taskId)
@@ -187,6 +179,19 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		taskLogInfo.EndTime, taskId)
 	tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
 	tx.Commit()
+	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
+		Message: "ok",
+	})
+}
+func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responder {
+	//username, verified := utils.Verify(params.Authorization)
+	taskId := params.RestartTrigger.ID
+	task := &database.TaskModel{}
+	database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
+	if task.Status == "completed" || task.Status == "init" {
+		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
+		go startTask(taskIdInt)
+	}
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
 		Message: "ok",
 	})
