@@ -88,7 +88,7 @@ pullCCAndPush(){
   else
     initGitRepo ${gitRepoUrl} ${gitBranchName} ${tmpGitDir} ${username} ${email}
   fi
-  $cp -rf ${tmpCCDir}/* ${tmpGitDir}/
+  $cp -rf ${tmpCCDir}${componentName}/* ${tmpGitDir}/
   if [[ ${containEmptyDir} == "true" ]]; then
     find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/.gitkeep \;
   fi
