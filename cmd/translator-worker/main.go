@@ -157,9 +157,10 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 			gitUrl = strings.Replace(gitUrl, "https://", "", 1)
 			gitUrl = "https://" + workerTaskModel.GitUser + ":" + workerTaskModel.GitPassword + "@" + gitUrl
 		}
+		cwd, _ := os.Getwd()
 		cmd := exec.Command("/bin/bash", "-c",
-			fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash cc2git.sh" %s %s %s %s %s %d %t %s %s`,
-				workerTaskModel.CcPassword, workerTaskModel.CcUser, workerTaskModel.Pvob, workerTaskModel.Component,
+			fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/cc2git.sh" %s %s %s %s %s %d %t %s %s`,
+				workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
 				workerTaskModel.Stream, gitUrl, workerTaskModel.Branch, workerTaskModel.TaskId,
 				workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail))
 		go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmd)
