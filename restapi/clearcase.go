@@ -58,10 +58,12 @@ func GetAllComponent(pvob string) []string {
 
 func checkStreamComponent(pvob, component, stream string) bool {
 	log.Debug("stream", stream)
-	args := `lsstream -fmt %[components]p ` + stream + " " + pvob
+	args := `lsstream -fmt %[components]p ` + stream + "@" + pvob
 	cmd := exec.Command("cleartool", strings.Split(args, " ")...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Error("cmd:", cmd.String())
+		log.Error("stream list comp:", err)
 		return false
 	}
 	result := string(out)

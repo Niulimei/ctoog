@@ -95,10 +95,10 @@ type TaskModel struct {
 	Pvob string
 
 	// include empty dir
-	IncludeEmpty bool
+	IncludeEmpty bool `db:"include_empty"`
 
 	// git email
-	GitEmail string
+	GitEmail string `db:"git_email"`
 }
 
 type WorkerModel struct {
