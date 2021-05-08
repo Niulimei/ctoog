@@ -3,9 +3,10 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
 	"os"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/go-openapi/loads"
 	flags "github.com/jessevdk/go-flags"

@@ -5,8 +5,9 @@ import (
 	"ctgb/models"
 	"ctgb/restapi/operations"
 	"ctgb/utils"
-	"github.com/go-openapi/runtime/middleware"
 	"net/http"
+
+	"github.com/go-openapi/runtime/middleware"
 )
 
 type ROLE int
@@ -17,7 +18,7 @@ const (
 )
 
 func CreateUserHandler(params operations.CreateUserParams) middleware.Responder {
-	checkRet := checkPermission(params.Authorization)
+	checkRet := CheckPermission(params.Authorization)
 	if checkRet != nil {
 		return checkRet
 	}
@@ -42,6 +43,7 @@ func CreateUserHandler(params operations.CreateUserParams) middleware.Responder 
 			Message: "Sql Error",
 		})
 	} else {
+		utils.RecordLog(utils.Info, utils.AddUser, "", "", 0)
 		return operations.NewCreateUserCreated().WithPayload(&models.OK{Message: "User Create Success"})
 	}
 }
@@ -54,24 +56,6 @@ func getUserInfo(username string) *models.UserInfoModel {
 		return user
 	}
 	return user
-}
-
-func checkPermission(token string) middleware.Responder {
-	username, valid := utils.Verify(token)
-	if !valid {
-		return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
-			Code:    http.StatusUnauthorized,
-			Message: "",
-		})
-	}
-	userInfo := getUserInfo(username)
-	if userInfo.RoleID != int64(AdminRole) {
-		return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
-			Code:    http.StatusForbidden,
-			Message: "",
-		})
-	}
-	return nil
 }
 
 func GetUserHandler(param operations.GetUserParams) middleware.Responder {
@@ -87,7 +71,7 @@ func GetUserHandler(param operations.GetUserParams) middleware.Responder {
 }
 
 func ListUsersHandler(param operations.ListUserParams) middleware.Responder {
-	checkRet := checkPermission(param.Authorization)
+	checkRet := CheckPermission(param.Authorization)
 	if checkRet != nil {
 		return checkRet
 	}
@@ -131,6 +115,7 @@ func LoginHandler(params operations.LoginParams) middleware.Responder {
 	}
 	if passwordInDB == params.UserInfo.Password {
 		token := utils.CreateJWT(params.UserInfo.Username)
+		utils.RecordLog(utils.Info, utils.Login, "", "", 0)
 		return operations.NewLoginCreated().WithPayload(&models.Authorization{
 			Token: token,
 		})

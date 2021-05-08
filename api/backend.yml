@@ -37,6 +37,34 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /logs:
+    post:
+      summary: 获取日志
+      description: ''
+      operationId: ListLogs
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: params
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/LogFilterParamsModel'
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/LogPageInfoModel'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /users:
     post:
       summary: 开通账户
@@ -393,6 +421,51 @@ definitions:
       id:
         type: integer
       role_id:
+        type: integer
+  LogPageInfoModel:
+    type: object
+    properties:
+      logInfo:
+        type: array
+        items:
+          $ref: '#/definitions/LogInfoModel'
+      limit:
+        type: integer
+      offset:
+        type: integer
+      count:
+        type: integer
+  LogInfoModel:
+    type: object
+    properties:
+      level:
+        type: string
+      action:
+        type: string
+      position:
+        type: string
+      message:
+        type: string
+      user:
+        type: string
+      id:
+        type: integer
+      errcode:
+        type: integer
+      time:
+        type: integer
+  LogFilterParamsModel:
+    type: object
+    properties:
+      level:
+        type: string
+      action:
+        type: string
+      user:
+        type: string
+      offset:
+        type: integer
+      limit:
         type: integer
   UserModel:
     type: object
