@@ -44,6 +44,7 @@ func GetAllComponent(pvob string) []string {
 		return nil
 	}
 	result := string(out)
+	result = strings.Replace(result, `"`, "", -1)
 	log.Debug("cmd", cmd.String(), "result:", result)
 	lines := strings.Split(result, "\n")
 	for _, line := range lines {
