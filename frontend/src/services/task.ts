@@ -40,5 +40,5 @@ export const getComponents = (pvobId: string) => {
 
 /** 获取 stream 列表 */
 export const getStreams = (pvobId: string, componentId: string) => {
-  return request.get(`/pvobs/${pvobId}/components/${componentId}`);
+  return request.get(`/pvobs/${pvobId}/components/${componentId}/streams`);
 };

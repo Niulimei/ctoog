@@ -23,6 +23,7 @@ const descriptionsGenerator = (fieldKeys: string[], data: any) => {
     gitUser: 'Git 用户名',
     gitPassword: 'Git 密码',
     gitBranch: 'Git分支',
+    includeEmptyDir: '是否保留空目录',
   };
   return fieldKeys.map((key) => {
     if (key === 'EmptyColSpace') return EmptyColSpace;
@@ -66,7 +67,7 @@ const TableColumns: ProColumns<Task.Log>[] = [
   },
 ];
 
-const ModalDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, actionRef }) => {
+const TaskDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, actionRef }) => {
   const [visible, toggleVisible] = useToggle(false);
 
   React.useImperativeHandle(actionRef, () => ({
@@ -95,6 +96,7 @@ const ModalDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, a
                 {data.taskModel.matchInfo.map(({ stream }) =>
                   descriptionsGenerator(['stream'], { stream }),
                 )}
+                {descriptionsGenerator(['includeEmptyDir'], data.taskModel)}
               </ul>
             </div>
             <div className={styles.row}>
@@ -124,4 +126,4 @@ const ModalDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, a
   );
 };
 
-export default ModalDetail;
+export default TaskDetail;

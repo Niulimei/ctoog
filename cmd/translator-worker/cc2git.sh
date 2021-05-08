@@ -11,7 +11,6 @@ set -e
 
 ccTmpRootPath="/home/tmp/pvobs_view"
 gitTmpRootPath="/home/tmp/git"
-cp=/usr/bin/cp
 
 initGitRepo(){
   repoUrl=$1
@@ -88,16 +87,17 @@ pullCCAndPush(){
   else
     initGitRepo ${gitRepoUrl} ${gitBranchName} ${tmpGitDir} ${username} ${email}
   fi
-  $cp -rf ${tmpCCDir}${componentName}/* ${tmpGitDir}/
+  rm -rf ${tmpGitDir:?}/*
+  cp -rf ${tmpCCDir}${componentName}/* ${tmpGitDir}/
   if [[ ${containEmptyDir} == "true" ]]; then
     find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/.gitkeep \;
   fi
   cd ${tmpGitDir}
   git add -A .
   if $tmpCCDirExist && $tmpGitDirExist; then
-    git commit -m "import from cc,update commit $(date '+%Y%m%d%H%M%S')"
+    git commit -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')"
   else
-    git commit -m "import from cc,first commit $(date '+%Y%m%d%H%M%S')"
+    git commit -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')"
   fi
   git push origin ${gitBranchName}
 }

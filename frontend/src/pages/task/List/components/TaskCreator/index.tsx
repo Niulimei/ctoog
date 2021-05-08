@@ -1,16 +1,25 @@
 import React from 'react';
-import { Button, message, Form } from 'antd';
-import { ModalForm, ProFormGroup, ProFormSelect, ProFormText } from '@ant-design/pro-form';
-import ProCard from '@ant-design/pro-card';
-import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { guid } from '@/utils/utils';
-import { renderCardTitle, useSelectOptions } from '../../helper';
-import type { FormInstance } from 'antd/es/form';
-import { observer } from 'mobx-react';
 import { useMount } from 'react-use';
+import { guid } from '@/utils/utils';
+import { observer } from 'mobx-react';
+import { useToggle } from 'react-use';
+import ProCard from '@ant-design/pro-card';
+import type { FormInstance } from 'antd/es/form';
 import { task as taskService } from '@/services';
+import { Button, message, Form, Checkbox } from 'antd';
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { renderCardTitle, useSelectOptions } from '../../helper';
+import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 
 import styles from './style.less';
+
+interface IModalCreatorProps {
+  /** 创建成功回调 */
+  onSuccess?: () => void;
+  actionRef?: React.RefObject<{
+    openModal: (mode?: 'create' | 'update', id?: string) => void;
+  }>;
+}
 
 interface IFormFields {
   pvob: string;
@@ -20,21 +29,24 @@ interface IFormFields {
   gitURL: string;
   gitUser: string;
   gitPassword: string;
-  matchInfo: { stream: string; gitBranch: string };
+  matchInfo: { stream: string; gitBranch: string }[];
 }
 
 /** 空行 */
-const EmptyColSpace = <div style={{ marginBottom: 24, height: 32 }} />;
+const EmptyColSpace = <div className={styles.emptyCol} />;
 /** 右侧操作空白数 */
-const RightButtonTopSpaces = 5;
-/** 增减按钮默认样式 */
-const ActionButtonDefaultStyles = {
-  width: 31,
-  height: 31,
-  position: 'relative',
-  top: -10,
-  marginLeft: -30,
-} as React.CSSProperties;
+const RightButtonTopSpaceNum = 5;
+/** empty values */
+const EmptyFormValues: IFormFields = {
+  pvob: '',
+  component: '',
+  ccUser: '',
+  ccPassword: '',
+  gitURL: '',
+  gitUser: '',
+  gitPassword: '',
+  matchInfo: [{ stream: '', gitBranch: '' }],
+};
 
 type CustomChangeHandlersType = Record<
   keyof IFormFields,
@@ -73,9 +85,6 @@ const formFieldsGenerator = (fields: any[]) => {
         message: restProps.placeholder ? restProps.placeholder : `${name} 为必填参数`,
       },
     ];
-    if (component === 'EmptyColSpace') {
-      return React.cloneElement(EmptyColSpace, { key: guid() });
-    }
     return React.createElement(component, { key: name, rules, name, ...restProps });
   });
 };
@@ -89,21 +98,44 @@ const renderElements = (num: number, nodeGetter: ElementGetter) => {
   });
 };
 
-const ModalCreator: React.FC<{ onCreateSuccess?: () => void }> = (props) => {
+const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
+  const { onSuccess, actionRef } = props;
+  /** 更新模式
+   * 1. 回填表单数据
+   * 2. pvob component matchInfo 为可修改配置，其他表单项只读
+   */
+
   const [branchFieldNum, setBranchFieldNum] = React.useState(1);
   const [form] = Form.useForm<IFormFields>();
-
   const { dispatch: optionDispatch, options } = useSelectOptions();
+  const [visible, toggleVisible] = useToggle(false);
+  const [isUpdateMode, setIsUpdateMode] = useToggle(false);
 
-  useMount(() => {
+  React.useImperativeHandle(actionRef, () => {
+    return {
+      async openModal(mode, id) {
+        setIsUpdateMode(mode === 'update');
+        if (mode === 'update' && id) {
+          const res = await taskService.getTaskDetail(id);
+          // TODO:
+          form.setFieldsValue(res.task);
+          toggleVisible(true);
+        }
+        toggleVisible(true);
+      },
+    };
+  });
+
+  useMount(async () => {
     optionDispatch('pvob', {});
+    form.resetFields();
   });
 
   const finishHandler = async (values: any) => {
     try {
       await taskService.createTask(values);
       message.success('迁移任务新建成功');
-      props.onCreateSuccess?.();
+      onSuccess?.();
       return true;
     } catch (err) {
       message.error('迁移任务新建出现异常');
@@ -118,7 +150,6 @@ const ModalCreator: React.FC<{ onCreateSuccess?: () => void }> = (props) => {
   const deleteBranch = (pos: number) => {
     setBranchFieldNum((num) => num - 1);
     const { matchInfo } = form.getFieldsValue(['matchInfo']);
-    // remove item
     matchInfo.splice(pos, 1);
     form.setFieldsValue({
       matchInfo,
@@ -135,15 +166,13 @@ const ModalCreator: React.FC<{ onCreateSuccess?: () => void }> = (props) => {
     <ModalForm
       form={form}
       width="700px"
+      visible={visible}
       title="新建迁移任务"
-      onValuesChange={onFormValuesChange}
-      modalProps={{ okText: '新建', className: styles.modalForm }}
-      trigger={
-        <Button size="small" type="primary">
-          新建迁移任务
-        </Button>
-      }
       onFinish={finishHandler}
+      initialValues={EmptyFormValues}
+      onValuesChange={onFormValuesChange}
+      onVisibleChange={(vis) => toggleVisible(vis)}
+      modalProps={{ okText: '新建', className: styles.modalForm }}
     >
       <ProCard split="vertical" ghost>
         <ProCard colSpan="47%">
@@ -165,14 +194,16 @@ const ModalCreator: React.FC<{ onCreateSuccess?: () => void }> = (props) => {
               name: 'ccUser',
               component: ProFormText,
               placeholder: '请输入CC用户名',
+              readonly: isUpdateMode,
             },
             {
               name: 'ccPassword',
               component: ProFormText.Password,
               placeholder: '请输入CC密码',
+              readonly: isUpdateMode,
             },
           ])}
-          <ProFormGroup>
+          <div className={styles.dynamicFields}>
             {renderElements(branchFieldNum, (index, uid) => (
               <ProFormSelect
                 key={uid}
@@ -182,7 +213,11 @@ const ModalCreator: React.FC<{ onCreateSuccess?: () => void }> = (props) => {
                 name={['matchInfo', index, 'stream']}
               />
             ))}
-          </ProFormGroup>
+          </div>
+          <Form.Item noStyle name="include">
+            <Checkbox />
+            <span className={styles.checkboxLabel}>是否保留空目录</span>
+          </Form.Item>
         </ProCard>
         <ProCard colSpan="47%" style={{ border: 'none' }}>
           {renderCardTitle('Git')}
@@ -191,24 +226,28 @@ const ModalCreator: React.FC<{ onCreateSuccess?: () => void }> = (props) => {
               name: 'gitURL',
               component: ProFormText,
               placeholder: '请输入 Git Repo URL',
-              valueEnum: options.pvob,
+              readonly: isUpdateMode,
             },
             {
-              component: 'EmptyColSpace',
+              name: 'gitEmail',
+              component: ProFormText,
+              placeholder: '请输入 Git Email，用于提交 Git 代码配置',
+              readonly: isUpdateMode,
             },
             {
               name: 'gitUser',
               component: ProFormText,
               placeholder: '请输入 Git 账号',
-              valueEnum: options.component,
+              readonly: isUpdateMode,
             },
             {
               name: 'gitPassword',
               component: ProFormText.Password,
               placeholder: '请输入 Git 密码',
+              readonly: isUpdateMode,
             },
           ])}
-          <ProFormGroup>
+          <div className={styles.dynamicFields}>
             {renderElements(branchFieldNum, (index, uid) => (
               <ProFormText
                 key={uid}
@@ -217,33 +256,32 @@ const ModalCreator: React.FC<{ onCreateSuccess?: () => void }> = (props) => {
                 name={['matchInfo', index, 'gitBranch']}
               />
             ))}
-          </ProFormGroup>
+          </div>
         </ProCard>
         <ProCard colSpan="6%">
-          {renderElements(RightButtonTopSpaces, EmptyColSpace)}
+          {renderElements(RightButtonTopSpaceNum, EmptyColSpace)}
 
-          {renderElements(branchFieldNum - 1, (index, uid) => (
+          <div className={styles.dynamicFields}>
+            {renderElements(branchFieldNum - 1, (index, uid) => (
+              <Button
+                icon={<MinusOutlined />}
+                key={uid}
+                onClick={() => deleteBranch(index)}
+                className={styles.actionButton}
+              />
+            ))}
+
             <Button
-              icon={<MinusOutlined />}
-              key={uid}
-              onClick={() => deleteBranch(index)}
-              style={{
-                ...ActionButtonDefaultStyles,
-                marginBottom: 24,
-              }}
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={addBranchField}
+              className={styles.actionButton}
             />
-          ))}
-
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={addBranchField}
-            style={ActionButtonDefaultStyles}
-          />
+          </div>
         </ProCard>
       </ProCard>
     </ModalForm>
   );
 };
 
-export default observer(ModalCreator);
+export default observer(TaskCreator);

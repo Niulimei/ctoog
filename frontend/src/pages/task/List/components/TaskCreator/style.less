@@ -1,0 +1,40 @@
+@field-margin-bottom: 18px;
+
+.modalForm {
+  :global .ant-modal-body {
+    max-height: 600px;
+    padding: 10px;
+    overflow: auto;
+  }
+
+  :global .ant-form-item:not(.ant-form-item-with-help) {
+    margin-bottom: @field-margin-bottom;
+  }
+  :global .ant-form-item-explain {
+    min-height: @field-margin-bottom;
+    font-size: 12px;
+  }
+}
+
+.dynamicFields {
+  padding-top: 20px;
+}
+
+.emptyCol {
+  height: 32px;
+  margin-bottom: @field-margin-bottom;
+}
+
+.actionButton {
+  position: relative;
+  top: -3px;
+  width: 31px;
+  height: 31px;
+  margin-bottom: 19px;
+  margin-left: -30px;
+}
+
+.checkboxLabel {
+  margin-left: 10px;
+  font-weight: 400;
+}
