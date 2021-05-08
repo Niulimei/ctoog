@@ -98,7 +98,7 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 	taskInfo := params.TaskInfo
 	r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
 		"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email)"+
-		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, '', $10, $11)",
+		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11)",
 		taskInfo.Pvob, taskInfo.Component, taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL,
 		taskInfo.GitUser, taskInfo.GitPassword, "init", username,
 		taskInfo.IncludeEmpty, taskInfo.GitEmail)
@@ -222,8 +222,7 @@ func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responde
 	task := &database.TaskModel{}
 	database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
 	if task.Status == "completed" || task.Status == "init" {
-		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
-		go startTask(taskIdInt)
+		go startTask(taskId)
 	}
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
 		Message: "ok",

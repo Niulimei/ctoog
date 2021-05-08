@@ -573,7 +573,7 @@ definitions:
     type: object
     properties:
       id:
-        type: string
+        type: integer
   TaskLogInfo:
     type: object
     properties:

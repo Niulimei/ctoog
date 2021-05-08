@@ -883,7 +883,7 @@ func init() {
       "type": "object",
       "properties": {
         "id": {
-          "type": "string"
+          "type": "integer"
         }
       }
     },
@@ -1819,7 +1819,7 @@ func init() {
       "type": "object",
       "properties": {
         "id": {
-          "type": "string"
+          "type": "integer"
         }
       }
     },

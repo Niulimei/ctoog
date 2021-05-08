@@ -42,7 +42,7 @@ type ListTask struct {
 func (o *ListTask) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
-		*r = *rCtx
+		r = rCtx
 	}
 	var Params = NewListTaskParams()
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
