@@ -2,19 +2,21 @@ package restapi
 
 import (
 	"ctgb/restapi/operations"
+	"fmt"
 	"github.com/go-openapi/runtime/middleware"
 	"os/exec"
 	"strings"
 )
 
 func GetAllPvob() []string {
-	pvobs := make([]string, 10)
+	pvobs := make([]string, 0, 10)
 	cmd := exec.Command("cleartool", "lsvob", "-l")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil
 	}
 	result := string(out)
+	fmt.Println("cmd", cmd.String(), "result:", result)
 	infos := strings.Split(result, "\n\n")
 	for _, info := range infos {
 		lines := strings.Split(info, "\n")
@@ -30,7 +32,7 @@ func GetAllPvob() []string {
 }
 
 func GetAllComponent(pvob string) []string {
-	components := make([]string, 10)
+	components := make([]string, 0, 10)
 	args := `lscomp -fmt "%[root_dir]p\n" -invob ` + pvob
 	cmd := exec.Command("cleartool", strings.Split(args, " ")...)
 	out, err := cmd.CombinedOutput()
@@ -38,9 +40,10 @@ func GetAllComponent(pvob string) []string {
 		return nil
 	}
 	result := string(out)
+	fmt.Println("cmd", cmd.String(), "result:", result)
 	lines := strings.Split(result, "\n")
 	for _, line := range lines {
-		if len(line) > 0 {
+		if len(line) > 0 && strings.Index(line, " ") == -1 {
 			components = append(components, line)
 		}
 	}
@@ -55,17 +58,26 @@ func checkStreamComponent(pvob, component, stream string) bool {
 		return false
 	}
 	result := string(out)
+	fmt.Println("cmd", cmd.String(), "result:", result)
 	lines := strings.Split(result, "\n")
 	for _, line := range lines {
 		if line == component {
 			return true
+		}
+		if strings.Index(line, " ") != -1 {
+			ls := strings.Split(line, " ")
+			for _, l := range ls {
+				if l == component {
+					return true
+				}
+			}
 		}
 	}
 	return false
 }
 
 func GetAllStream(pvob, component string) []string {
-	streams := make([]string, 10)
+	streams := make([]string, 0, 10)
 	args := `lsstream -s -invob ` + pvob
 	cmd := exec.Command("cleartool", strings.Split(args, " ")...)
 	out, err := cmd.CombinedOutput()
@@ -73,9 +85,13 @@ func GetAllStream(pvob, component string) []string {
 		return nil
 	}
 	result := string(out)
+	fmt.Println("cmd", cmd.String(), "result:", result)
 	lines := strings.Split(result, "\n")
 	for _, line := range lines {
 		if len(line) == 0 {
+			continue
+		}
+		if strings.Index(line, " ") != -1 {
 			continue
 		}
 		if checkStreamComponent(pvob, component, line) {
