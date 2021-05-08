@@ -64,7 +64,7 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
               修改任务
             </Button>
             <Button size="small" type="link" onClick={() => actions.refreshTask(item.id)}>
-              刷新任务
+              启动任务
             </Button>
           </>
         );
@@ -87,13 +87,13 @@ const TaskList: React.FC = () => {
       setTaskDetail(res);
       detailModalRef.current.openModal();
     },
-    /** 刷新任务 */
+    /** 启动任务 */
     async refreshTask(id: string) {
       try {
         await taskService.refreshTask(id);
-        message.success('迁移任务刷新成功');
+        message.success('迁移任务启动成功');
       } catch (err) {
-        message.error('迁移任务刷新出现异常');
+        message.error('迁移任务启动出现异常');
       }
     },
     /** 更新任务 */

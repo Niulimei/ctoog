@@ -19,7 +19,7 @@ export const createTask = (data: any) => {
   });
 };
 
-/** 刷新迁移任务 */
+/** 启动迁移任务 */
 export const refreshTask = (id: string) => {
   return request.post('/tasks/restart', {
     data: {
