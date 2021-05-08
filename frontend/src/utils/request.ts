@@ -27,7 +27,7 @@ request.interceptors.request.use((url, { headers, ...restOpts }) => {
       ...restOpts,
       headers: {
         ...headers,
-        Authorization: authTokenAction.get(),
+        Authorization: authTokenAction.get(), 
       },
     },
   };

@@ -33,8 +33,7 @@ export const useSelectOptions = () => {
   return {
     async dispatch(type: OptionType, payload: Partial<Record<OptionType, string>>) {
       if (type === 'pvob') {
-        // const res = await task.getPvobs();
-        const res = ["/vobs/TST_GIT_PVOB", "test"]
+        const res = await task.getPvobs();
         set('pvob', listToOptions(res));
       } else if (type === 'component') {
         if (!payload.pvob) throw Error('pvob is required');
@@ -42,8 +41,7 @@ export const useSelectOptions = () => {
         set('component', listToOptions(res));
       } else if (type === 'stream') {
         if (!payload.pvob || !payload.component) throw Error('pvob is required');
-        // const res = await task.getStreams(payload.pvob, payload.component);
-        const res = ["TST_GIT_1.0_SIT", "test-stream"]
+        const res = await task.getStreams(payload.pvob, payload.component);
         set('stream', listToOptions(res));
       }
     },

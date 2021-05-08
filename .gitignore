@@ -44,3 +44,6 @@ translator.db
 **/screenshot
 **/.firebase
 **/.eslintcache
+
+#fronted
+/fronted/dist
