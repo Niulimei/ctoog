@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/PuerkitoBio/urlesc"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	l "log"
 	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
@@ -149,15 +149,16 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	workerTaskModel := Task{}
 	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
+		workerTaskModel.GitUser = urlesc.QueryEscape(workerTaskModel.GitUser)
+		workerTaskModel.GitPassword = urlesc.QueryEscape(workerTaskModel.GitPassword)
 		log.Printf("%+v\n", workerTaskModel)
 		gitUrl := workerTaskModel.GitURL
-		userPass := url.QueryEscape(workerTaskModel.GitUser + ":" + workerTaskModel.GitPassword)
 		if strings.HasPrefix(gitUrl, "http://") {
 			gitUrl = strings.Replace(gitUrl, "http://", "", 1)
-			gitUrl = "http://" + userPass + "@" + gitUrl
+			gitUrl = "http://" + workerTaskModel.GitUser + ":" + workerTaskModel.GitPassword + "@" + gitUrl
 		} else if strings.HasPrefix(gitUrl, "https://") {
 			gitUrl = strings.Replace(gitUrl, "https://", "", 1)
-			gitUrl = "https://" + userPass + "@" + gitUrl
+			gitUrl = "https://" + workerTaskModel.GitUser + ":" + workerTaskModel.GitPassword + "@" + gitUrl
 		}
 		cwd, _ := os.Getwd()
 		cmd := exec.Command("/bin/bash", "-c",
