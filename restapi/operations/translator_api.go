@@ -54,6 +54,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		GetUserHandler: GetUserHandlerFunc(func(params GetUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetUser has not yet been implemented")
 		}),
+		ListLogsHandler: ListLogsHandlerFunc(func(params ListLogsParams) middleware.Responder {
+			return middleware.NotImplemented("operation ListLogs has not yet been implemented")
+		}),
 		ListPvobHandler: ListPvobHandlerFunc(func(params ListPvobParams) middleware.Responder {
 			return middleware.NotImplemented("operation ListPvob has not yet been implemented")
 		}),
@@ -125,6 +128,8 @@ type TranslatorAPI struct {
 	GetTaskHandler GetTaskHandler
 	// GetUserHandler sets the operation handler for the get user operation
 	GetUserHandler GetUserHandler
+	// ListLogsHandler sets the operation handler for the list logs operation
+	ListLogsHandler ListLogsHandler
 	// ListPvobHandler sets the operation handler for the list pvob operation
 	ListPvobHandler ListPvobHandler
 	// ListPvobComponentHandler sets the operation handler for the list pvob component operation
@@ -231,6 +236,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.GetUserHandler == nil {
 		unregistered = append(unregistered, "GetUserHandler")
+	}
+	if o.ListLogsHandler == nil {
+		unregistered = append(unregistered, "ListLogsHandler")
 	}
 	if o.ListPvobHandler == nil {
 		unregistered = append(unregistered, "ListPvobHandler")
@@ -363,6 +371,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/users/self"] = NewGetUser(o.context, o.GetUserHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/logs"] = NewListLogs(o.context, o.ListLogsHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

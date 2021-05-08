@@ -73,6 +73,48 @@ func init() {
         }
       }
     },
+    "/logs": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "获取日志",
+        "operationId": "ListLogs",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LogFilterParamsModel"
+            }
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/LogPageInfoModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/pvobs": {
       "get": {
         "consumes": [
@@ -584,6 +626,75 @@ func init() {
         }
       }
     },
+    "LogFilterParamsModel": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "level": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "user": {
+          "type": "string"
+        }
+      }
+    },
+    "LogInfoModel": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "errcode": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "level": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "time": {
+          "type": "integer"
+        },
+        "user": {
+          "type": "string"
+        }
+      }
+    },
+    "LogPageInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "logInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LogInfoModel"
+          }
+        },
+        "offset": {
+          "type": "integer"
+        }
+      }
+    },
     "OK": {
       "type": "object",
       "properties": {
@@ -772,7 +883,7 @@ func init() {
       "type": "object",
       "properties": {
         "id": {
-          "type": "string"
+          "type": "integer"
         }
       }
     },
@@ -898,6 +1009,48 @@ func init() {
         }
       }
     },
+    "/logs": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "获取日志",
+        "operationId": "ListLogs",
+        "parameters": [
+          {
+            "name": "params",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LogFilterParamsModel"
+            }
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/LogPageInfoModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/pvobs": {
       "get": {
         "consumes": [
@@ -1409,6 +1562,75 @@ func init() {
         }
       }
     },
+    "LogFilterParamsModel": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "level": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "user": {
+          "type": "string"
+        }
+      }
+    },
+    "LogInfoModel": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "errcode": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "level": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "time": {
+          "type": "integer"
+        },
+        "user": {
+          "type": "string"
+        }
+      }
+    },
+    "LogPageInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "logInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LogInfoModel"
+          }
+        },
+        "offset": {
+          "type": "integer"
+        }
+      }
+    },
     "OK": {
       "type": "object",
       "properties": {
@@ -1597,7 +1819,7 @@ func init() {
       "type": "object",
       "properties": {
         "id": {
-          "type": "string"
+          "type": "integer"
         }
       }
     },

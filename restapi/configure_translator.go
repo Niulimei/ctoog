@@ -4,9 +4,11 @@ package restapi
 
 import (
 	"crypto/tls"
+	"ctgb/utils"
 	"net/http"
 
 	"ctgb/restapi/operations"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 )
@@ -48,10 +50,13 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	api.ListPvobComponentHandler = operations.ListPvobComponentHandlerFunc(ListPvobComponentHandler)
 	api.ListPvobComponentStreamHandler = operations.ListPvobComponentStreamHandlerFunc(ListPvobComponentStreamHandler)
 	api.GetUserHandler = operations.GetUserHandlerFunc(GetUserHandler)
+	api.ListLogsHandler = operations.ListLogsHandlerFunc(ListLogsHandler)
 
 	api.PreServerShutdown = func() {}
 
 	api.ServerShutdown = func() {}
+
+	go utils.LogHandle()
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))
 }

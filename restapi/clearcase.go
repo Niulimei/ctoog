@@ -44,6 +44,7 @@ func GetAllComponent(pvob string) []string {
 		return nil
 	}
 	result := string(out)
+	result = strings.Replace(result, `"`, "", -1)
 	log.Debug("cmd", cmd.String(), "result:", result)
 	lines := strings.Split(result, "\n")
 	for _, line := range lines {
@@ -56,10 +57,13 @@ func GetAllComponent(pvob string) []string {
 }
 
 func checkStreamComponent(pvob, component, stream string) bool {
-	args := `lsstream -fmt %[components]p ` + stream + " " + pvob
+	log.Debug("stream:", pvob, ":", component, ":", stream)
+	args := `lsstream -fmt %[components]p ` + stream + "@" + pvob
 	cmd := exec.Command("cleartool", strings.Split(args, " ")...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Error("cmd:", cmd.String())
+		log.Error("stream list comp:", err)
 		return false
 	}
 	result := string(out)
@@ -72,8 +76,10 @@ func checkStreamComponent(pvob, component, stream string) bool {
 			return true
 		}
 		// cleartool 命令返回的信息里可能存在cleartool的提示或者警告信息，不是我们期望的内容，以 cleartoo: 开头，应该跳过
-		if strings.Index(line, "cleartool: ") != -1 {
+		log.Debug("line", line, strings.Index(line, "cleartool: "))
+		if strings.Index(line, "cleartool: ") == -1 {
 			ls := strings.Split(line, " ")
+			log.Debug("ls", ls)
 			for _, l := range ls {
 				if l == component {
 					return true
@@ -100,7 +106,7 @@ func GetAllStream(pvob, component string) []string {
 			continue
 		}
 		// cleartool 命令返回的信息里可能存在cleartool的提示或者警告信息，不是我们期望的内容，以 cleartoo: 开头，应该跳过
-		if strings.Index(line, "cleartool ") != -1 {
+		if strings.Index(line, "cleartool: ") != -1 {
 			continue
 		}
 		if checkStreamComponent(pvob, component, line) {

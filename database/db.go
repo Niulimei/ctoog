@@ -17,6 +17,17 @@ CREATE TABLE user (
     role_id integer
 );
 
+CREATE TABLE log (
+    id integer PRIMARY KEY autoincrement,
+    time integer,
+	level varchar (256),
+	user varchar (256),
+	action varchar (256),
+	position varchar (256),
+	message varchar (256),
+	errcode integer
+);
+
 CREATE TABLE task (
     id integer PRIMARY KEY autoincrement,
     pvob varchar (256),
@@ -95,10 +106,10 @@ type TaskModel struct {
 	Pvob string
 
 	// include empty dir
-	IncludeEmpty bool
+	IncludeEmpty bool `db:"include_empty"`
 
 	// git email
-	GitEmail string
+	GitEmail string `db:"git_email"`
 }
 
 type WorkerModel struct {
