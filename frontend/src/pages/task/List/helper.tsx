@@ -19,29 +19,36 @@ export const useSelectOptions = () => {
   }));
 
   const listToOptions = (list: any[]) => {
-    return { mockData: 'mockData' };
-    if (!Array.isArray(list)) return { mockData: 'mockData' };
+    // return { mockData: 'mockData' };
+    if (!Array.isArray(list)) return {  };
     return list.reduce(
-      (res, item) => ({
+      (res, item) => ([
         ...res,
-        item,
-      }),
-      {},
+        {
+          value: item,
+          label: item,
+          name: item
+        },
+      ]),
+      [],
     ) as OptionItem;
   };
 
   return {
     async dispatch(type: OptionType, payload: Partial<Record<OptionType, string>>) {
       if (type === 'pvob') {
-        const res = await task.getPvobs();
+        // const res = await task.getPvobs(); 
+        const res = ["/vobs/TST_GIT_PVOB", "test"]
         set('pvob', listToOptions(res));
       } else if (type === 'component') {
         if (!payload.pvob) throw Error('pvob is required');
-        const res = await task.getComponents(payload.pvob);
+        // const res = await task.getComponents(payload.pvob);
+        const res = ["/vobs/TST_GIT_APP/GIT_APP1", "test-component"]
         set('component', listToOptions(res));
       } else if (type === 'stream') {
         if (!payload.pvob || !payload.component) throw Error('pvob is required');
-        const res = await task.getStreams(payload.pvob, payload.component);
+        // const res = await task.getStreams(payload.pvob, payload.component);
+        const res = ["TST_GIT_1.0_SIT", "test-stream"]
         set('stream', listToOptions(res));
       }
     },

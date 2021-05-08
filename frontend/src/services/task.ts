@@ -35,10 +35,10 @@ export const getPvobs = () => {
 
 /** 获取 component 列表 */
 export const getComponents = (pvobId: string) => {
-  return request.get(`/pvobs/${pvobId}/components`);
+  return request.get(`/pvobs/${encodeURIComponent(pvobId)}/components`);
 };
 
 /** 获取 stream 列表 */
 export const getStreams = (pvobId: string, componentId: string) => {
-  return request.get(`/pvobs/${pvobId}/components/${componentId}/streams`);
+  return request.get(`/pvobs/${encodeURIComponent(pvobId)}/components/${encodeURIComponent(componentId)}/streams`);
 };

@@ -182,13 +182,13 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               name: 'pvob',
               component: ProFormSelect,
               placeholder: '请选择 PVOB',
-              valueEnum: options.pvob,
+              options: options.pvob,
             },
             {
               name: 'component',
               component: ProFormSelect,
               placeholder: '请选择组件',
-              valueEnum: options.component,
+              options: options.component,
             },
             {
               name: 'ccUser',
@@ -204,15 +204,15 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             },
           ])}
           <div className={styles.dynamicFields}>
-            {renderElements(branchFieldNum, (index, uid) => (
+            {/* {renderElements(branchFieldNum, (index, uid) => (
               <ProFormSelect
                 key={uid}
                 width="md"
                 placeholder="请选择开发流"
-                valueEnum={options.stream}
+                options={options.stream}
                 name={['matchInfo', index, 'stream']}
               />
-            ))}
+            ))} */}
           </div>
           <Form.Item noStyle name="include">
             <Checkbox />

@@ -17,7 +17,7 @@ export const authTokenAction = {
 
 const request = extend({
   prefix: '/api',
-  timeout: 10000,
+  timeout: 100000,
 });
 
 request.interceptors.request.use((url, { headers, ...restOpts }) => {
