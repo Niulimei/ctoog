@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-delve/delve v1.6.0 // indirect
 	github.com/go-openapi/analysis v0.20.1 // indirect
 	github.com/go-openapi/errors v0.20.0
 	github.com/go-openapi/loads v0.20.2
@@ -18,7 +19,12 @@ require (
 	github.com/jmoiron/sqlx v1.3.3
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7
-	github.com/sirupsen/logrus v1.4.2
+	github.com/onsi/ginkgo v1.8.0 // indirect
+	github.com/onsi/gomega v1.5.0 // indirect
+	github.com/pkg/profile v0.0.0-20170413231811-06b906832ed0 // indirect
+	github.com/sirupsen/logrus v1.6.0
 	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
 	golang.org/x/sys v0.0.0-20210426230700-d19ff857e887 // indirect
+	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
+	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
 )
