@@ -61,13 +61,17 @@ func infoServerTaskCompleted(task *Task, server string, cmd *exec.Cmd) {
 	}
 	start := time.Now()
 	log.Debug("start cmd:", cmd.String())
-	if err := cmd.Start(); err != nil {
+	out, err := cmd.CombinedOutput()
+	if err != nil {
 		end := time.Now()
 		duration := end.Sub(start).Seconds()
 		d := strconv.FormatInt(int64(duration), 10)
 		data.Status = "failed"
 		data.Duration = d
 	}
+
+	result := string(out)
+	log.Debug(result)
 
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
