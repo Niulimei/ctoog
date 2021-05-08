@@ -2,6 +2,7 @@ package restapi
 
 import (
 	"ctgb/restapi/operations"
+	"fmt"
 	"github.com/go-openapi/runtime/middleware"
 	log "github.com/sirupsen/logrus"
 	"os/exec"
@@ -20,9 +21,13 @@ func GetAllPvob() []string {
 	infos := strings.Split(result, "\n\n")
 	for _, info := range infos {
 		lines := strings.Split(info, "\n")
+		for i, l := range lines {
+			log.Debug(i, l)
+		}
 		if len(lines) == 0 {
 			continue
 		}
+		log.Debug(lines[0], lines[len(lines)-1], strings.HasPrefix(lines[0], "Tag: "), lines[len(lines)-1] == "Vob registry attributes: ucmvob")
 		if strings.HasPrefix(lines[0], "Tag: ") && lines[len(lines)-1] == "Vob registry attributes: ucmvob" {
 			pvob := lines[0][5:]
 			pvobs = append(pvobs, pvob)
@@ -107,6 +112,7 @@ func GetAllStream(pvob, component string) []string {
 }
 
 func ListPvobHandler(params operations.ListPvobParams) middleware.Responder {
+	fmt.Println("here")
 	return operations.NewListPvobOK().WithPayload(GetAllPvob())
 }
 
