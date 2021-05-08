@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	l "log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
@@ -150,12 +151,13 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
 		log.Printf("%+v\n", workerTaskModel)
 		gitUrl := workerTaskModel.GitURL
+		userPass := url.QueryEscape(workerTaskModel.GitUser + ":" + workerTaskModel.GitPassword)
 		if strings.HasPrefix(gitUrl, "http://") {
 			gitUrl = strings.Replace(gitUrl, "http://", "", 1)
-			gitUrl = "http://" + workerTaskModel.GitUser + ":" + workerTaskModel.GitPassword + "@" + gitUrl
+			gitUrl = "http://" + userPass + "@" + gitUrl
 		} else if strings.HasPrefix(gitUrl, "https://") {
 			gitUrl = strings.Replace(gitUrl, "https://", "", 1)
-			gitUrl = "https://" + workerTaskModel.GitUser + ":" + workerTaskModel.GitPassword + "@" + gitUrl
+			gitUrl = "https://" + userPass + "@" + gitUrl
 		}
 		cwd, _ := os.Getwd()
 		cmd := exec.Command("/bin/bash", "-c",
