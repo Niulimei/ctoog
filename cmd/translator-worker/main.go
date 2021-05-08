@@ -158,7 +158,7 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 			gitUrl = "https://" + workerTaskModel.GitUser + ":" + workerTaskModel.GitPassword + "@" + gitUrl
 		}
 		cmd := exec.Command("/bin/bash", "-c",
-			fmt.Sprintf(`echo %s | sudo -S su - %s -c "/usr/bin/bash cc2git.sh" %s %s %s %s %s %d %t %s %s`,
+			fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash cc2git.sh" %s %s %s %s %s %d %t %s %s`,
 				workerTaskModel.CcPassword, workerTaskModel.CcUser, workerTaskModel.Pvob, workerTaskModel.Component,
 				workerTaskModel.Stream, gitUrl, workerTaskModel.Branch, workerTaskModel.TaskId,
 				workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail))
