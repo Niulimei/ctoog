@@ -210,7 +210,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
                 width="md"
                 placeholder="请选择开发流"
                 valueEnum={options.stream}
-                name={['matchInfo', index, 'st ream']}
+                name={['matchInfo', index, 'stream']}
               />
             ))}
           </div>
