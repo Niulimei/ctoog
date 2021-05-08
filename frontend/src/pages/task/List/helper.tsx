@@ -22,28 +22,23 @@ export const useSelectOptions = () => {
     // return { mockData: 'mockData' };
     if (!Array.isArray(list)) return {  };
     return list.reduce(
-      (res, item) => ([
+      (res, item) => ({
         ...res,
-        {
-          value: item,
-          label: item,
-          name: item
-        },
-      ]),
-      [],
+        [item]: item,
+      }),
+      {},
     ) as OptionItem;
   };
 
   return {
     async dispatch(type: OptionType, payload: Partial<Record<OptionType, string>>) {
       if (type === 'pvob') {
-        // const res = await task.getPvobs(); 
+        // const res = await task.getPvobs();
         const res = ["/vobs/TST_GIT_PVOB", "test"]
         set('pvob', listToOptions(res));
       } else if (type === 'component') {
         if (!payload.pvob) throw Error('pvob is required');
-        // const res = await task.getComponents(payload.pvob);
-        const res = ["/vobs/TST_GIT_APP/GIT_APP1", "test-component"]
+        const res = await task.getComponents(payload.pvob);
         set('component', listToOptions(res));
       } else if (type === 'stream') {
         if (!payload.pvob || !payload.component) throw Error('pvob is required');
