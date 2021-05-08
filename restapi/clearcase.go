@@ -2,7 +2,6 @@ package restapi
 
 import (
 	"ctgb/restapi/operations"
-	"fmt"
 	"github.com/go-openapi/runtime/middleware"
 	log "github.com/sirupsen/logrus"
 	"os/exec"
@@ -45,7 +44,7 @@ func GetAllComponent(pvob string) []string {
 		return nil
 	}
 	result := string(out)
-	log.Println("cmd", cmd.String(), "result:", result)
+	log.Debug("cmd", cmd.String(), "result:", result)
 	lines := strings.Split(result, "\n")
 	for _, line := range lines {
 		// cleartool 命令返回的信息里可能存在cleartool的提示或者警告信息，不是我们期望的内容，以 cleartoo: 开头，应该跳过
@@ -112,7 +111,6 @@ func GetAllStream(pvob, component string) []string {
 }
 
 func ListPvobHandler(params operations.ListPvobParams) middleware.Responder {
-	fmt.Println("here")
 	return operations.NewListPvobOK().WithPayload(GetAllPvob())
 }
 
