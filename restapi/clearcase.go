@@ -2,8 +2,8 @@ package restapi
 
 import (
 	"ctgb/restapi/operations"
-	"fmt"
 	"github.com/go-openapi/runtime/middleware"
+	log "github.com/sirupsen/logrus"
 	"os/exec"
 	"strings"
 )
@@ -16,13 +16,17 @@ func GetAllPvob() []string {
 		return nil
 	}
 	result := string(out)
-	fmt.Println("cmd", cmd.String(), "result:", result)
+	log.Debug("cmd", cmd.String(), "result:", result)
 	infos := strings.Split(result, "\n\n")
 	for _, info := range infos {
 		lines := strings.Split(info, "\n")
+		for i, l := range lines {
+			log.Debug(i, l)
+		}
 		if len(lines) == 0 {
 			continue
 		}
+		log.Debug(lines[0], lines[len(lines)-1], strings.HasPrefix(lines[0], "Tag: "), lines[len(lines)-1] == "Vob registry attributes: ucmvob")
 		if strings.HasPrefix(lines[0], "Tag: ") && lines[len(lines)-1] == "Vob registry attributes: ucmvob" {
 			pvob := lines[0][5:]
 			pvobs = append(pvobs, pvob)
@@ -40,7 +44,7 @@ func GetAllComponent(pvob string) []string {
 		return nil
 	}
 	result := string(out)
-	fmt.Println("cmd", cmd.String(), "result:", result)
+	log.Debug("cmd", cmd.String(), "result:", result)
 	lines := strings.Split(result, "\n")
 	for _, line := range lines {
 		// cleartool 命令返回的信息里可能存在cleartool的提示或者警告信息，不是我们期望的内容，以 cleartoo: 开头，应该跳过
@@ -59,7 +63,7 @@ func checkStreamComponent(pvob, component, stream string) bool {
 		return false
 	}
 	result := string(out)
-	fmt.Println("cmd", cmd.String(), "result:", result)
+	log.Debug("cmd", cmd.String(), "result:", result)
 	lines := strings.Split(result, "\n")
 	tmp := strings.Split(component, "/")
 	component = tmp[len(tmp)-1]
@@ -89,7 +93,7 @@ func GetAllStream(pvob, component string) []string {
 		return nil
 	}
 	result := string(out)
-	fmt.Println("cmd", cmd.String(), "result:", result)
+	log.Debug("cmd", cmd.String(), "result:", result)
 	lines := strings.Split(result, "\n")
 	for _, line := range lines {
 		if len(line) == 0 {

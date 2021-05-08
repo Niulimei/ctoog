@@ -47,3 +47,7 @@ translator.db
 
 #fronted
 /fronted/dist
+/fronted/dist.tar.gz
+
+release/
+release.tar.gz

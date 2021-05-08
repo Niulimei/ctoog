@@ -139,7 +139,7 @@ func init() {
         }
       }
     },
-    "/pvobs/{pvob_id}/components/{component_id}": {
+    "/pvobs/{pvob_id}/components/{component_id}/streams": {
       "get": {
         "consumes": [
           "application/json"
@@ -964,7 +964,7 @@ func init() {
         }
       }
     },
-    "/pvobs/{pvob_id}/components/{component_id}": {
+    "/pvobs/{pvob_id}/components/{component_id}/streams": {
       "get": {
         "consumes": [
           "application/json"

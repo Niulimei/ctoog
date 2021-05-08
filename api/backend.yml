@@ -315,7 +315,7 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
-  /pvobs/{pvob_id}/components/{component_id}:
+  /pvobs/{pvob_id}/components/{component_id}/streams:
     get:
       summary: 流列表
       description: ''

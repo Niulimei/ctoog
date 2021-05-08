@@ -29,7 +29,7 @@ func NewListPvobComponentStream(ctx *middleware.Context, handler ListPvobCompone
 	return &ListPvobComponentStream{Context: ctx, Handler: handler}
 }
 
-/* ListPvobComponentStream swagger:route GET /pvobs/{pvob_id}/components/{component_id} listPvobComponentStream
+/* ListPvobComponentStream swagger:route GET /pvobs/{pvob_id}/components/{component_id}/streams listPvobComponentStream
 
 流列表
 
