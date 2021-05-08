@@ -41,7 +41,7 @@ func (o *ListPvobComponentStreamURL) SetBasePath(bp string) {
 func (o *ListPvobComponentStreamURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/pvobs/{pvob_id}/components/{component_id}"
+	var _path = "/pvobs/{pvob_id}/components/{component_id}/streams"
 
 	componentID := o.ComponentID
 	if componentID != "" {

@@ -374,7 +374,7 @@ func (o *TranslatorAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/pvobs/{pvob_id}/components/{component_id}"] = NewListPvobComponentStream(o.context, o.ListPvobComponentStreamHandler)
+	o.handlers["GET"]["/pvobs/{pvob_id}/components/{component_id}/streams"] = NewListPvobComponentStream(o.context, o.ListPvobComponentStreamHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

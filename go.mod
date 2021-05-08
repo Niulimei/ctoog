@@ -18,6 +18,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.3
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7
+	github.com/sirupsen/logrus v1.4.2
 	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
 	golang.org/x/sys v0.0.0-20210426230700-d19ff857e887 // indirect
 )
