@@ -6,14 +6,30 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os/exec"
 	"strings"
+	"time"
 )
 
-func GetAllPvob() []string {
-	pvobs := make([]string, 0, 10)
+var pvobs []string
+
+func init() {
+	go func() {
+		t := time.NewTimer(time.Second * 10)
+		for {
+			select {
+			case <- t.C:
+				GetAllPvob()
+				t.Reset(time.Second * 10)
+			}
+		}
+	} ()
+}
+
+func GetAllPvob() {
+	pvobs = make([]string, 0, 10)
 	cmd := exec.Command("cleartool", "lsvob", "-l")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil
+		return
 	}
 	result := string(out)
 	log.Debug("cmd", cmd.String(), "result:", result)
@@ -32,7 +48,7 @@ func GetAllPvob() []string {
 			pvobs = append(pvobs, pvob)
 		}
 	}
-	return pvobs
+	return
 }
 
 func GetAllComponent(pvob string) []string {
@@ -117,7 +133,7 @@ func GetAllStream(pvob, component string) []string {
 }
 
 func ListPvobHandler(params operations.ListPvobParams) middleware.Responder {
-	return operations.NewListPvobOK().WithPayload(GetAllPvob())
+	return operations.NewListPvobOK().WithPayload(pvobs)
 }
 
 func ListPvobComponentHandler(params operations.ListPvobComponentParams) middleware.Responder {
