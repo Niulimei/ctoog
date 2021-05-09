@@ -222,7 +222,7 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 	database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
 	taskLogInfo := params.TaskLog
 	taskLog := &database.TaskLog{}
-	err := database.DB.Get(taskLog, "SELECT * FROM task_log WHERE task_id = $1 AND status = 'running'", taskId)
+	err := database.DB.Get(taskLog, "SELECT * FROM task_log WHERE task_id = $1", taskId)
 	if err != nil {
 		log.Error(err)
 		return middleware.Error(404, "没发现任务")

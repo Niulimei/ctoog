@@ -59,14 +59,16 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 		Logid:  strconv.FormatInt(task.TaskLogId, 10),
 		Status: "completed",
 	}
-	failedCount := 0
+	//failedCount := 0
 	for _, cmd := range cmds {
 		start := time.Now()
 		data.Starttime = start.Format("2006-01-02 15:04:05")
 		log.Debug("start cmd:", cmd.String())
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			failedCount += 1
+			//failedCount += 1
+			data.Status = "failed"
+			break
 		}
 		end := time.Now()
 		data.Endtime = end.Format("2006-01-02 15:04:05")
@@ -77,9 +79,9 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 		result := string(out)
 		log.Debug("result:", result)
 	}
-	if failedCount > 0 {
-		data.Status = "failed"
-	}
+	//if failedCount > 0 {
+	//	data.Status = "failed"
+	//}
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
 		log.Error(err)
