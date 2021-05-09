@@ -38,17 +38,21 @@ const Login: React.FC = () => {
   const handleSubmit = async ({ password, username }: User.Base) => {
     setSubmitting(true);
     // 登录
-    const msg = await UserService.login({
-      username,
-      password: md5(password),
-    });
-    if (msg.token) {
-      message.success('登录成功！');
-      await fetchUserInfo();
-      goto();
-      return;
+    try {
+      const msg = await UserService.login({
+        username,
+        password: md5(password),
+      });
+      if (msg.token) {
+        message.success('登录成功！');
+        await fetchUserInfo();
+        goto();
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   return (

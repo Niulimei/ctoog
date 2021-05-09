@@ -36,17 +36,6 @@ interface IFormFields {
 const EmptyColSpace = <div className={styles.emptyCol} />;
 /** 右侧操作空白数 */
 const RightButtonTopSpaceNum = 5;
-/** empty values */
-const EmptyFormValues: IFormFields = {
-  pvob: '',
-  component: '',
-  ccUser: '',
-  ccPassword: '',
-  gitURL: '',
-  gitUser: '',
-  gitPassword: '',
-  matchInfo: [{ stream: '', gitBranch: '' }],
-};
 
 type CustomChangeHandlersType = Record<
   keyof IFormFields,
@@ -56,9 +45,18 @@ type CustomChangeHandlersType = Record<
 const CustomChangeHandlers: Partial<CustomChangeHandlersType> = {
   pvob(form, value, dispatch) {
     dispatch('component', { pvob: value });
+    const { matchInfo } = form.getFieldsValue(['matchInfo']);
+    form.setFieldsValue({
+      component: undefined,
+      matchInfo: matchInfo.map((info: any) => ({ ...info, stream: '' })),
+    });
   },
   component(form, value, dispatch) {
     dispatch('stream', { component: value, pvob: form.getFieldValue('pvob') });
+    const { matchInfo } = form.getFieldsValue(['matchInfo']);
+    form.setFieldsValue({
+      matchInfo: matchInfo.map((info: any) => ({ ...info, stream: '' })),
+    });
   },
   ccUser(form, value) {
     if (value !== form.getFieldValue('gitUser')) {
@@ -100,15 +98,14 @@ const renderElements = (num: number, nodeGetter: ElementGetter) => {
 
 const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   const { onSuccess, actionRef } = props;
-  /** 更新模式
-   * 1. 回填表单数据
-   * 2. pvob component matchInfo 为可修改配置，其他表单项只读
-   */
-
   const [branchFieldNum, setBranchFieldNum] = React.useState(1);
   const [form] = Form.useForm<IFormFields>();
   const { dispatch: optionDispatch, options } = useSelectOptions();
   const [visible, toggleVisible] = useToggle(false);
+  /** 更新模式
+   * 1. 回填表单数据
+   * 2. pvob component matchInfo 为可修改配置，其他表单项只读
+   */
   const [isUpdateMode, setIsUpdateMode] = useToggle(false);
 
   React.useImperativeHandle(actionRef, () => {
@@ -116,9 +113,9 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       async openModal(mode, id) {
         setIsUpdateMode(mode === 'update');
         if (mode === 'update' && id) {
-          const res = await taskService.getTaskDetail(id);
-          // TODO:
-          form.setFieldsValue(res.task);
+          const { taskModel } = await taskService.getTaskDetail(id);
+          form.setFieldsValue(taskModel);
+          setBranchFieldNum(taskModel.matchInfo.length);
           toggleVisible(true);
         }
         toggleVisible(true);
@@ -150,10 +147,12 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   const deleteBranch = (pos: number) => {
     setBranchFieldNum((num) => num - 1);
     const { matchInfo } = form.getFieldsValue(['matchInfo']);
-    matchInfo.splice(pos, 1);
-    form.setFieldsValue({
-      matchInfo,
-    });
+    if (Array.isArray(matchInfo)) {
+      matchInfo.splice(pos, 1);
+      form.setFieldsValue({
+        matchInfo,
+      });
+    }
   };
 
   const onFormValuesChange = (values: Partial<IFormFields>) => {
@@ -169,7 +168,6 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       visible={visible}
       title="新建迁移任务"
       onFinish={finishHandler}
-      initialValues={EmptyFormValues}
       onValuesChange={onFormValuesChange}
       onVisibleChange={(vis) => toggleVisible(vis)}
       modalProps={{ okText: '新建', className: styles.modalForm }}
@@ -183,6 +181,20 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               component: ProFormSelect,
               placeholder: '请选择 PVOB',
               valueEnum: options.pvob,
+              // props
+              showSearch: true,
+              // async request(data: any) {
+              //   const { keyWords } = data;
+              //   return transform(
+              //     options.pvob,
+              //     (result, val) => {
+              //       if (!keyWords || new RegExp(keyWords, 'i').test(val)) {
+              //         result.push({ label: val, value: val });
+              //       }
+              //     },
+              //     [] as Record<'label' | 'value', string>[],
+              //   );
+              // },
             },
             {
               name: 'component',
@@ -214,10 +226,10 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               />
             ))}
           </div>
-          <Form.Item noStyle name="include">
+          <Form.Item valuePropName="checked" noStyle name="includeEmpty">
             <Checkbox />
-            <span className={styles.checkboxLabel}>是否保留空目录</span>
           </Form.Item>
+          <span className={styles.checkboxLabel}>是否保留空目录</span>
         </ProCard>
         <ProCard colSpan="47%" style={{ border: 'none' }}>
           {renderCardTitle('Git')}

@@ -10,27 +10,32 @@ import { humanizeDuration } from '../../helper';
 
 import styles from './style.less';
 
-const EmptyColSpace = <li key="emptyCol" className={styles.emptyCol} />;
-
 const descriptionsGenerator = (fieldKeys: string[], data: any) => {
   const taskKeyLabel: Record<string, string> = {
     pvob: 'PVOB',
     component: 'Component',
     ccUser: 'CC 用户名',
+    gitEmail: 'Git Email',
     ccPassword: 'CC 密码',
     stream: 'CC 开发流',
     gitURL: 'Git Repo URL',
     gitUser: 'Git 用户名',
     gitPassword: 'Git 密码',
     gitBranch: 'Git分支',
-    includeEmptyDir: '是否保留空目录',
+    includeEmpty: '是否保留空目录',
+  };
+  const valueFormatter: any = {
+    includeEmpty(val: boolean) {
+      return val ? '是' : '否';
+    },
   };
   return fieldKeys.map((key) => {
-    if (key === 'EmptyColSpace') return EmptyColSpace;
+    const formatter = valueFormatter[key];
+
     return (
       <li key={guid()}>
         <span>{taskKeyLabel[key]}：</span>
-        {data[key]}
+        {formatter ? formatter(data[key]) : data[key]}
       </li>
     );
   });
@@ -96,13 +101,13 @@ const TaskDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, ac
                 {data.taskModel.matchInfo.map(({ stream }) =>
                   descriptionsGenerator(['stream'], { stream }),
                 )}
-                {descriptionsGenerator(['includeEmptyDir'], data.taskModel)}
+                {descriptionsGenerator(['includeEmpty'], data.taskModel)}
               </ul>
             </div>
             <div className={styles.row}>
               <h6>Git</h6>
               <ul className={styles.list}>
-                {descriptionsGenerator(['gitURL', 'EmptyColSpace', 'gitUser'], data.taskModel)}
+                {descriptionsGenerator(['gitURL', 'gitEmail', 'gitUser'], data.taskModel)}
                 <div className={styles.divider} />
                 {data.taskModel.matchInfo.map(({ gitBranch }) =>
                   descriptionsGenerator(['gitBranch'], { gitBranch }),
@@ -110,7 +115,6 @@ const TaskDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, ac
               </ul>
             </div>
           </div>
-          {EmptyColSpace}
           <ProCard title="执行历史记录" style={{ marginTop: 22 }}>
             <Table
               rowKey="logID"
