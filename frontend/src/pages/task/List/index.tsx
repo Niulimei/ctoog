@@ -1,14 +1,17 @@
 import React from 'react';
 import moment from 'moment';
 import { Button, message } from 'antd';
+import { Task } from '@/typings/model';
 import Table from '@ant-design/pro-table';
-import type { Task } from '@/typings/model';
 import { task as taskService } from '@/services';
 import TaskDetail from './components/TaskDetail';
 import TaskCreator from './components/TaskCreator';
 import type { ProColumns } from '@ant-design/pro-table';
 
-type Actions = Record<'refreshTask' | 'displayDetail' | 'updateTask' | 'createTask', (id: string) => void>;
+type Actions = Record<
+  'startTask' | 'displayDetail' | 'updateTask' | 'createTask',
+  (id: string) => void
+>;
 const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
   return [
     {
@@ -63,9 +66,11 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
             <Button size="small" type="link" onClick={() => actions.updateTask(item.id)}>
               修改任务
             </Button>
-            <Button size="small" type="link" onClick={() => actions.refreshTask(item.id)}>
-              启动任务
-            </Button>
+            {item.status !== Task.Status.RUNNING && (
+              <Button size="small" type="link" onClick={() => actions.startTask(item.id)}>
+                启动任务
+              </Button>
+            )}
           </>
         );
       },
@@ -88,9 +93,9 @@ const TaskList: React.FC = () => {
       detailModalRef.current.openModal();
     },
     /** 启动任务 */
-    async refreshTask(id: string) {
+    async startTask(id: string) {
       try {
-        await taskService.refreshTask(id);
+        await taskService.startTask(id);
         message.success('迁移任务启动成功');
       } catch (err) {
         message.error('迁移任务启动出现异常');

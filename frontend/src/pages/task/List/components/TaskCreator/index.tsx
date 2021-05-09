@@ -102,6 +102,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   const [form] = Form.useForm<IFormFields>();
   const { dispatch: optionDispatch, options } = useSelectOptions();
   const [visible, toggleVisible] = useToggle(false);
+  const modalRef = React.useRef<{ taskId: string }>({ taskId: '' });
+
   /** 更新模式
    * 1. 回填表单数据
    * 2. pvob component matchInfo 为可修改配置，其他表单项只读
@@ -113,6 +115,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       async openModal(mode, id) {
         setIsUpdateMode(mode === 'update');
         if (mode === 'update' && id) {
+          modalRef.current.taskId = id;
           const { taskModel } = await taskService.getTaskDetail(id);
           form.setFieldsValue(taskModel);
           setBranchFieldNum(taskModel.matchInfo.length);
@@ -128,9 +131,15 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
     form.resetFields();
   });
 
+  const actionText = isUpdateMode ? '更新' : '新建';
+
   const finishHandler = async (values: any) => {
     try {
-      await taskService.createTask(values);
+      if (isUpdateMode) {
+        await taskService.updateTask(modalRef.current.taskId, values);
+      } else {
+        await taskService.createTask(values);
+      }
       message.success('迁移任务新建成功');
       onSuccess?.();
       return true;
@@ -166,11 +175,11 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       form={form}
       width="700px"
       visible={visible}
-      title="新建迁移任务"
+      title={`${actionText}迁移任务`}
       onFinish={finishHandler}
       onValuesChange={onFormValuesChange}
       onVisibleChange={(vis) => toggleVisible(vis)}
-      modalProps={{ okText: '新建', className: styles.modalForm }}
+      modalProps={{ okText: actionText, className: styles.modalForm }}
     >
       <ProCard split="vertical" ghost>
         <ProCard colSpan="47%">

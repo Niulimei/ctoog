@@ -19,8 +19,15 @@ export const createTask = (data: any) => {
   });
 };
 
+/** 更新迁移任务 */
+export const updateTask = (id: string, data: any) => {
+  return request.put(`/tasks/${id}`, {
+    data,
+  });
+};
+
 /** 启动迁移任务 */
-export const refreshTask = (id: string) => {
+export const startTask = (id: string) => {
   return request.post('/tasks/restart', {
     data: {
       id,
@@ -40,5 +47,7 @@ export const getComponents = (pvobId: string) => {
 
 /** 获取 stream 列表 */
 export const getStreams = (pvobId: string, componentId: string) => {
-  return request.get(`/pvobs/${encodeURIComponent(pvobId)}/components/${encodeURIComponent(componentId)}/streams`);
+  return request.get(
+    `/pvobs/${encodeURIComponent(pvobId)}/components/${encodeURIComponent(componentId)}/streams`,
+  );
 };
