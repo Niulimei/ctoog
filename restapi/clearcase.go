@@ -17,12 +17,12 @@ func init() {
 		t := time.NewTimer(time.Second * 60)
 		for {
 			select {
-			case <- t.C:
+			case <-t.C:
 				GetAllPvob()
 				t.Reset(time.Second * 60)
 			}
 		}
-	} ()
+	}()
 }
 
 func GetAllPvob() {

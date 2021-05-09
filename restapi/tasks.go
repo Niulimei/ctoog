@@ -19,7 +19,7 @@ func init() {
 		t := time.NewTicker(time.Second * 5)
 		for {
 			select {
-			case <- t.C:
+			case <-t.C:
 				log.Debug("ticker begin")
 				var taskLogs []*database.TaskLog
 				now := time.Now()
@@ -74,7 +74,12 @@ func startTask(taskID int64) {
 	)
 	taskLogId, err := r.LastInsertId()
 	if err == nil {
-		workerTaskModel := struct {
+		type InnerMatchInfo struct {
+			Branch string
+			Stream string
+		}
+
+		type InnerTask struct {
 			TaskId       int64
 			TaskLogId    int64
 			CcPassword   string
@@ -85,10 +90,10 @@ func startTask(taskID int64) {
 			GitUser      string
 			GitEmail     string
 			Pvob         string
-			Stream       string
-			Branch       string
 			IncludeEmpty bool
-		}{
+			Matches      []InnerMatchInfo
+		}
+		workerTaskModel := InnerTask{
 			TaskId:       taskID,
 			TaskLogId:    taskLogId,
 			CcPassword:   task.CcPassword,
@@ -99,9 +104,11 @@ func startTask(taskID int64) {
 			GitUser:      task.GitUser,
 			GitEmail:     task.GitEmail,
 			Pvob:         task.Pvob,
-			Stream:       matchInfo[0].Stream,
-			Branch:       matchInfo[0].GitBranch,
 			IncludeEmpty: task.IncludeEmpty,
+		}
+		for _, match := range matchInfo {
+			workerTaskModel.Matches =
+				append(workerTaskModel.Matches, InnerMatchInfo{Stream: match.Stream, Branch: match.GitBranch})
 		}
 		workerTaskModelByte, _ := json.Marshal(workerTaskModel)
 		req, _ := http.NewRequest(http.MethodPost, "http://"+workerUrl+"/new_task", bytes.NewBuffer(workerTaskModelByte))
