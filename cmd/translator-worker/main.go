@@ -56,28 +56,30 @@ func infoServerTaskCompleted(task *Task, server string, cmd *exec.Cmd) {
 	}
 
 	data := Payload{
-		Status:   "completed",
-		Endtime:  time.Now().Format("2006-01-02 15:04:05"),
-		Duration: "10",
+		Logid:  strconv.FormatInt(task.TaskLogId, 10),
+		Status: "completed",
 	}
 	start := time.Now()
+	data.Starttime = start.Format("2006-01-02 15:04:05")
 	log.Debug("start cmd:", cmd.String())
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		end := time.Now()
-		duration := end.Sub(start).Seconds()
-		d := strconv.FormatInt(int64(duration), 10)
 		data.Status = "failed"
-		data.Duration = d
 	}
+	end := time.Now()
+	data.Endtime = end.Format("2006-01-02 15:04:05")
+	duration := end.Sub(start).Seconds()
+	d := strconv.FormatInt(int64(duration), 10)
+	data.Duration = d
 
 	result := string(out)
-	log.Debug(result)
+	log.Debug("result:", result)
 
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
-		// handle err
+		log.Error(err)
 	}
+	log.Printf("playlod: %+v\n", data)
 	body := bytes.NewReader(payloadBytes)
 
 	req, err := http.NewRequest("PUT",
@@ -95,6 +97,7 @@ func infoServerTaskCompleted(task *Task, server string, cmd *exec.Cmd) {
 		time.Sleep(time.Second * 3)
 		http.DefaultClient.Do(req)
 	}
+	log.Debug("info server success")
 	defer resp.Body.Close()
 }
 
@@ -131,6 +134,7 @@ func pingServer(host string, port int) {
 
 type Task struct {
 	TaskId       int64
+	TaskLogId    int64
 	CcPassword   string
 	CcUser       string
 	Component    string

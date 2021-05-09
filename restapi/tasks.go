@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-openapi/runtime/middleware"
+	log "github.com/sirupsen/logrus"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -20,7 +20,7 @@ func startTask(taskID int64) {
 		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty"+
 		" FROM task WHERE id = $1", taskID)
 	if err != nil {
-		fmt.Println(err)
+		log.Error("start task but db err:", err)
 		return
 	}
 	worker := &database.WorkerModel{}
@@ -36,39 +36,56 @@ func startTask(taskID int64) {
 	var matchInfo []*models.TaskMatchInfo
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1 ORDER BY id",
 		taskID)
-
-	workerTaskModel := struct {
-		TaskId       int64
-		CcPassword   string
-		CcUser       string
-		Component    string
-		GitPassword  string
-		GitURL       string
-		GitUser      string
-		GitEmail     string
-		Pvob         string
-		Stream       string
-		Branch       string
-		IncludeEmpty bool
-	}{
-		TaskId:       taskID,
-		CcPassword:   task.CcPassword,
-		CcUser:       task.CcUser,
-		Component:    task.Component,
-		GitPassword:  task.GitPassword,
-		GitURL:       task.GitURL,
-		GitUser:      task.GitUser,
-		GitEmail:     task.GitEmail,
-		Pvob:         task.Pvob,
-		Stream:       matchInfo[0].Stream,
-		Branch:       matchInfo[0].GitBranch,
-		IncludeEmpty: task.IncludeEmpty,
-	}
-	workerTaskModelByte, _ := json.Marshal(workerTaskModel)
-	req, _ := http.NewRequest(http.MethodPost, "http://"+workerUrl+"/new_task", bytes.NewBuffer(workerTaskModelByte))
-	req.Header.Set("Content-Type", "application/json")
-	client := http.Client{}
 	startTime := time.Now().Format("2006-01-02 15:04:05")
+	r := database.DB.MustExec(
+		"INSERT INTO task_log (task_id, status, start_time, end_time, duration)"+
+			" VALUES($1, 'running', $2, $3, 0)", taskID, startTime, "",
+	)
+	taskLogId, err := r.LastInsertId()
+	if err == nil {
+		workerTaskModel := struct {
+			TaskId       int64
+			TaskLogId    int64
+			CcPassword   string
+			CcUser       string
+			Component    string
+			GitPassword  string
+			GitURL       string
+			GitUser      string
+			GitEmail     string
+			Pvob         string
+			Stream       string
+			Branch       string
+			IncludeEmpty bool
+		}{
+			TaskId:       taskID,
+			TaskLogId:    taskLogId,
+			CcPassword:   task.CcPassword,
+			CcUser:       task.CcUser,
+			Component:    task.Component,
+			GitPassword:  task.GitPassword,
+			GitURL:       task.GitURL,
+			GitUser:      task.GitUser,
+			GitEmail:     task.GitEmail,
+			Pvob:         task.Pvob,
+			Stream:       matchInfo[0].Stream,
+			Branch:       matchInfo[0].GitBranch,
+			IncludeEmpty: task.IncludeEmpty,
+		}
+		workerTaskModelByte, _ := json.Marshal(workerTaskModel)
+		req, _ := http.NewRequest(http.MethodPost, "http://"+workerUrl+"/new_task", bytes.NewBuffer(workerTaskModelByte))
+		req.Header.Set("Content-Type", "application/json")
+		client := http.Client{}
+		resp, err := client.Do(req)
+		if err != nil || resp.StatusCode != http.StatusCreated {
+			log.Error(fmt.Errorf("不能发送任务给%d", worker.Id), err)
+			database.DB.MustExec("UPDATE task_log SET status = 'failed' WHERE id = $1", taskLogId)
+			return
+		}
+	} else {
+		log.Error(err)
+	}
+
 	tx := database.DB.MustBegin()
 	tx.MustExec(
 		"UPDATE task SET status = 'running', worker_id = $1 WHERE id = $2", worker.Id, taskID,
@@ -76,16 +93,7 @@ func startTask(taskID int64) {
 	tx.MustExec(
 		"UPDATE worker SET task_count = task_count + 1 WHERE id = $1", worker.Id,
 	)
-	tx.MustExec(
-		"INSERT INTO task_log (task_id, status, start_time, end_time, duration)"+
-			" VALUES($1, 'running', $2, $3, 0)", taskID, startTime, "",
-	)
 	tx.Commit()
-	resp, err := client.Do(req)
-	if err != nil || resp.StatusCode != http.StatusCreated {
-		fmt.Println(fmt.Errorf("不能发送任务给%d", worker.Id), err)
-		return
-	}
 	return
 }
 
@@ -177,13 +185,14 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 	taskLog := &database.TaskLog{}
 	err := database.DB.Get(taskLog, "SELECT * FROM task_log WHERE task_id = $1 AND status = 'running'", taskId)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return middleware.Error(404, "没发现任务")
 	}
 	tx := database.DB.MustBegin()
-	if params.TaskLog.Status != "" {
+	log.Debug("update task:", params.TaskLog)
+	if params.TaskLog.LogID != "" {
 		tx.MustExec("UPDATE task_log SET status = $1, end_time = $2, duration = $3 WHERE log_id = $4",
-			taskLogInfo.Status, taskLogInfo.EndTime, taskLogInfo.Duration, taskLog.LogId)
+			taskLogInfo.Status, taskLogInfo.EndTime, taskLogInfo.Duration, params.TaskLog.LogID)
 		tx.MustExec("UPDATE task SET status = 'completed', last_completed_date_time = $1 WHERE id = $2",
 			taskLogInfo.EndTime, taskId)
 		tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
@@ -207,11 +216,7 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 			}
 		}
 	}
-	tx.Commit()
-	taskIdInt, err := strconv.ParseInt(taskId, 10, 64)
-	if err != nil {
-		go startTask(taskIdInt)
-	}
+	log.Debug("task update commit:", tx.Commit())
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
 		Message: "ok",
 	})
