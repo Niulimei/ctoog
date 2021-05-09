@@ -14,6 +14,36 @@ import (
 	"time"
 )
 
+func init() {
+	go func() {
+		t := time.NewTicker(time.Second * 5)
+		for {
+			select {
+			case <- t.C:
+				log.Debug("ticker begin")
+				var taskLogs []*database.TaskLog
+				now := time.Now()
+				start := now.Add(time.Hour * -1).Format("2006-01-02 15:04:05")
+				log.Debug("start", start)
+				log.Debug(database.DB.Select(&taskLogs,
+					"SELECT * FROM task_log WHERE start_time < $1 AND status = 'running'", start))
+				tx, err := database.DB.Begin()
+				if err == nil {
+					for _, taskLog := range taskLogs {
+						log.Debug("auto close task log ", taskLog.LogId)
+						tx.Exec("UPDATE task_log SET status = 'failed', end_time = $1 WHERE log_id = $2",
+							now.Format("2006-01-02 15:04:05"), taskLog.LogId)
+						tx.Exec("UPDATE task SET status = 'failed' WHERE id = $1", taskLog.TaskId)
+					}
+					tx.Commit()
+				} else {
+					log.Error(err)
+				}
+			}
+		}
+	}()
+}
+
 func startTask(taskID int64) {
 	task := &database.TaskModel{}
 	err := database.DB.Get(task, "SELECT cc_password,"+
@@ -193,8 +223,8 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 	if params.TaskLog.LogID != "" {
 		tx.MustExec("UPDATE task_log SET status = $1, end_time = $2, duration = $3 WHERE log_id = $4",
 			taskLogInfo.Status, taskLogInfo.EndTime, taskLogInfo.Duration, params.TaskLog.LogID)
-		tx.MustExec("UPDATE task SET status = 'completed', last_completed_date_time = $1 WHERE id = $2",
-			taskLogInfo.EndTime, taskId)
+		tx.MustExec("UPDATE task SET status = $1, last_completed_date_time = $2 WHERE id = $3",
+			taskLogInfo.Status, taskLogInfo.EndTime, taskId)
 		tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
 	} else {
 		if params.TaskLog.Pvob != "" {
