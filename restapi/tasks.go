@@ -19,7 +19,7 @@ func init() {
 		t := time.NewTicker(time.Second * 5)
 		for {
 			select {
-			case <- t.C:
+			case <-t.C:
 				log.Debug("ticker begin")
 				var taskLogs []*database.TaskLog
 				now := time.Now()
@@ -61,6 +61,7 @@ func startTask(taskID int64) {
 	}
 	workerUrl := worker.WorkerUrl
 	if worker.WorkerUrl == "" {
+		log.Error("get worker with no url:", worker)
 		return
 	}
 	var matchInfo []*models.TaskMatchInfo
@@ -73,7 +74,12 @@ func startTask(taskID int64) {
 	)
 	taskLogId, err := r.LastInsertId()
 	if err == nil {
-		workerTaskModel := struct {
+		type InnerMatchInfo struct {
+			Branch string
+			Stream string
+		}
+
+		type InnerTask struct {
 			TaskId       int64
 			TaskLogId    int64
 			CcPassword   string
@@ -84,10 +90,10 @@ func startTask(taskID int64) {
 			GitUser      string
 			GitEmail     string
 			Pvob         string
-			Stream       string
-			Branch       string
 			IncludeEmpty bool
-		}{
+			Matches      []InnerMatchInfo
+		}
+		workerTaskModel := InnerTask{
 			TaskId:       taskID,
 			TaskLogId:    taskLogId,
 			CcPassword:   task.CcPassword,
@@ -98,9 +104,11 @@ func startTask(taskID int64) {
 			GitUser:      task.GitUser,
 			GitEmail:     task.GitEmail,
 			Pvob:         task.Pvob,
-			Stream:       matchInfo[0].Stream,
-			Branch:       matchInfo[0].GitBranch,
 			IncludeEmpty: task.IncludeEmpty,
+		}
+		for _, match := range matchInfo {
+			workerTaskModel.Matches =
+				append(workerTaskModel.Matches, InnerMatchInfo{Stream: match.Stream, Branch: match.GitBranch})
 		}
 		workerTaskModelByte, _ := json.Marshal(workerTaskModel)
 		req, _ := http.NewRequest(http.MethodPost, "http://"+workerUrl+"/new_task", bytes.NewBuffer(workerTaskModelByte))
@@ -114,6 +122,7 @@ func startTask(taskID int64) {
 		}
 	} else {
 		log.Error(err)
+		return
 	}
 
 	tx := database.DB.MustBegin()
@@ -210,10 +219,8 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 	//username, verified := utils.Verify(params.Authorization)
 	taskId := params.ID
 	task := &database.TaskModel{}
-	database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
+	err := database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
 	taskLogInfo := params.TaskLog
-	taskLog := &database.TaskLog{}
-	err := database.DB.Get(taskLog, "SELECT * FROM task_log WHERE task_id = $1 AND status = 'running'", taskId)
 	if err != nil {
 		log.Error(err)
 		return middleware.Error(404, "没发现任务")
@@ -256,7 +263,7 @@ func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responde
 	taskId := params.RestartTrigger.ID
 	task := &database.TaskModel{}
 	database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
-	if task.Status == "completed" || task.Status == "init" {
+	if task.Status != "running" {
 		go startTask(taskId)
 	}
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{

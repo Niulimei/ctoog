@@ -13,15 +13,16 @@ var pvobs []string
 
 func init() {
 	go func() {
-		t := time.NewTimer(time.Second * 10)
+		GetAllPvob()
+		t := time.NewTimer(time.Second * 60)
 		for {
 			select {
-			case <- t.C:
+			case <-t.C:
 				GetAllPvob()
-				t.Reset(time.Second * 10)
+				t.Reset(time.Second * 60)
 			}
 		}
-	} ()
+	}()
 }
 
 func GetAllPvob() {
@@ -32,7 +33,7 @@ func GetAllPvob() {
 		return
 	}
 	result := string(out)
-	log.Debug("cmd", cmd.String(), "result:", result)
+	//log.Debug("cmd", cmd.String(), "result:", result)
 	infos := strings.Split(result, "\n\n")
 	for _, info := range infos {
 		lines := strings.Split(info, "\n")

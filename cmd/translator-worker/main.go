@@ -45,7 +45,7 @@ func init() {
 	}
 }
 
-func infoServerTaskCompleted(task *Task, server string, cmd *exec.Cmd) {
+func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 
 	type Payload struct {
 		Logid     string `json:"logID"`
@@ -59,22 +59,29 @@ func infoServerTaskCompleted(task *Task, server string, cmd *exec.Cmd) {
 		Logid:  strconv.FormatInt(task.TaskLogId, 10),
 		Status: "completed",
 	}
-	start := time.Now()
-	data.Starttime = start.Format("2006-01-02 15:04:05")
-	log.Debug("start cmd:", cmd.String())
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		data.Status = "failed"
+	//failedCount := 0
+	for _, cmd := range cmds {
+		start := time.Now()
+		data.Starttime = start.Format("2006-01-02 15:04:05")
+		log.Debug("start cmd:", cmd.String())
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			//failedCount += 1
+			data.Status = "failed"
+			break
+		}
+		end := time.Now()
+		data.Endtime = end.Format("2006-01-02 15:04:05")
+		duration := end.Sub(start).Seconds()
+		d := strconv.FormatInt(int64(duration), 10)
+		data.Duration = d
+
+		result := string(out)
+		log.Debug("result:", result)
 	}
-	end := time.Now()
-	data.Endtime = end.Format("2006-01-02 15:04:05")
-	duration := end.Sub(start).Seconds()
-	d := strconv.FormatInt(int64(duration), 10)
-	data.Duration = d
-
-	result := string(out)
-	log.Debug("result:", result)
-
+	//if failedCount > 0 {
+	//	data.Status = "failed"
+	//}
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
 		log.Error(err)
@@ -132,6 +139,11 @@ func pingServer(host string, port int) {
 	defer resp.Body.Close()
 }
 
+type MatchInfo struct {
+	Branch string
+	Stream string
+}
+
 type Task struct {
 	TaskId       int64
 	TaskLogId    int64
@@ -143,9 +155,8 @@ type Task struct {
 	GitUser      string
 	GitEmail     string
 	Pvob         string
-	Stream       string
-	Branch       string
 	IncludeEmpty bool
+	Matches      []MatchInfo
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
@@ -165,12 +176,16 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 			gitUrl = "https://" + workerTaskModel.GitUser + ":" + workerTaskModel.GitPassword + "@" + gitUrl
 		}
 		cwd, _ := os.Getwd()
-		cmd := exec.Command("/bin/bash", "-c",
-			fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/cc2git.sh %s %s %s %s %s %d %t %s %s"`,
-				workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
-				workerTaskModel.Stream, gitUrl, workerTaskModel.Branch, workerTaskModel.TaskId,
-				workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail))
-		go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmd)
+		var cmds []*exec.Cmd
+		for _, match := range workerTaskModel.Matches {
+			cmd := exec.Command("/bin/bash", "-c",
+				fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/cc2git.sh %s %s %s %s %s %d %t %s %s"`,
+					workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
+					match.Stream, gitUrl, match.Branch, workerTaskModel.TaskId,
+					workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail))
+			cmds = append(cmds, cmd)
+		}
+		go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmds)
 	} else {
 		log.Error(err)
 		w.WriteHeader(500)
