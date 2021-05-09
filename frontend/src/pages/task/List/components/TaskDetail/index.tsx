@@ -86,7 +86,7 @@ const TaskDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, ac
       {data ? (
         <Modal
           title="任务详情"
-          width="700px"
+          width="850px"
           visible={visible}
           cancelButtonProps={{ style: { display: 'none' } }}
           onOk={() => toggleVisible(false)}

@@ -48,14 +48,14 @@ const CustomChangeHandlers: Partial<CustomChangeHandlersType> = {
     const { matchInfo } = form.getFieldsValue(['matchInfo']);
     form.setFieldsValue({
       component: undefined,
-      matchInfo: matchInfo.map((info: any) => ({ ...info, stream: '' })),
+      matchInfo: (matchInfo || []).map((info: any) => ({ ...info, stream: '' })),
     });
   },
   component(form, value, dispatch) {
     dispatch('stream', { component: value, pvob: form.getFieldValue('pvob') });
     const { matchInfo } = form.getFieldsValue(['matchInfo']);
     form.setFieldsValue({
-      matchInfo: matchInfo.map((info: any) => ({ ...info, stream: '' })),
+      matchInfo: (matchInfo || []).map((info: any) => ({ ...info, stream: '' })),
     });
   },
   ccUser(form, value) {
@@ -113,22 +113,27 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   React.useImperativeHandle(actionRef, () => {
     return {
       async openModal(mode, id) {
+        form.resetFields();
         setIsUpdateMode(mode === 'update');
         if (mode === 'update' && id) {
           modalRef.current.taskId = id;
-          const { taskModel } = await taskService.getTaskDetail(id);
-          form.setFieldsValue(taskModel);
-          setBranchFieldNum(taskModel.matchInfo.length);
+          const { taskModel: fieldValues } = await taskService.getTaskDetail(id);
+          const { pvob, component, matchInfo } = fieldValues;
+          optionDispatch('component', { pvob });
+          optionDispatch('stream', { component, pvob });
+
+          form.setFieldsValue(fieldValues);
+          setBranchFieldNum(matchInfo.length);
+          toggleVisible(true);
+        } else {
           toggleVisible(true);
         }
-        toggleVisible(true);
       },
     };
   });
 
   useMount(async () => {
     optionDispatch('pvob', {});
-    form.resetFields();
   });
 
   const actionText = isUpdateMode ? '更新' : '新建';
@@ -173,7 +178,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   return (
     <ModalForm
       form={form}
-      width="700px"
+      width="800px"
       visible={visible}
       title={`${actionText}迁移任务`}
       onFinish={finishHandler}
