@@ -61,6 +61,7 @@ func startTask(taskID int64) {
 	}
 	workerUrl := worker.WorkerUrl
 	if worker.WorkerUrl == "" {
+		log.Error("get worker with no url:", worker)
 		return
 	}
 	var matchInfo []*models.TaskMatchInfo
@@ -114,6 +115,7 @@ func startTask(taskID int64) {
 		}
 	} else {
 		log.Error(err)
+		return
 	}
 
 	tx := database.DB.MustBegin()
@@ -256,7 +258,7 @@ func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responde
 	taskId := params.RestartTrigger.ID
 	task := &database.TaskModel{}
 	database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
-	if task.Status == "completed" || task.Status == "init" {
+	if task.Status != "running" {
 		go startTask(taskId)
 	}
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{

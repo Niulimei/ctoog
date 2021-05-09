@@ -32,7 +32,7 @@ func GetAllPvob() {
 		return
 	}
 	result := string(out)
-	log.Debug("cmd", cmd.String(), "result:", result)
+	//log.Debug("cmd", cmd.String(), "result:", result)
 	infos := strings.Split(result, "\n\n")
 	for _, info := range infos {
 		lines := strings.Split(info, "\n")
