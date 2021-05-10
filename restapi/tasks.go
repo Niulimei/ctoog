@@ -44,11 +44,11 @@ func init() {
 	}()
 }
 
-func startTask(taskID int64) {
+func startTask(taskId int64) {
 	task := &database.TaskModel{}
 	err := database.DB.Get(task, "SELECT cc_password,"+
 		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty"+
-		" FROM task WHERE id = $1", taskID)
+		" FROM task WHERE id = $1", taskId)
 	if err != nil {
 		log.Error("start task but db err:", err)
 		return
@@ -66,11 +66,11 @@ func startTask(taskID int64) {
 	}
 	var matchInfo []*models.TaskMatchInfo
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1 ORDER BY id",
-		taskID)
+		taskId)
 	startTime := time.Now().Format("2006-01-02 15:04:05")
 	r := database.DB.MustExec(
 		"INSERT INTO task_log (task_id, status, start_time, end_time, duration)"+
-			" VALUES($1, 'running', $2, $3, 0)", taskID, startTime, "",
+			" VALUES($1, 'running', $2, $3, 0)", taskId, startTime, "",
 	)
 	taskLogId, err := r.LastInsertId()
 	if err == nil {
@@ -94,7 +94,7 @@ func startTask(taskID int64) {
 			Matches      []InnerMatchInfo
 		}
 		workerTaskModel := InnerTask{
-			TaskId:       taskID,
+			TaskId:       taskId,
 			TaskLogId:    taskLogId,
 			CcPassword:   task.CcPassword,
 			CcUser:       task.CcUser,
@@ -117,7 +117,8 @@ func startTask(taskID int64) {
 		resp, err := client.Do(req)
 		if err != nil || resp.StatusCode != http.StatusCreated {
 			log.Error(fmt.Errorf("不能发送任务给%d", worker.Id), err)
-			database.DB.MustExec("UPDATE task_log SET status = 'failed' WHERE id = $1", taskLogId)
+			database.DB.MustExec("UPDATE task_log SET status = 'failed' WHERE log_id = $1", taskLogId)
+			database.DB.MustExec("UPDATE task SET status = 'failed' WHERE id = $1", taskId)
 			return
 		}
 	} else {
@@ -127,7 +128,7 @@ func startTask(taskID int64) {
 
 	tx := database.DB.MustBegin()
 	tx.MustExec(
-		"UPDATE task SET status = 'running', worker_id = $1 WHERE id = $2", worker.Id, taskID,
+		"UPDATE task SET status = 'running', worker_id = $1 WHERE id = $2", worker.Id, taskId,
 	)
 	tx.MustExec(
 		"UPDATE worker SET task_count = task_count + 1 WHERE id = $1", worker.Id,
