@@ -496,6 +496,10 @@ definitions:
         type: string
       component:
         type: string
+      dir:
+        type: string
+      keep:
+        type: string
       gitRepo:
         type: string
       gitEmail:
@@ -514,6 +518,10 @@ definitions:
       pvob:
         type: string
       component:
+        type: string
+      dir:
+        type: string
+      keep:
         type: string
       gitRepo:
         type: string
@@ -550,6 +558,10 @@ definitions:
       pvob:
         type: string
       component:
+        type: string
+      dir:
+        type: string
+      keep:
         type: string
       ccUser:
         type: string

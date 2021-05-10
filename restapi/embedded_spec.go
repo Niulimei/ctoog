@@ -723,6 +723,9 @@ func init() {
         "component": {
           "type": "string"
         },
+        "dir": {
+          "type": "string"
+        },
         "gitEmail": {
           "type": "string"
         },
@@ -734,6 +737,9 @@ func init() {
         },
         "includeEmpty": {
           "type": "boolean"
+        },
+        "keep": {
+          "type": "string"
         },
         "lastCompleteDateTime": {
           "type": "string"
@@ -752,6 +758,9 @@ func init() {
         "component": {
           "type": "string"
         },
+        "dir": {
+          "type": "string"
+        },
         "duration": {
           "type": "string"
         },
@@ -766,6 +775,9 @@ func init() {
         },
         "includeEmpty": {
           "type": "boolean"
+        },
+        "keep": {
+          "type": "string"
         },
         "lastCompleteDateTime": {
           "type": "string"
@@ -833,6 +845,9 @@ func init() {
         "component": {
           "type": "string"
         },
+        "dir": {
+          "type": "string"
+        },
         "gitEmail": {
           "type": "string"
         },
@@ -847,6 +862,9 @@ func init() {
         },
         "includeEmpty": {
           "type": "boolean"
+        },
+        "keep": {
+          "type": "string"
         },
         "matchInfo": {
           "type": "array",
@@ -1659,6 +1677,9 @@ func init() {
         "component": {
           "type": "string"
         },
+        "dir": {
+          "type": "string"
+        },
         "gitEmail": {
           "type": "string"
         },
@@ -1670,6 +1691,9 @@ func init() {
         },
         "includeEmpty": {
           "type": "boolean"
+        },
+        "keep": {
+          "type": "string"
         },
         "lastCompleteDateTime": {
           "type": "string"
@@ -1688,6 +1712,9 @@ func init() {
         "component": {
           "type": "string"
         },
+        "dir": {
+          "type": "string"
+        },
         "duration": {
           "type": "string"
         },
@@ -1702,6 +1729,9 @@ func init() {
         },
         "includeEmpty": {
           "type": "boolean"
+        },
+        "keep": {
+          "type": "string"
         },
         "lastCompleteDateTime": {
           "type": "string"
@@ -1769,6 +1799,9 @@ func init() {
         "component": {
           "type": "string"
         },
+        "dir": {
+          "type": "string"
+        },
         "gitEmail": {
           "type": "string"
         },
@@ -1783,6 +1816,9 @@ func init() {
         },
         "includeEmpty": {
           "type": "boolean"
+        },
+        "keep": {
+          "type": "string"
         },
         "matchInfo": {
           "type": "array",

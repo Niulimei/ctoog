@@ -11,6 +11,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -47,7 +48,7 @@ func init() {
 func startTask(taskId int64) {
 	task := &database.TaskModel{}
 	err := database.DB.Get(task, "SELECT cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty"+
+		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty, dir, keep"+
 		" FROM task WHERE id = $1", taskId)
 	if err != nil {
 		log.Error("start task but db err:", err)
@@ -73,6 +74,7 @@ func startTask(taskId int64) {
 			" VALUES($1, 'running', $2, $3, 0)", taskId, startTime, "",
 	)
 	taskLogId, err := r.LastInsertId()
+	component := task.Component + task.Dir
 	if err == nil {
 		type InnerMatchInfo struct {
 			Branch string
@@ -92,19 +94,21 @@ func startTask(taskId int64) {
 			Pvob         string
 			IncludeEmpty bool
 			Matches      []InnerMatchInfo
+			Keep         string
 		}
 		workerTaskModel := InnerTask{
 			TaskId:       taskId,
 			TaskLogId:    taskLogId,
 			CcPassword:   task.CcPassword,
 			CcUser:       task.CcUser,
-			Component:    task.Component,
+			Component:    component,
 			GitPassword:  task.GitPassword,
 			GitURL:       task.GitURL,
 			GitUser:      task.GitUser,
 			GitEmail:     task.GitEmail,
 			Pvob:         task.Pvob,
 			IncludeEmpty: task.IncludeEmpty,
+			Keep:         task.Keep,
 		}
 		for _, match := range matchInfo {
 			workerTaskModel.Matches =
@@ -144,12 +148,15 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		return middleware.Error(401, "鉴权失败")
 	}
 	taskInfo := params.TaskInfo
+	if len(taskInfo.Dir) > 0 && !strings.HasPrefix(taskInfo.Dir, "/") {
+		taskInfo.Dir = "/" + taskInfo.Dir
+	}
 	r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
-		"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email)"+
-		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11)",
+		"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep)"+
+		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13)",
 		taskInfo.Pvob, taskInfo.Component, taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL,
 		taskInfo.GitUser, taskInfo.GitPassword, "init", username,
-		taskInfo.IncludeEmpty, taskInfo.GitEmail)
+		taskInfo.IncludeEmpty, taskInfo.GitEmail, taskInfo.Dir, taskInfo.Keep)
 	taskId, err := r.LastInsertId()
 	if err != nil {
 		return operations.NewCreateTaskInternalServerError().WithPayload(
@@ -171,7 +178,7 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	taskID := params.ID
 	task := &models.TaskModel{}
 	database.DB.Get(task, "SELECT cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email"+
+		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep"+
 		" FROM task WHERE id = $1", taskID)
 	var matchInfo []*models.TaskMatchInfo
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", taskID)
@@ -191,12 +198,12 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	user := getUserInfo(username)
 	if user.RoleID == int64(AdminRole) {
 		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-			" status, include_empty, git_email" +
+			" status, include_empty, git_email, dir, keep" +
 			" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
 		queryCount = "SELECT count(id) FROM task;"
 	} else {
 		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-			" status, include_empty, git_email" +
+			" status, include_empty, git_email, dir, keep" +
 			" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
 		queryCount = "SELECT count(id) FROM task WHERE creator = $1;"
 	}
@@ -244,6 +251,12 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		}
 		if params.TaskLog.Component != "" {
 			tx.MustExec("UPDATE task SET component = $1 WHERE id = $2", params.TaskLog.Component, taskId)
+		}
+		if params.TaskLog.Dir != "" {
+			tx.MustExec("UPDATE task SET dir = $1 WHERE id = $2", params.TaskLog.Dir, taskId)
+		}
+		if params.TaskLog.Keep != "" {
+			tx.MustExec("UPDATE task SET keep = $1 WHERE id = $2", params.TaskLog.Keep, taskId)
 		}
 		if params.TaskLog.IncludeEmpty != task.IncludeEmpty {
 			tx.MustExec("UPDATE task SET include_empty = $1 WHERE id = $2", params.TaskLog.IncludeEmpty, taskId)

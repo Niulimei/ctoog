@@ -32,6 +32,8 @@ CREATE TABLE task (
     id integer PRIMARY KEY autoincrement,
     pvob varchar (256),
     component varchar (256),
+    dir varchar (256),
+    keep varchar (256),
     cc_user varchar (256),
     cc_password varchar (256),
     git_url varchar (256),
@@ -83,6 +85,12 @@ type TaskModel struct {
 
 	// component
 	Component string
+
+	// dir
+	Dir string
+
+	// keep
+	Keep string
 
 	// git password
 	GitPassword string `db:"git_password"`

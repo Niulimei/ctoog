@@ -28,6 +28,9 @@ type TaskModel struct {
 	// component
 	Component string `json:"component,omitempty"`
 
+	// dir
+	Dir string `json:"dir,omitempty"`
+
 	// git email
 	GitEmail string `json:"gitEmail,omitempty" db:"git_email"`
 
@@ -42,6 +45,9 @@ type TaskModel struct {
 
 	// include empty
 	IncludeEmpty bool `json:"includeEmpty,omitempty" db:"include_empty"`
+
+	// keep
+	Keep string `json:"keep,omitempty"`
 
 	// match info
 	MatchInfo []*TaskMatchInfo `json:"matchInfo"`

@@ -160,6 +160,7 @@ type Task struct {
 	Pvob         string
 	IncludeEmpty bool
 	Matches      []MatchInfo
+	Keep         string
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
@@ -182,10 +183,10 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		var cmds []*exec.Cmd
 		for _, match := range workerTaskModel.Matches {
 			cmd := exec.Command("/bin/bash", "-c",
-				fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/cc2git.sh %s %s %s %s %s %d %t %s %s"`,
+				fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/cc2git.sh %s %s %s %s %s %d %t %s %s %s"`,
 					workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
 					match.Stream, gitUrl, match.Branch, workerTaskModel.TaskId,
-					workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail))
+					workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail, workerTaskModel.Keep))
 			cmds = append(cmds, cmd)
 		}
 		go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmds)

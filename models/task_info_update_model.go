@@ -22,6 +22,9 @@ type TaskInfoUpdateModel struct {
 	// component
 	Component string `json:"component,omitempty"`
 
+	// dir
+	Dir string `json:"dir,omitempty"`
+
 	// duration
 	Duration string `json:"duration,omitempty"`
 
@@ -36,6 +39,9 @@ type TaskInfoUpdateModel struct {
 
 	// include empty
 	IncludeEmpty bool `json:"includeEmpty,omitempty"`
+
+	// keep
+	Keep string `json:"keep,omitempty"`
 
 	// last complete date time
 	LastCompleteDateTime string `json:"lastCompleteDateTime,omitempty"`
