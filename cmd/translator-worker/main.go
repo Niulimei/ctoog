@@ -34,10 +34,14 @@ func init() {
 	log.SetOutput(os.Stdout)
 
 	// Only log the warning severity or above.
+	// Only log the warning severity or above.
 	lvl, ok := os.LookupEnv("LOG_LEVEL")
+	lvl = strings.ToLower(lvl)
 	if ok {
-		if strings.ToLower(lvl) == "debug" {
+		if lvl == "debug" {
 			log.SetLevel(log.DebugLevel)
+		} else if lvl == "info" {
+			log.SetLevel(log.InfoLevel)
 		} else {
 			log.SetLevel(log.WarnLevel)
 		}

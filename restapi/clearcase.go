@@ -14,12 +14,12 @@ var pvobs []string
 func init() {
 	go func() {
 		GetAllPvob()
-		t := time.NewTimer(time.Second * 60)
+		t := time.NewTimer(time.Second * 600)
 		for {
 			select {
 			case <-t.C:
 				GetAllPvob()
-				t.Reset(time.Second * 60)
+				t.Reset(time.Second * 600)
 			}
 		}
 	}()
