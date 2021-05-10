@@ -1,4 +1,56 @@
 @field-margin-bottom: 18px;
+@border-color: #f0f0f0;
+
+.gutter {
+  padding-left: 24px;
+
+  .col {
+    display: flex;
+    align-items: center;
+  }
+
+  .row {
+    flex: 0 0 47%;
+  }
+
+  .left {
+    padding-right: 30px;
+  }
+
+  .right {
+    padding-right: 12px;
+  }
+
+  .action {
+    flex: 6%;
+    align-self: flex-start;
+  }
+
+  .divider {
+    padding: 12px 0;
+    // border-top: 1px solid @border-color;
+  }
+
+  .keep {
+    position: relative;
+    top: 8px;
+  }
+
+  .keepLabel {
+    position: relative;
+    top: -8px;
+  }
+
+  .label {
+    margin-left: 10px;
+    font-weight: 400;
+  }
+
+  .keep {
+    display: flex;
+    align-items: center;
+  }
+}
 
 .modalForm {
   :global .ant-modal-body {
@@ -16,25 +68,8 @@
   }
 }
 
-.dynamicFields {
-  padding-top: 20px;
-}
-
 .emptyCol {
   height: 32px;
   margin-bottom: @field-margin-bottom;
 }
 
-.actionButton {
-  position: relative;
-  top: -3px;
-  width: 31px;
-  height: 31px;
-  margin-bottom: 19px;
-  margin-left: -30px;
-}
-
-.checkboxLabel {
-  margin-left: 10px;
-  font-weight: 400;
-}

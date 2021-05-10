@@ -1,12 +1,12 @@
 import React from 'react';
 import { useMount } from 'react-use';
-import { guid } from '@/utils/utils';
 import { observer } from 'mobx-react';
 import { useToggle } from 'react-use';
-import ProCard from '@ant-design/pro-card';
+import classnames from 'classnames';
+import { guid } from '@/utils/utils';
 import type { FormInstance } from 'antd/es/form';
 import { task as taskService } from '@/services';
-import { Button, message, Form, Checkbox } from 'antd';
+import { Button, message, Form, Checkbox, Input } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { renderCardTitle, useSelectOptions } from '../../helper';
 import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
@@ -32,16 +32,11 @@ interface IFormFields {
   matchInfo: { stream: string; gitBranch: string }[];
 }
 
-/** 空行 */
-const EmptyColSpace = <div className={styles.emptyCol} />;
-/** 右侧操作空白数 */
-const RightButtonTopSpaceNum = 5;
-
 type CustomChangeHandlersType = Record<
   keyof IFormFields,
   (form: FormInstance<IFormFields>, value: any, dispatch: any) => void
 >;
-/** 页面联动交互处理 */
+/** 表单变更处理 */
 const CustomChangeHandlers: Partial<CustomChangeHandlersType> = {
   pvob(form, value, dispatch) {
     dispatch('component', { pvob: value });
@@ -75,24 +70,44 @@ const CustomChangeHandlers: Partial<CustomChangeHandlersType> = {
 };
 
 /** 生成表单项 */
-const formFieldsGenerator = (fields: any[]) => {
-  return fields.map(({ component, name, ...restProps }) => {
-    const rules = [
-      {
-        required: true,
-        message: restProps.placeholder ? restProps.placeholder : `${name} 为必填参数`,
-      },
-    ];
-    return React.createElement(component, { key: name, rules, name, ...restProps });
-  });
-};
+const formFieldsGenerator = (fields: any) => {
+  // 序列化
+  // const matrix = fields.reduce((res, item, index) => {
+  //   if (index % 2 === 0) {
+  //     res.push([item]);
+  //   } else {
+  //     const pos = Math.floor(index / 2);
+  //     res[pos] = res[pos].concat(item);
+  //   }
+  //   return res;
+  // }, [] as any[][]);
 
-type ElementGetter = React.ReactElement | ((index: number, uid: string) => React.ReactElement);
-/** 渲染指定个数元素 */
-const renderElements = (num: number, nodeGetter: ElementGetter) => {
-  return Array.from(Array(num), (_, index) => {
-    if (typeof nodeGetter === 'function') return nodeGetter(index, guid());
-    return React.cloneElement(nodeGetter, { key: guid() });
+  const renderFieldComponent = ({ component, name, required, ...restProps }: any) => {
+    const rules = required
+      ? [
+          {
+            required: true,
+            message: restProps.placeholder ? restProps.placeholder : `${name} 为必填参数`,
+          },
+        ]
+      : [];
+    return React.createElement(component, { key: name, rules, name, ...restProps });
+  };
+
+  return fields.map((nodes: any) => {
+    const key = guid();
+
+    const [leftNode, rightNode, actionNode] = nodes.map((node: any) =>
+      node.component ? renderFieldComponent(node) : node,
+    );
+
+    return (
+      <div className={styles.col} key={key}>
+        <div className={classnames(styles.row, styles.left)}>{leftNode}</div>
+        <div className={classnames(styles.row, styles.right)}>{rightNode}</div>
+        {actionNode ? <div className={styles.action}>{actionNode}</div> : null}
+      </div>
+    );
   });
 };
 
@@ -180,18 +195,20 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       form={form}
       width="800px"
       visible={visible}
-      title={`${actionText}迁移任务`}
       onFinish={finishHandler}
+      title={`${actionText}迁移任务`}
       onValuesChange={onFormValuesChange}
       onVisibleChange={(vis) => toggleVisible(vis)}
       modalProps={{ okText: actionText, className: styles.modalForm }}
+      initialValues={{ keep: '.gitkeep' }}
     >
-      <ProCard split="vertical" ghost>
-        <ProCard colSpan="47%">
-          {renderCardTitle('ClearCase')}
-          {formFieldsGenerator([
+      <div className={styles.gutter}>
+        {formFieldsGenerator([
+          [renderCardTitle('Clearcase'), renderCardTitle('Git')],
+          [
             {
               name: 'pvob',
+              required: true,
               component: ProFormSelect,
               placeholder: '请选择 PVOB',
               valueEnum: options.pvob,
@@ -211,101 +228,159 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               // },
             },
             {
+              name: 'gitURL',
+              required: true,
+              component: ProFormText,
+              placeholder: '请输入 Git Repo URL',
+              readonly: isUpdateMode,
+            },
+          ],
+          [
+            {
               name: 'component',
+              required: true,
               component: ProFormSelect,
               placeholder: '请选择组件',
               valueEnum: options.component,
             },
             {
+              name: 'gitEmail',
+              required: true,
+              component: ProFormText,
+              placeholder: '请输入 Git Email，用于提交 Git 代码配置',
+              readonly: isUpdateMode,
+            },
+          ],
+          [
+            {
+              name: 'dir',
+              component: ProFormText,
+              placeholder: '请输入组件子目录，如果为空则迁移整个组件',
+              valueEnum: options.component,
+            },
+          ],
+          [
+            {
               name: 'ccUser',
+              required: true,
               component: ProFormText,
               placeholder: '请输入CC用户名',
               readonly: isUpdateMode,
             },
             {
-              name: 'ccPassword',
-              component: ProFormText.Password,
-              placeholder: '请输入CC密码',
-              readonly: isUpdateMode,
-            },
-          ])}
-          <div className={styles.dynamicFields}>
-            {renderElements(branchFieldNum, (index, uid) => (
-              <ProFormSelect
-                key={uid}
-                width="md"
-                placeholder="请选择开发流"
-                valueEnum={options.stream}
-                name={['matchInfo', index, 'stream']}
-              />
-            ))}
-          </div>
-          <Form.Item valuePropName="checked" noStyle name="includeEmpty">
-            <Checkbox />
-          </Form.Item>
-          <span className={styles.checkboxLabel}>是否保留空目录</span>
-        </ProCard>
-        <ProCard colSpan="47%" style={{ border: 'none' }}>
-          {renderCardTitle('Git')}
-          {formFieldsGenerator([
-            {
-              name: 'gitURL',
-              component: ProFormText,
-              placeholder: '请输入 Git Repo URL',
-              readonly: isUpdateMode,
-            },
-            {
-              name: 'gitEmail',
-              component: ProFormText,
-              placeholder: '请输入 Git Email，用于提交 Git 代码配置',
-              readonly: isUpdateMode,
-            },
-            {
               name: 'gitUser',
+              required: true,
               component: ProFormText,
               placeholder: '请输入 Git 账号',
               readonly: isUpdateMode,
             },
+          ],
+          [
+            {
+              name: 'ccPassword',
+              required: true,
+              component: ProFormText.Password,
+              placeholder: '请输入CC密码',
+              readonly: isUpdateMode,
+            },
             {
               name: 'gitPassword',
+              required: true,
               component: ProFormText.Password,
               placeholder: '请输入 Git 密码',
               readonly: isUpdateMode,
             },
-          ])}
-          <div className={styles.dynamicFields}>
-            {renderElements(branchFieldNum, (index, uid) => (
-              <ProFormText
-                key={uid}
-                width="md"
-                placeholder="请输入Git对应分支"
-                name={['matchInfo', index, 'gitBranch']}
+          ],
+        ])}
+        <div className={styles.divider} />
+        {formFieldsGenerator(
+          Array.from(Array(branchFieldNum), (_, index) => [
+            {
+              name: ['matchInfo', index, 'stream'],
+              component: ProFormSelect,
+              placeholder: '请选择开发流',
+              valueEnum: options.stream,
+              rules: [
+                {
+                  async validator(_, value: string) {
+                    if (value) {
+                      const matchInfo = form.getFieldValue('matchInfo');
+                      if (Array.isArray(matchInfo)) {
+                        const streams = matchInfo.map((item) => item.stream);
+                        const len = streams.filter((stream) => stream === value).length;
+                        if (len >= 2) {
+                          throw new Error('不能出现重复的开发流');
+                        }
+                      }
+                    }
+                  },
+                },
+              ],
+            },
+            {
+              name: ['matchInfo', index, 'gitBranch'],
+              component: ProFormText,
+              placeholder: '请输入Git对应分支',
+              valueEnum: options.stream,
+              rules: [
+                {
+                  async validator(_, value: string) {
+                    if (value) {
+                      const matchInfo = form.getFieldValue('matchInfo');
+                      if (Array.isArray(matchInfo)) {
+                        const gitBranchs = matchInfo.map((item) => item.gitBranch);
+                        const len = gitBranchs.filter((branch) => branch === value).length;
+                        if (len >= 2) {
+                          throw new Error('不能出现重复的 Git 分支');
+                        }
+                      }
+                    }
+                  },
+                },
+              ],
+            },
+            <>
+              {index === branchFieldNum - 1 ? (
+                <Button key="add" type="primary" icon={<PlusOutlined />} onClick={addBranchField} />
+              ) : (
+                <Button key="delete" icon={<MinusOutlined />} onClick={() => deleteBranch(index)} />
+              )}
+            </>,
+          ]),
+        )}
+        <div className={classnames(styles.col, styles.keep)}>
+          <span>
+            <Form.Item valuePropName="checked" noStyle name="includeEmpty">
+              <Checkbox />
+            </Form.Item>
+            <span className={styles.label}>是否保留空目录</span>
+          </span>
+          <span className={styles.keep}>
+            <span className={classnames(styles.label, styles.keepLabel)}>占位文件名</span>
+            <Form.Item
+              name={['keep']}
+              rules={[
+                {
+                  async validator(_, value) {
+                    const invalidated = /[^a-z0-9-_.]+/.test(value);
+                    if (invalidated) {
+                      throw new Error(
+                        '文件名称字符只能包括：字母、数字、"."(点)、"_"(下划线)和"-"(连字符)',
+                      );
+                    }
+                  },
+                },
+              ]}
+            >
+              <Input
+                size="small"
+                style={{ width: 128, marginLeft: 12 }}
+                placeholder="请输入占位文件名"
               />
-            ))}
-          </div>
-        </ProCard>
-        <ProCard colSpan="6%">
-          {renderElements(RightButtonTopSpaceNum, EmptyColSpace)}
-
-          <div className={styles.dynamicFields}>
-            {renderElements(branchFieldNum - 1, (index, uid) => (
-              <Button
-                icon={<MinusOutlined />}
-                key={uid}
-                onClick={() => deleteBranch(index)}
-                className={styles.actionButton}
-              />
-            ))}
-
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={addBranchField}
-              className={styles.actionButton}
-            />
-          </div>
-        </ProCard>
-      </ProCard>
+            </Form.Item>
+          </span>
+        </div>
+      </div>
     </ModalForm>
   );
 };
