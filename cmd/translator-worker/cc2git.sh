@@ -13,6 +13,7 @@ ccTmpRootPath="/home/tmp/pvobs_view"
 gitTmpRootPath="/home/tmp/git"
 
 initGitRepo(){
+  echo "正在初始化git仓库..."
   repoUrl=$1
   branchName=$2
   tmpGitDir=$3
@@ -26,7 +27,9 @@ initGitRepo(){
   git config user.email "${email}"
   git config push.default simple
   git remote add origin ${repoUrl}
+  git remote update
   git fetch --all
+  git fetch -p origin
   remoteBrList=$(git branch -r)
   branchExist=false
   branchMasterExist=false
@@ -73,6 +76,9 @@ pullCCAndPush(){
   local tmpCCDir="${ccTmpRootPath}/${combainNameAdapt}_${taskID}"
   local tmpCCDirExist=false
   local tmpGitDirExist=false
+
+  echo "正在克隆代码..."
+
   if [[ -d ${tmpCCDir} ]]; then
     tmpCCDirExist=true
     cd ${tmpCCDir}
@@ -88,17 +94,57 @@ pullCCAndPush(){
     initGitRepo ${gitRepoUrl} ${gitBranchName} ${tmpGitDir} ${username} ${email}
   fi
   rm -rf ${tmpGitDir:?}/*
+
+  echo "正在创建分支..."
+
+  cd ${tmpGitDir}
+  git remote update
+  git fetch --all
+  git fetch -p origin
+
+  localBrList=$(git branch | sed 's/\*//g')
+  localBrExist=false
+  for br in ${localBrList}; do
+    if [[ ${br} == "TMP" ]]; then
+      localBrExist=true
+    fi
+  done
+  if ${localBrExist}; then
+    git checkout TMP
+  else
+    git checkout -b TMP
+  fi
+  git branch | grep -v \* | xargs -n1 git branch -D
+
+  remoteBrList=$(git branch -r)
+  remoteBrExist=false
+  for br in ${remoteBrList}; do
+    if [[ $(basename ${br}) == "${gitBranchName}" ]]; then
+      remoteBrExist=true
+    fi
+  done
+  if ! ${remoteBrExist}; then
+    git checkout -b ${gitBranchName}
+  else
+    git checkout -b ${gitBranchName} origin/${gitBranchName}
+    git pull origin ${gitBranchName}
+  fi
+
+  echo "正在拷贝文件..."
+
   cp -rf ${tmpCCDir}${componentName}/* ${tmpGitDir}/
   if [[ ${containEmptyDir} == "true" ]]; then
     find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/.gitkeep \;
   fi
-  cd ${tmpGitDir}
   git add -A .
   if $tmpCCDirExist && $tmpGitDirExist; then
     git commit -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')"
   else
     git commit -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')"
   fi
+
+  echo "正在推送代码..."
+
   git push origin ${gitBranchName}
 }
 
