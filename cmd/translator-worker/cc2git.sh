@@ -43,7 +43,7 @@ initGitRepo(){
   done
   if $branchExist; then
     git checkout -b ${branchName} origin/${branchName}
-    git pull origin ${branchName}
+    git pull
     return
   fi
   if $branchMasterExist; then
@@ -52,10 +52,10 @@ initGitRepo(){
     git checkout -b init_master
     touch ./.init_master
     git add -A .init_master
-    git commit -m "init master"
+    git commit --allow-empty -m "init master"
     rm -rf .init_master
     git add -A .init_master
-    git commit -m "delete master init file"
+    git commit --allow-empty -m "delete master init file"
     git push origin init_master
   fi
   git checkout -b ${branchName}
@@ -127,7 +127,7 @@ pullCCAndPush(){
     git checkout -b ${gitBranchName}
   else
     git checkout -b ${gitBranchName} origin/${gitBranchName}
-    git pull origin ${gitBranchName}
+    git pull
   fi
 
   echo "正在拷贝文件..."
@@ -138,9 +138,9 @@ pullCCAndPush(){
   fi
   git add -A .
   if $tmpCCDirExist && $tmpGitDirExist; then
-    git commit -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')"
+    git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')"
   else
-    git commit -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')"
+    git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')"
   fi
 
   echo "正在推送代码..."
