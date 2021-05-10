@@ -218,6 +218,7 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder {
 	//username, verified := utils.Verify(params.Authorization)
 	taskId := params.ID
+	log.Warn(taskId)
 	task := &database.TaskModel{}
 	err := database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
 	taskLogInfo := params.TaskLog
@@ -234,6 +235,7 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 			taskLogInfo.Status, taskLogInfo.EndTime, taskId)
 		tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
 	} else {
+		log.Debug("update params:", params.TaskLog)
 		if params.TaskLog.Pvob != "" {
 			tx.MustExec("UPDATE task SET pvob = $1 WHERE id = $2", params.TaskLog.Pvob, taskId)
 		}
