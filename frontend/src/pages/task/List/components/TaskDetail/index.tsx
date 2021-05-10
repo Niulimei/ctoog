@@ -1,12 +1,12 @@
 import React from 'react';
 import { Modal } from 'antd';
-import ProCard from '@ant-design/pro-card';
-import { useToggle } from 'react-use';
-import type { Task } from '@/typings/model';
-import type { ProColumns } from '@ant-design/pro-table';
-import Table from '@ant-design/pro-table';
 import { guid } from '@/utils/utils';
+import { useToggle } from 'react-use';
+import Table from '@ant-design/pro-table';
+import ProCard from '@ant-design/pro-card';
+import type { Task } from '@/typings/model';
 import { humanizeDuration } from '../../helper';
+import type { ProColumns } from '@ant-design/pro-table';
 
 import styles from './style.less';
 
@@ -15,13 +15,13 @@ const descriptionsGenerator = (fieldKeys: string[], data: any) => {
     pvob: 'PVOB',
     component: 'Component',
     ccUser: 'CC 用户名',
-    gitEmail: 'Git Email',
+    gitBranch: 'Git分支',
     ccPassword: 'CC 密码',
     stream: 'CC 开发流',
     gitURL: 'Git Repo URL',
     gitUser: 'Git 用户名',
+    gitEmail: 'Git Email',
     gitPassword: 'Git 密码',
-    gitBranch: 'Git分支',
     includeEmpty: '是否保留空目录',
   };
   const valueFormatter: any = {
@@ -67,7 +67,7 @@ const TableColumns: ProColumns<Task.Log>[] = [
   {
     title: '历时时长',
     renderText(item: Task.Log) {
-      return item.duration ? '-' : humanizeDuration(Number(item.duration));
+      return item.duration ? humanizeDuration(Number(item.duration)) : '-';
     },
   },
 ];
@@ -85,12 +85,12 @@ const TaskDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, ac
     <div>
       {data ? (
         <Modal
-          title="任务详情"
           width="850px"
+          title="任务详情"
           visible={visible}
-          cancelButtonProps={{ style: { display: 'none' } }}
           onOk={() => toggleVisible(false)}
           onCancel={() => toggleVisible(false)}
+          cancelButtonProps={{ style: { display: 'none' } }}
         >
           <div className={styles.gutter}>
             <div className={styles.row}>
@@ -117,6 +117,9 @@ const TaskDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, ac
           </div>
           <ProCard title="执行历史记录" style={{ marginTop: 22 }}>
             <Table
+              pagination={{
+                pageSize: 5,
+              }}
               rowKey="logID"
               search={false}
               toolBarRender={false}

@@ -116,6 +116,9 @@ const TaskList: React.FC = () => {
       <Table
         rowKey="id"
         actionRef={tableRef}
+        pagination={{
+          pageSize: 10,
+        }}
         request={async (params) => {
           const { taskInfo, count } = await taskService.getTasks({
             offset: params.current! - 1 || 0,
