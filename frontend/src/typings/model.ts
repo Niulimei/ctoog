@@ -29,6 +29,10 @@ export namespace Task {
     status: string;
   } & Base;
 
+  export enum Status {
+    RUNNING = 'running',
+  }
+
   export type Detail = {
     taskModel: Base & { matchInfo: MatchInfo[] };
     logList: Log[];

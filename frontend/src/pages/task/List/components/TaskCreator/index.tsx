@@ -48,14 +48,14 @@ const CustomChangeHandlers: Partial<CustomChangeHandlersType> = {
     const { matchInfo } = form.getFieldsValue(['matchInfo']);
     form.setFieldsValue({
       component: undefined,
-      matchInfo: matchInfo.map((info: any) => ({ ...info, stream: '' })),
+      matchInfo: (matchInfo || []).map((info: any) => ({ ...info, stream: '' })),
     });
   },
   component(form, value, dispatch) {
     dispatch('stream', { component: value, pvob: form.getFieldValue('pvob') });
     const { matchInfo } = form.getFieldsValue(['matchInfo']);
     form.setFieldsValue({
-      matchInfo: matchInfo.map((info: any) => ({ ...info, stream: '' })),
+      matchInfo: (matchInfo || []).map((info: any) => ({ ...info, stream: '' })),
     });
   },
   ccUser(form, value) {
@@ -102,6 +102,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   const [form] = Form.useForm<IFormFields>();
   const { dispatch: optionDispatch, options } = useSelectOptions();
   const [visible, toggleVisible] = useToggle(false);
+  const modalRef = React.useRef<{ taskId: string }>({ taskId: '' });
+
   /** 更新模式
    * 1. 回填表单数据
    * 2. pvob component matchInfo 为可修改配置，其他表单项只读
@@ -111,26 +113,38 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   React.useImperativeHandle(actionRef, () => {
     return {
       async openModal(mode, id) {
+        form.resetFields();
         setIsUpdateMode(mode === 'update');
         if (mode === 'update' && id) {
-          const { taskModel } = await taskService.getTaskDetail(id);
-          form.setFieldsValue(taskModel);
-          setBranchFieldNum(taskModel.matchInfo.length);
+          modalRef.current.taskId = id;
+          const { taskModel: fieldValues } = await taskService.getTaskDetail(id);
+          const { pvob, component, matchInfo } = fieldValues;
+          optionDispatch('component', { pvob });
+          optionDispatch('stream', { component, pvob });
+
+          form.setFieldsValue(fieldValues);
+          setBranchFieldNum(matchInfo.length);
+          toggleVisible(true);
+        } else {
           toggleVisible(true);
         }
-        toggleVisible(true);
       },
     };
   });
 
   useMount(async () => {
     optionDispatch('pvob', {});
-    form.resetFields();
   });
+
+  const actionText = isUpdateMode ? '更新' : '新建';
 
   const finishHandler = async (values: any) => {
     try {
-      await taskService.createTask(values);
+      if (isUpdateMode) {
+        await taskService.updateTask(modalRef.current.taskId, values);
+      } else {
+        await taskService.createTask(values);
+      }
       message.success('迁移任务新建成功');
       onSuccess?.();
       return true;
@@ -164,13 +178,13 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   return (
     <ModalForm
       form={form}
-      width="700px"
+      width="800px"
       visible={visible}
-      title="新建迁移任务"
+      title={`${actionText}迁移任务`}
       onFinish={finishHandler}
       onValuesChange={onFormValuesChange}
       onVisibleChange={(vis) => toggleVisible(vis)}
-      modalProps={{ okText: '新建', className: styles.modalForm }}
+      modalProps={{ okText: actionText, className: styles.modalForm }}
     >
       <ProCard split="vertical" ghost>
         <ProCard colSpan="47%">
