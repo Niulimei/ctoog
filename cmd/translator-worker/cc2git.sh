@@ -77,9 +77,7 @@ pullCCAndPush(){
   local tmpCCDir="${ccTmpRootPath}/${combainNameAdapt}_${taskID}"
   local tmpCCDirExist=false
   local tmpGitDirExist=false
-
   echo "Cloning code..."
-
   if [[ -d ${tmpCCDir} ]]; then
     tmpCCDirExist=true
     cd ${tmpCCDir}
@@ -95,28 +93,10 @@ pullCCAndPush(){
     initGitRepo ${gitRepoUrl} ${gitBranchName} ${tmpGitDir} ${username} ${email}
   fi
   rm -rf ${tmpGitDir:?}/*
-
-#  echo "Creating branch..."
-
   cd ${tmpGitDir}
   git remote update
   git fetch --all
   git fetch -p origin
-
-#  localBrList=$(git branch | sed 's/\*//g')
-#  localBrExist=false
-#  for br in ${localBrList}; do
-#    if [[ ${br} == "TMP" ]]; then
-#      localBrExist=true
-#    fi
-#  done
-#  if ${localBrExist}; then
-#    git checkout TMP
-#  else
-#    git checkout -b TMP
-#  fi
-#  git branch | grep -v \* | xargs -n1 git branch -D
-#
   remoteBrList=$(git branch -r)
   remoteBrExist=false
   for br in ${remoteBrList}; do
@@ -127,9 +107,7 @@ pullCCAndPush(){
   if ${remoteBrExist}; then
     git pull origin ${gitBranchName}
   fi
-
   echo "Copying files..."
-
   cp -rf ${tmpCCDir}${componentName}/* ${tmpGitDir}/
   if [[ ${containEmptyDir} == "true" ]]; then
     find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
@@ -140,9 +118,7 @@ pullCCAndPush(){
   else
     git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')"
   fi
-
   echo "Pushing code..."
-
   git push origin ${gitBranchName}
 }
 
