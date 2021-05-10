@@ -69,6 +69,7 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 		log.Debug("result:", result)
 		if err != nil {
 			//failedCount += 1
+			log.Error("cmd err:", err)
 			data.Status = "failed"
 			break
 		}
@@ -103,7 +104,7 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 		time.Sleep(time.Second * 3)
 		http.DefaultClient.Do(req)
 	}
-	log.Debug("info server success")
+	log.Info("info server success")
 	defer resp.Body.Close()
 }
 
@@ -132,7 +133,7 @@ func pingServer(host string, port int) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		// handle err
 	}
 	defer resp.Body.Close()
@@ -178,7 +179,7 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		var cmds []*exec.Cmd
 		for _, match := range workerTaskModel.Matches {
 			cmd := exec.Command("/bin/bash", "-c",
-				fmt.Sprintf(`"echo %s" | su - %s -c "/usr/bin/bash %s/cc2git.sh %s %s %s %s %s %d %t %s %s"`,
+				fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/cc2git.sh %s %s %s %s %s %d %t %s %s"`,
 					workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
 					match.Stream, gitUrl, match.Branch, workerTaskModel.TaskId,
 					workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail))
