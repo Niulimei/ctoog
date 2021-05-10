@@ -8,7 +8,6 @@ import (
 	"github.com/PuerkitoBio/urlesc"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	l "log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -66,7 +65,7 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 		log.Debug("start cmd:", cmd.String())
 		out, err := cmd.CombinedOutput()
 		result := string(out)
-		log.Debug("result:", result)
+		log.Println("result:", result)
 		if err != nil {
 			//failedCount += 1
 			log.Error("cmd err:", err)
@@ -200,5 +199,5 @@ func main() {
 	flag.Parse()
 	go pingServer(hostFlag, portFlag)
 	http.HandleFunc("/new_task", taskHandler) //	设置访问路由
-	l.Fatal(http.ListenAndServe(hostFlag+":"+strconv.Itoa(portFlag), nil))
+	log.Fatal(http.ListenAndServe(hostFlag+":"+strconv.Itoa(portFlag), nil))
 }
