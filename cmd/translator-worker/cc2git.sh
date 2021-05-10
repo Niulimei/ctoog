@@ -3,8 +3,8 @@
 ######
 #脚本名称：cc2git.sh
 #作用：完成CC代码的拉取，git仓库的初始化，代码向git的推送
-#传参说明：共需9个参数，依次分别为：
-#pvob名称，component名称，stream名称，gitRepoURL，git目标分支代码，任务ID，是否保留空目录(是：true，否：false)，用户名，邮箱
+#传参说明：共需10个参数，依次分别为：
+#pvob名称，component名称，stream名称，gitRepoURL，git目标分支代码，任务ID，是否保留空目录(是：true，否：false)，用户名，邮箱, 空目录占位文件名称
 ######
 
 set -e
@@ -71,6 +71,7 @@ pullCCAndPush(){
   containEmptyDir=$7
   username=$8
   email=$9
+  emptyFileName=${10}
   combainNameAdapt=$(echo -n ${pvobName}_${streamName}_${componentName} | sed 's/\//_/g')
   local tmpGitDir="${gitTmpRootPath}/${combainNameAdapt}_${taskID}"
   local tmpCCDir="${ccTmpRootPath}/${combainNameAdapt}_${taskID}"
@@ -134,7 +135,7 @@ pullCCAndPush(){
 
   cp -rf ${tmpCCDir}${componentName}/* ${tmpGitDir}/
   if [[ ${containEmptyDir} == "true" ]]; then
-    find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/.gitkeep \;
+    find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
   fi
   git add -A .
   if $tmpCCDirExist && $tmpGitDirExist; then
@@ -160,8 +161,8 @@ postClean(){
 main(){
   mkdir -p ${ccTmpRootPath}
   mkdir -p ${gitTmpRootPath}
-  pullCCAndPush $1 $2 $3 $4 $5 $6 $7 $8 $9
+  pullCCAndPush $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10}
   #postClean
 }
 
-main $1 $2 $3 $4 $5 $6 $7 $8 $9
+main $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10}
