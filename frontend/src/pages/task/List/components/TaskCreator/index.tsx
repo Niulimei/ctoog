@@ -71,26 +71,15 @@ const CustomChangeHandlers: Partial<CustomChangeHandlersType> = {
 
 /** 生成表单项 */
 const formFieldsGenerator = (fields: any) => {
-  // 序列化
-  // const matrix = fields.reduce((res, item, index) => {
-  //   if (index % 2 === 0) {
-  //     res.push([item]);
-  //   } else {
-  //     const pos = Math.floor(index / 2);
-  //     res[pos] = res[pos].concat(item);
-  //   }
-  //   return res;
-  // }, [] as any[][]);
-
-  const renderFieldComponent = ({ component, name, required, ...restProps }: any) => {
-    const rules = required
-      ? [
-          {
-            required: true,
-            message: restProps.placeholder ? restProps.placeholder : `${name} 为必填参数`,
-          },
-        ]
-      : [];
+  const renderFieldComponent = ({ component, name, required, rules, ...restProps }: any) => {
+    const requiredRules = [
+      {
+        required: true,
+        message: restProps.placeholder ? restProps.placeholder : `${name} 为必填参数`,
+      },
+    ];
+    // eslint-disable-next-line no-param-reassign
+    rules = (rules || []).concat(required && requiredRules).filter(Boolean);
     return React.createElement(component, { key: name, rules, name, ...restProps });
   };
 
@@ -160,11 +149,11 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       } else {
         await taskService.createTask(values);
       }
-      message.success('迁移任务新建成功');
+      message.success(`迁移任务${actionText}成功`);
       onSuccess?.();
       return true;
     } catch (err) {
-      message.error('迁移任务新建出现异常');
+      message.error(`迁移任务${actionText}出现异常`);
       return false;
     }
   };
@@ -204,7 +193,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
     >
       <div className={styles.gutter}>
         {formFieldsGenerator([
-          [renderCardTitle('Clearcase'), renderCardTitle('Git')],
+          [renderCardTitle('ClearCase'), renderCardTitle('Git')],
           [
             {
               name: 'pvob',
@@ -232,7 +221,6 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               required: true,
               component: ProFormText,
               placeholder: '请输入 Git Repo URL',
-              readonly: isUpdateMode,
             },
           ],
           [
@@ -246,9 +234,9 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             {
               name: 'gitEmail',
               required: true,
+              rules: [{ type: 'email', message: '请正确输入邮箱地址' }],
               component: ProFormText,
               placeholder: '请输入 Git Email，用于提交 Git 代码配置',
-              readonly: isUpdateMode,
             },
           ],
           [
@@ -265,14 +253,12 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               required: true,
               component: ProFormText,
               placeholder: '请输入CC用户名',
-              readonly: isUpdateMode,
             },
             {
               name: 'gitUser',
               required: true,
               component: ProFormText,
               placeholder: '请输入 Git 账号',
-              readonly: isUpdateMode,
             },
           ],
           [
@@ -281,14 +267,12 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               required: true,
               component: ProFormText.Password,
               placeholder: '请输入CC密码',
-              readonly: isUpdateMode,
             },
             {
               name: 'gitPassword',
               required: true,
               component: ProFormText.Password,
               placeholder: '请输入 Git 密码',
-              readonly: isUpdateMode,
             },
           ],
         ])}
@@ -302,7 +286,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               valueEnum: options.stream,
               rules: [
                 {
-                  async validator(_, value: string) {
+                  // eslint-disable-next-line @typescript-eslint/no-shadow
+                  async validator(_: any, value: string) {
                     if (value) {
                       const matchInfo = form.getFieldValue('matchInfo');
                       if (Array.isArray(matchInfo)) {
@@ -324,7 +309,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               valueEnum: options.stream,
               rules: [
                 {
-                  async validator(_, value: string) {
+                  // eslint-disable-next-line @typescript-eslint/no-shadow
+                  async validator(_: any, value: string) {
                     if (value) {
                       const matchInfo = form.getFieldValue('matchInfo');
                       if (Array.isArray(matchInfo)) {
@@ -374,6 +360,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             >
               <Input
                 size="small"
+                disabled={isUpdateMode}
                 style={{ width: 128, marginLeft: 12 }}
                 placeholder="请输入占位文件名"
               />
