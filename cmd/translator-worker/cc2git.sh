@@ -140,7 +140,7 @@ postClean(){
 main(){
   mkdir -p ${ccTmpRootPath}
   mkdir -p ${gitTmpRootPath}
-  git config --system core.longpaths true
+  git config --global core.longpaths true
   pullCCAndPush $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10}
   #postClean
 }
