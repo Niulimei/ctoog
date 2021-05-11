@@ -248,7 +248,7 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 	} else {
 		log.Debug("update params:", params.TaskLog)
 		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, " +
-			"git_url = $5, git_user = $6, git_password = $7, git_email = $8, include_empty = $9 WHERE id = $10",
+			"git_url = $6, git_user = $7, git_password = $8, git_email = $9, include_empty = $10 WHERE id = $11",
 			params.TaskLog.Pvob, params.TaskLog.Component, params.TaskLog.Dir, params.TaskLog.CcUser,
 			params.TaskLog.CcPassword, params.TaskLog.GitURL, params.TaskLog.GitUser, params.TaskLog.GitPassword,
 			params.TaskLog.GitEmail, params.TaskLog.IncludeEmpty, params.ID)
