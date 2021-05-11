@@ -19,6 +19,12 @@ import (
 // swagger:model TaskInfoUpdateModel
 type TaskInfoUpdateModel struct {
 
+	// cc password
+	CcPassword string `json:"ccPassword,omitempty"`
+
+	// cc user
+	CcUser string `json:"ccUser,omitempty"`
+
 	// component
 	Component string `json:"component,omitempty"`
 
@@ -34,14 +40,17 @@ type TaskInfoUpdateModel struct {
 	// git email
 	GitEmail string `json:"gitEmail,omitempty"`
 
-	// git repo
-	GitRepo string `json:"gitRepo,omitempty"`
+	// git password
+	GitPassword string `json:"gitPassword,omitempty"`
+
+	// git URL
+	GitURL string `json:"gitURL,omitempty"`
+
+	// git user
+	GitUser string `json:"gitUser,omitempty"`
 
 	// include empty
 	IncludeEmpty bool `json:"includeEmpty,omitempty"`
-
-	// keep
-	Keep string `json:"keep,omitempty"`
 
 	// last complete date time
 	LastCompleteDateTime string `json:"lastCompleteDateTime,omitempty"`
