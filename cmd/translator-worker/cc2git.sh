@@ -94,6 +94,8 @@ pullCCAndPush(){
   fi
   rm -rf ${tmpGitDir:?}/*
   cd ${tmpGitDir}
+  git remote remove origin
+  git remote add origin ${gitRepoUrl}
   git remote update
   git fetch --all
   git fetch -p origin
@@ -134,6 +136,7 @@ postClean(){
 main(){
   mkdir -p ${ccTmpRootPath}
   mkdir -p ${gitTmpRootPath}
+  git config --system core.longpaths true
   pullCCAndPush $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10}
   #postClean
 }

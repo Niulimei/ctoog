@@ -56,10 +56,12 @@ func startTask(taskId int64) {
 		return
 	}
 	worker := &database.WorkerModel{}
+	err = nil
 	if task.WorkerId != 0 {
-		err = database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1", task.WorkerId)
-	} else {
-		err = database.DB.Get(worker, "SELECT * FROM worker ORDER BY task_count DESC limit 1")
+		err = database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1 and status = 'running'", task.WorkerId)
+	}
+	if err != nil || task.WorkerId == 0 || worker.WorkerUrl == "" {
+		err = database.DB.Get(worker, "SELECT * FROM worker WHERE status = 'running' ORDER BY task_count DESC limit 1")
 	}
 	workerUrl := worker.WorkerUrl
 	if worker.WorkerUrl == "" {
@@ -124,6 +126,7 @@ func startTask(taskId int64) {
 			log.Error(fmt.Errorf("不能发送任务给%d", worker.Id), err)
 			database.DB.MustExec("UPDATE task_log SET status = 'failed' WHERE log_id = $1", taskLogId)
 			database.DB.MustExec("UPDATE task SET status = 'failed' WHERE id = $1", taskId)
+			database.DB.MustExec("UPDATE worker SET status = 'dead' WHERE id = $1", worker.Id)
 			return
 		}
 	} else {
@@ -229,17 +232,17 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder {
 	//username, verified := utils.Verify(params.Authorization)
 	taskId := params.ID
-	log.Warn(taskId)
-	task := &database.TaskModel{}
-	err := database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
-	taskLogInfo := params.TaskLog
-	if err != nil {
-		log.Error(err)
-		return middleware.Error(404, "没发现任务")
-	}
+	log.Debug(taskId)
 	tx := database.DB.MustBegin()
 	log.Debug("update task:", params.TaskLog)
 	if params.TaskLog.LogID != "" {
+		task := &database.TaskModel{}
+		err := database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
+		taskLogInfo := params.TaskLog
+		if err != nil {
+			log.Error(err)
+			return middleware.Error(404, "没发现任务")
+		}
 		tx.MustExec("UPDATE task_log SET status = $1, end_time = $2, duration = $3 WHERE log_id = $4",
 			taskLogInfo.Status, taskLogInfo.EndTime, taskLogInfo.Duration, params.TaskLog.LogID)
 		tx.MustExec("UPDATE task SET status = $1, last_completed_date_time = $2 WHERE id = $3",
@@ -247,8 +250,8 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
 	} else {
 		log.Debug("update params:", params.TaskLog)
-		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, " +
-			"git_url = $5, git_user = $6, git_password = $7, git_email = $8, include_empty = $9 WHERE id = $10",
+		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, "+
+			"git_url = $6, git_user = $7, git_password = $8, git_email = $9, include_empty = $10 WHERE id = $11",
 			params.TaskLog.Pvob, params.TaskLog.Component, params.TaskLog.Dir, params.TaskLog.CcUser,
 			params.TaskLog.CcPassword, params.TaskLog.GitURL, params.TaskLog.GitUser, params.TaskLog.GitPassword,
 			params.TaskLog.GitEmail, params.TaskLog.IncludeEmpty, params.ID)
