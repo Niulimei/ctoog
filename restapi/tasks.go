@@ -56,9 +56,11 @@ func startTask(taskId int64) {
 		return
 	}
 	worker := &database.WorkerModel{}
+	err = nil
 	if task.WorkerId != 0 {
-		err = database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1", task.WorkerId)
-	} else {
+		err = database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1 and status = 'running'", task.WorkerId)
+	}
+	if err != nil || task.WorkerId == 0 || worker.WorkerUrl == "" {
 		err = database.DB.Get(worker, "SELECT * FROM worker WHERE status = 'running' ORDER BY task_count DESC limit 1")
 	}
 	workerUrl := worker.WorkerUrl
@@ -248,7 +250,7 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
 	} else {
 		log.Debug("update params:", params.TaskLog)
-		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, " +
+		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, "+
 			"git_url = $6, git_user = $7, git_password = $8, git_email = $9, include_empty = $10 WHERE id = $11",
 			params.TaskLog.Pvob, params.TaskLog.Component, params.TaskLog.Dir, params.TaskLog.CcUser,
 			params.TaskLog.CcPassword, params.TaskLog.GitURL, params.TaskLog.GitUser, params.TaskLog.GitPassword,
