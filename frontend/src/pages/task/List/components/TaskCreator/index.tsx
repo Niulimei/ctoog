@@ -348,6 +348,10 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               rules={[
                 {
                   async validator(_, value) {
+                    const { includeEmpty } = form.getFieldsValue(['includeEmpty']);
+                    if (includeEmpty && !value) {
+                      throw new Error('文件名称不能为空');
+                    }
                     const invalidated = /[^a-z0-9-_.]+/.test(value);
                     if (invalidated) {
                       throw new Error(

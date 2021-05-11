@@ -23,6 +23,9 @@ function UserList() {
   const tableRef = React.useRef<any>(null);
   return (
     <Table
+      pagination={{
+        pageSize: 10,
+      }}
       rowKey="username"
       actionRef={tableRef}
       request={async (params) => {

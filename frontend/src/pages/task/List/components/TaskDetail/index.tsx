@@ -140,7 +140,11 @@ const TaskDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, ac
             <Table
               pagination={{
                 pageSize: 5,
+                pageSizeOptions: ['5', '10', '15'],
               }}
+              // sorter={(a: Task.Log, b: Task.Log) =>
+              //   moment(a.startTime).unix() - moment(b.startTime).unix()
+              // }
               rowKey="logID"
               search={false}
               toolBarRender={false}
