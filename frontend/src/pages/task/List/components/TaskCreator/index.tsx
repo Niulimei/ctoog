@@ -9,14 +9,14 @@ import { task as taskService } from '@/services';
 import { Button, message, Form, Checkbox, Input } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { renderCardTitle, useSelectOptions } from '../../helper';
-import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
+import { ModalForm, ProFormSelect as FormSelect, ProFormText } from '@ant-design/pro-form';
 
 import styles from './style.less';
 
 interface IModalCreatorProps {
   /** 创建成功回调 */
   onSuccess?: () => void;
-  actionRef?: React.RefObject<{
+  actionRef?: React.MutableRefObject<{
     openModal: (mode?: 'create' | 'update', id?: string) => void;
   }>;
 }
@@ -31,6 +31,22 @@ interface IFormFields {
   gitPassword: string;
   matchInfo: { stream: string; gitBranch: string }[];
 }
+
+// 绑定 getPopupContainer
+const ProFormSelect = ({ children, ...props }: React.ComponentProps<any>) => {
+  return (
+    <div key={props.name} data-field-key={props.name}>
+      <FormSelect
+        {...props}
+        fieldProps={{
+          getPopupContainer: () => document.querySelector(`[data-field-key="${props.name}"]`)!,
+        }}
+      >
+        {children}
+      </FormSelect>
+    </div>
+  );
+};
 
 type CustomChangeHandlersType = Record<
   keyof IFormFields,
@@ -80,7 +96,13 @@ const formFieldsGenerator = (fields: any) => {
     ];
     // eslint-disable-next-line no-param-reassign
     rules = (rules || []).concat(required && requiredRules).filter(Boolean);
-    return React.createElement(component, { key: name, rules, name, ...restProps });
+
+    return React.createElement(component, {
+      key: name,
+      rules,
+      name,
+      ...restProps,
+    });
   };
 
   return fields.map((nodes: any) => {
@@ -182,7 +204,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   return (
     <ModalForm
       form={form}
-      width="800px"
+      width="850px"
       visible={visible}
       onFinish={finishHandler}
       title={`${actionText}迁移任务`}
@@ -326,10 +348,16 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               ],
             },
             <>
-              {index === branchFieldNum - 1 ? (
+              {branchFieldNum !== 1 && (
+                <Button
+                  key="delete"
+                  icon={<MinusOutlined />}
+                  className={styles.deleteButton}
+                  onClick={() => deleteBranch(index)}
+                />
+              )}
+              {index === branchFieldNum - 1 && (
                 <Button key="add" type="primary" icon={<PlusOutlined />} onClick={addBranchField} />
-              ) : (
-                <Button key="delete" icon={<MinusOutlined />} onClick={() => deleteBranch(index)} />
               )}
             </>,
           ]),
