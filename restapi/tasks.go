@@ -11,6 +11,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -246,21 +247,11 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
 	} else {
 		log.Debug("update params:", params.TaskLog)
-		if params.TaskLog.Pvob != "" {
-			tx.MustExec("UPDATE task SET pvob = $1 WHERE id = $2", params.TaskLog.Pvob, taskId)
-		}
-		if params.TaskLog.Component != "" {
-			tx.MustExec("UPDATE task SET component = $1 WHERE id = $2", params.TaskLog.Component, taskId)
-		}
-		if params.TaskLog.Dir != "" {
-			tx.MustExec("UPDATE task SET dir = $1 WHERE id = $2", params.TaskLog.Dir, taskId)
-		}
-		if params.TaskLog.Keep != "" {
-			tx.MustExec("UPDATE task SET keep = $1 WHERE id = $2", params.TaskLog.Keep, taskId)
-		}
-		if params.TaskLog.IncludeEmpty != task.IncludeEmpty {
-			tx.MustExec("UPDATE task SET include_empty = $1 WHERE id = $2", params.TaskLog.IncludeEmpty, taskId)
-		}
+		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, " +
+			"git_url = $5, git_user = $6, git_password = $7, git_email = $8, include_empty = $9 WHERE id = $10",
+			params.TaskLog.Pvob, params.TaskLog.Component, params.TaskLog.Dir, params.TaskLog.CcUser,
+			params.TaskLog.CcPassword, params.TaskLog.GitURL, params.TaskLog.GitUser, params.TaskLog.GitPassword,
+			params.TaskLog.GitEmail, params.TaskLog.IncludeEmpty, params.ID)
 		if len(params.TaskLog.MatchInfo) > 0 {
 			tx.MustExec("DELETE FROM match_info WHERE task_id = $1", taskId)
 			for _, match := range params.TaskLog.MatchInfo {
@@ -270,6 +261,8 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 					taskId, match.Stream, match.GitBranch)
 			}
 		}
+		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
+		go startTask(taskIdInt)
 	}
 	log.Debug("task update commit:", tx.Commit())
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{

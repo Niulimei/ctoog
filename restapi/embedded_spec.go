@@ -755,6 +755,12 @@ func init() {
     "TaskInfoUpdateModel": {
       "type": "object",
       "properties": {
+        "ccPassword": {
+          "type": "string"
+        },
+        "ccUser": {
+          "type": "string"
+        },
         "component": {
           "type": "string"
         },
@@ -770,14 +776,17 @@ func init() {
         "gitEmail": {
           "type": "string"
         },
-        "gitRepo": {
+        "gitPassword": {
+          "type": "string"
+        },
+        "gitURL": {
+          "type": "string"
+        },
+        "gitUser": {
           "type": "string"
         },
         "includeEmpty": {
           "type": "boolean"
-        },
-        "keep": {
-          "type": "string"
         },
         "lastCompleteDateTime": {
           "type": "string"
@@ -1709,6 +1718,12 @@ func init() {
     "TaskInfoUpdateModel": {
       "type": "object",
       "properties": {
+        "ccPassword": {
+          "type": "string"
+        },
+        "ccUser": {
+          "type": "string"
+        },
         "component": {
           "type": "string"
         },
@@ -1724,14 +1739,17 @@ func init() {
         "gitEmail": {
           "type": "string"
         },
-        "gitRepo": {
+        "gitPassword": {
+          "type": "string"
+        },
+        "gitURL": {
+          "type": "string"
+        },
+        "gitUser": {
           "type": "string"
         },
         "includeEmpty": {
           "type": "boolean"
-        },
-        "keep": {
-          "type": "string"
         },
         "lastCompleteDateTime": {
           "type": "string"

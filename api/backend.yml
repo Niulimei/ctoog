@@ -521,9 +521,15 @@ definitions:
         type: string
       dir:
         type: string
-      keep:
+      ccUser:
         type: string
-      gitRepo:
+      ccPassword:
+        type: string
+      gitURL:
+        type: string
+      gitUser:
+        type: string
+      gitPassword:
         type: string
       gitEmail:
         type: string
