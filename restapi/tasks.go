@@ -11,6 +11,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -270,6 +271,8 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 					taskId, match.Stream, match.GitBranch)
 			}
 		}
+		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
+		go startTask(taskIdInt)
 	}
 	log.Debug("task update commit:", tx.Commit())
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
