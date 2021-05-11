@@ -17,9 +17,6 @@ func PingWorkerHandler(params operations.PingWorkerParams) middleware.Responder 
 	worker := &database.WorkerModel{}
 	err := database.DB.Get(worker, "SELECT * FROM worker WHERE worker_url = $1", url)
 	if err != nil {
-		log.Error(url, err)
-	}
-	if err != nil {
 		database.DB.Exec("INSERT INTO worker (worker_url, status, task_count) "+
 			"VALUES ($1, $2, $3)", url, "running", 0)
 	} else {

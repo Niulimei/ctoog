@@ -59,7 +59,7 @@ func startTask(taskId int64) {
 	if task.WorkerId != 0 {
 		err = database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1", task.WorkerId)
 	} else {
-		err = database.DB.Get(worker, "SELECT * FROM worker ORDER BY task_count DESC limit 1")
+		err = database.DB.Get(worker, "SELECT * FROM worker WHERE status = 'running' ORDER BY task_count DESC limit 1")
 	}
 	workerUrl := worker.WorkerUrl
 	if worker.WorkerUrl == "" {
@@ -124,6 +124,7 @@ func startTask(taskId int64) {
 			log.Error(fmt.Errorf("不能发送任务给%d", worker.Id), err)
 			database.DB.MustExec("UPDATE task_log SET status = 'failed' WHERE log_id = $1", taskLogId)
 			database.DB.MustExec("UPDATE task SET status = 'failed' WHERE id = $1", taskId)
+			database.DB.MustExec("UPDATE worker SET status = 'dead' WHERE id = $1", worker.Id)
 			return
 		}
 	} else {
