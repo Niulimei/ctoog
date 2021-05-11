@@ -230,7 +230,7 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder {
 	//username, verified := utils.Verify(params.Authorization)
 	taskId := params.ID
-	log.Warn(taskId)
+	log.Debug(taskId)
 	tx := database.DB.MustBegin()
 	log.Debug("update task:", params.TaskLog)
 	if params.TaskLog.LogID != "" {
