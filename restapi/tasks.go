@@ -230,16 +230,16 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 	//username, verified := utils.Verify(params.Authorization)
 	taskId := params.ID
 	log.Warn(taskId)
-	task := &database.TaskModel{}
-	err := database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
-	taskLogInfo := params.TaskLog
-	if err != nil {
-		log.Error(err)
-		return middleware.Error(404, "没发现任务")
-	}
 	tx := database.DB.MustBegin()
 	log.Debug("update task:", params.TaskLog)
 	if params.TaskLog.LogID != "" {
+		task := &database.TaskModel{}
+		err := database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
+		taskLogInfo := params.TaskLog
+		if err != nil {
+			log.Error(err)
+			return middleware.Error(404, "没发现任务")
+		}
 		tx.MustExec("UPDATE task_log SET status = $1, end_time = $2, duration = $3 WHERE log_id = $4",
 			taskLogInfo.Status, taskLogInfo.EndTime, taskLogInfo.Duration, params.TaskLog.LogID)
 		tx.MustExec("UPDATE task SET status = $1, last_completed_date_time = $2 WHERE id = $3",
