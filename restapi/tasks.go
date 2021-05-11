@@ -60,8 +60,7 @@ func startTask(taskId int64) {
 	err = nil
 	if task.WorkerId != 0 {
 		err = database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1 and status = 'running'", task.WorkerId)
-	}
-	if err != nil || task.WorkerId == 0 || worker.WorkerUrl == "" {
+	} else {
 		newAssigned = true
 		err = database.DB.Get(worker, "SELECT * FROM worker WHERE status = 'running' ORDER BY task_count DESC limit 1")
 	}
