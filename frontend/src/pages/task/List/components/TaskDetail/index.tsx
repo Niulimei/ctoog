@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal } from 'antd';
+import classnames from 'classnames';
 import { guid } from '@/utils/utils';
 import { useToggle } from 'react-use';
 import Table from '@ant-design/pro-table';
@@ -11,7 +12,7 @@ import type { ProColumns } from '@ant-design/pro-table';
 import styles from './style.less';
 
 const descriptionsGenerator = (fieldKeys: string[], data: any) => {
-  const taskKeyLabel: Record<string, string> = {
+  const labels: Record<string, string> = {
     pvob: 'PVOB',
     component: 'Component',
     ccUser: 'CC 用户名',
@@ -22,21 +23,34 @@ const descriptionsGenerator = (fieldKeys: string[], data: any) => {
     gitUser: 'Git 用户名',
     gitEmail: 'Git Email',
     gitPassword: 'Git 密码',
-    includeEmpty: '是否保留空目录',
+    dir: '组件子目录',
+    keep: '文件占位名',
   };
-  const valueFormatter: any = {
-    includeEmpty(val: boolean) {
-      return val ? '是' : '否';
-    },
-  };
-  return fieldKeys.map((key) => {
-    const formatter = valueFormatter[key];
 
+  // 序列化
+  const matrix = fieldKeys.reduce((res, item, index) => {
+    if (index % 2 === 0) {
+      res.push([item]);
+    } else {
+      const pos = Math.floor(index / 2);
+      res[pos] = res[pos].concat(item);
+    }
+    return res;
+  }, [] as any[][]);
+
+  return matrix.map((keys: any[]) => {
     return (
-      <li key={guid()}>
-        <span>{taskKeyLabel[key]}：</span>
-        {formatter ? formatter(data[key]) : data[key]}
-      </li>
+      <div className={styles.col}>
+        {keys.map((key, index) => {
+          const isLeftRow = index % 2 === 0;
+          return (
+            <div className={classnames(styles.row, isLeftRow && styles.left)} key={guid()}>
+              <span>{labels[key]}：</span>
+              <span>{data[key] || '-'}</span>
+            </div>
+          );
+        })}
+      </div>
     );
   });
 };
@@ -85,7 +99,7 @@ const TaskDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, ac
     <div>
       {data ? (
         <Modal
-          width="850px"
+          width="800px"
           title="任务详情"
           visible={visible}
           onOk={() => toggleVisible(false)}
@@ -93,26 +107,29 @@ const TaskDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, ac
           cancelButtonProps={{ style: { display: 'none' } }}
         >
           <div className={styles.gutter}>
-            <div className={styles.row}>
-              <h6>ClearCase</h6>
-              <ul className={styles.list}>
-                {descriptionsGenerator(['pvob', 'component', 'ccUser'], data.taskModel)}
-                <div className={styles.divider} />
-                {data.taskModel.matchInfo.map(({ stream }) =>
-                  descriptionsGenerator(['stream'], { stream }),
-                )}
-                {descriptionsGenerator(['includeEmpty'], data.taskModel)}
-              </ul>
-            </div>
-            <div className={styles.row}>
-              <h6>Git</h6>
-              <ul className={styles.list}>
-                {descriptionsGenerator(['gitURL', 'gitEmail', 'gitUser'], data.taskModel)}
-                <div className={styles.divider} />
-                {data.taskModel.matchInfo.map(({ gitBranch }) =>
-                  descriptionsGenerator(['gitBranch'], { gitBranch }),
-                )}
-              </ul>
+            {descriptionsGenerator(
+              [
+                'pvob',
+                'gitURL',
+                'component',
+                'gitEmail',
+                'ccUser',
+                'gitUser',
+                'ccPassword',
+                'gitPassword',
+                'dir',
+              ],
+              data.taskModel,
+            )}
+            <div className={styles.divider} />
+            {data.taskModel.matchInfo.map((matchInfo) =>
+              descriptionsGenerator(['stream', 'gitBranch'], matchInfo),
+            )}
+            <div className={styles.col}>
+              <span className={styles.row}>
+                <span>是否保留空目录：{data.taskModel.includeEmpty ? '是' : '否'}</span>
+                <span style={{ marginLeft: '2em' }}>占位文件名：{data.taskModel.keep}</span>
+              </span>
             </div>
           </div>
           <ProCard title="执行历史记录" style={{ marginTop: 22 }}>

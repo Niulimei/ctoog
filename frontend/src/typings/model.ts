@@ -21,6 +21,9 @@ export namespace Task {
     gitURL: string;
     gitUser: string;
     gitPassword: string;
+    includeEmpty: boolean;
+    keep: string;
+    dir: string;
   };
 
   export type Item = {
