@@ -78,6 +78,7 @@ const formFieldsGenerator = (fields: any) => {
         message: restProps.placeholder ? restProps.placeholder : `${name} 为必填参数`,
       },
     ];
+    // eslint-disable-next-line no-param-reassign
     rules = (rules || []).concat(required && requiredRules).filter(Boolean);
     return React.createElement(component, { key: name, rules, name, ...restProps });
   };
@@ -192,7 +193,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
     >
       <div className={styles.gutter}>
         {formFieldsGenerator([
-          [renderCardTitle('Clearcase'), renderCardTitle('Git')],
+          [renderCardTitle('ClearCase'), renderCardTitle('Git')],
           [
             {
               name: 'pvob',
@@ -285,7 +286,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               valueEnum: options.stream,
               rules: [
                 {
-                  async validator(_, value: string) {
+                  // eslint-disable-next-line @typescript-eslint/no-shadow
+                  async validator(_: any, value: string) {
                     if (value) {
                       const matchInfo = form.getFieldValue('matchInfo');
                       if (Array.isArray(matchInfo)) {
@@ -307,7 +309,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               valueEnum: options.stream,
               rules: [
                 {
-                  async validator(_, value: string) {
+                  // eslint-disable-next-line @typescript-eslint/no-shadow
+                  async validator(_: any, value: string) {
                     if (value) {
                       const matchInfo = form.getFieldValue('matchInfo');
                       if (Array.isArray(matchInfo)) {

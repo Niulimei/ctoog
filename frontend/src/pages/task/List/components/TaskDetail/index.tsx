@@ -6,8 +6,8 @@ import { useToggle } from 'react-use';
 import Table from '@ant-design/pro-table';
 import ProCard from '@ant-design/pro-card';
 import type { Task } from '@/typings/model';
-import { humanizeDuration } from '../../helper';
 import type { ProColumns } from '@ant-design/pro-table';
+import { humanizeDuration, renderCardTitle } from '../../helper';
 
 import styles from './style.less';
 
@@ -40,7 +40,7 @@ const descriptionsGenerator = (fieldKeys: string[], data: any) => {
 
   return matrix.map((keys: any[]) => {
     return (
-      <div className={styles.col}>
+      <div className={styles.col} key={guid()}>
         {keys.map((key, index) => {
           const isLeftRow = index % 2 === 0;
           return (
@@ -107,6 +107,10 @@ const TaskDetail: React.FC<{ data?: Task.Detail; actionRef: any }> = ({ data, ac
           cancelButtonProps={{ style: { display: 'none' } }}
         >
           <div className={styles.gutter}>
+            <div className={styles.col}>
+              <div className={styles.row}>{renderCardTitle('ClearCase')}</div>
+              <div className={styles.row}>{renderCardTitle('Git')}</div>
+            </div>
             {descriptionsGenerator(
               [
                 'pvob',
