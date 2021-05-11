@@ -94,7 +94,11 @@ pullCCAndPush(){
   fi
   rm -rf ${tmpGitDir:?}/*
   cd ${tmpGitDir}
-  git remote remove origin
+  for r in $(git remote); do
+    if [[ $r == "origin" ]]; then
+      git remote remove origin
+    fi
+  done
   git remote add origin ${gitRepoUrl}
   git remote update
   git fetch --all
