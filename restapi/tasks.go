@@ -56,11 +56,13 @@ func startTask(taskId int64) {
 		return
 	}
 	worker := &database.WorkerModel{}
+	newAssigned := false
 	err = nil
 	if task.WorkerId != 0 {
 		err = database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1 and status = 'running'", task.WorkerId)
 	}
 	if err != nil || task.WorkerId == 0 || worker.WorkerUrl == "" {
+		newAssigned = true
 		err = database.DB.Get(worker, "SELECT * FROM worker WHERE status = 'running' ORDER BY task_count DESC limit 1")
 	}
 	workerUrl := worker.WorkerUrl
@@ -134,14 +136,16 @@ func startTask(taskId int64) {
 		return
 	}
 
-	tx := database.DB.MustBegin()
-	tx.MustExec(
-		"UPDATE task SET status = 'running', worker_id = $1 WHERE id = $2", worker.Id, taskId,
-	)
-	tx.MustExec(
-		"UPDATE worker SET task_count = task_count + 1 WHERE id = $1", worker.Id,
-	)
-	tx.Commit()
+	if newAssigned {
+		tx := database.DB.MustBegin()
+		tx.MustExec(
+			"UPDATE task SET status = 'running', worker_id = $1 WHERE id = $2", worker.Id, taskId,
+		)
+		tx.MustExec(
+			"UPDATE worker SET task_count = task_count + 1 WHERE id = $1", worker.Id,
+		)
+		tx.Commit()
+	}
 	return
 }
 
@@ -247,7 +251,7 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 			taskLogInfo.Status, taskLogInfo.EndTime, taskLogInfo.Duration, params.TaskLog.LogID)
 		tx.MustExec("UPDATE task SET status = $1, last_completed_date_time = $2 WHERE id = $3",
 			taskLogInfo.Status, taskLogInfo.EndTime, taskId)
-		tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
+		//tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
 	} else {
 		log.Debug("update params:", params.TaskLog)
 		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, "+
