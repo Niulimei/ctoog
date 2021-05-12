@@ -51,6 +51,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		GetTaskHandler: GetTaskHandlerFunc(func(params GetTaskParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetTask has not yet been implemented")
 		}),
+		GetTaskCommandOutHandler: GetTaskCommandOutHandlerFunc(func(params GetTaskCommandOutParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetTaskCommandOut has not yet been implemented")
+		}),
 		GetUserHandler: GetUserHandlerFunc(func(params GetUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetUser has not yet been implemented")
 		}),
@@ -83,6 +86,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		}),
 		UpdateTaskHandler: UpdateTaskHandlerFunc(func(params UpdateTaskParams) middleware.Responder {
 			return middleware.NotImplemented("operation UpdateTask has not yet been implemented")
+		}),
+		UpdateTaskCommandOutHandler: UpdateTaskCommandOutHandlerFunc(func(params UpdateTaskCommandOutParams) middleware.Responder {
+			return middleware.NotImplemented("operation UpdateTaskCommandOut has not yet been implemented")
 		}),
 	}
 }
@@ -126,6 +132,8 @@ type TranslatorAPI struct {
 	CreateUserHandler CreateUserHandler
 	// GetTaskHandler sets the operation handler for the get task operation
 	GetTaskHandler GetTaskHandler
+	// GetTaskCommandOutHandler sets the operation handler for the get task command out operation
+	GetTaskCommandOutHandler GetTaskCommandOutHandler
 	// GetUserHandler sets the operation handler for the get user operation
 	GetUserHandler GetUserHandler
 	// ListLogsHandler sets the operation handler for the list logs operation
@@ -148,6 +156,8 @@ type TranslatorAPI struct {
 	RestartTaskHandler RestartTaskHandler
 	// UpdateTaskHandler sets the operation handler for the update task operation
 	UpdateTaskHandler UpdateTaskHandler
+	// UpdateTaskCommandOutHandler sets the operation handler for the update task command out operation
+	UpdateTaskCommandOutHandler UpdateTaskCommandOutHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -234,6 +244,9 @@ func (o *TranslatorAPI) Validate() error {
 	if o.GetTaskHandler == nil {
 		unregistered = append(unregistered, "GetTaskHandler")
 	}
+	if o.GetTaskCommandOutHandler == nil {
+		unregistered = append(unregistered, "GetTaskCommandOutHandler")
+	}
 	if o.GetUserHandler == nil {
 		unregistered = append(unregistered, "GetUserHandler")
 	}
@@ -266,6 +279,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.UpdateTaskHandler == nil {
 		unregistered = append(unregistered, "UpdateTaskHandler")
+	}
+	if o.UpdateTaskCommandOutHandler == nil {
+		unregistered = append(unregistered, "UpdateTaskCommandOutHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -370,6 +386,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/tasks/cmdout/{log_id}"] = NewGetTaskCommandOut(o.context, o.GetTaskCommandOutHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/users/self"] = NewGetUser(o.context, o.GetUserHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
@@ -411,6 +431,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
 	o.handlers["PUT"]["/tasks/{id}"] = NewUpdateTask(o.context, o.UpdateTaskHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/tasks/cmdout/{log_id}"] = NewUpdateTaskCommandOut(o.context, o.UpdateTaskCommandOutHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

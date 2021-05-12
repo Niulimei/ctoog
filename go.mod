@@ -15,12 +15,11 @@ require (
 	github.com/go-openapi/swag v0.19.15
 	github.com/go-openapi/validate v0.20.2
 	github.com/google/go-cmp v0.5.5 // indirect
+	github.com/gorilla/websocket v1.4.2
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/jmoiron/sqlx v1.3.3
-	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7
-	github.com/sevlyar/go-daemon v0.1.5 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
 	golang.org/x/sys v0.0.0-20210426230700-d19ff857e887 // indirect

@@ -1,10 +1,11 @@
 package database
 
 import (
-	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"os"
+
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var DB *sqlx.DB
@@ -61,6 +62,11 @@ CREATE TABLE task_log (
     start_time varchar (64),
     end_time varchar (64),
     duration integer
+);
+
+CREATE TABLE task_command_out (
+    log_id integer PRIMARY KEY,
+    content text
 );
 
 CREATE TABLE worker (

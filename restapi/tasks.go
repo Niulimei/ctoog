@@ -8,12 +8,13 @@ import (
 	"ctgb/utils"
 	"encoding/json"
 	"fmt"
-	"github.com/go-openapi/runtime/middleware"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-openapi/runtime/middleware"
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -284,6 +285,27 @@ func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responde
 		go startTask(taskId)
 	}
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
+		Message: "ok",
+	})
+}
+
+func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middleware.Responder {
+	out := &models.TaskCommandOut{}
+	row := database.DB.QueryRow("select log_id, content from task_command_out where log_id = ?", params.LogID)
+	err := row.Scan(&out.LogID, &out.Content)
+	if err != nil {
+		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Sql Error",
+		})
+	}
+	return operations.NewGetTaskCommandOutOK().WithPayload(out)
+}
+
+func UpdateTaskCommandOutHandler(params operations.UpdateTaskCommandOutParams) middleware.Responder {
+	sqlStr := "INSERT OR REPLACE INTO task_command_out (log_id,content) VALUES (?,?)"
+	database.DB.MustExec(sqlStr, params.TaskCommandOut.LogID, params.TaskCommandOut.Content)
+	return operations.NewUpdateTaskCommandOutCreated().WithPayload(&models.OK{
 		Message: "ok",
 	})
 }
