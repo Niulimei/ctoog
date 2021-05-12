@@ -5,6 +5,7 @@ package restapi
 import (
 	"crypto/tls"
 	"ctgb/utils"
+	"fmt"
 	"net/http"
 
 	"ctgb/restapi/operations"
@@ -51,6 +52,8 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	api.ListPvobComponentStreamHandler = operations.ListPvobComponentStreamHandlerFunc(ListPvobComponentStreamHandler)
 	api.GetUserHandler = operations.GetUserHandlerFunc(GetUserHandler)
 	api.ListLogsHandler = operations.ListLogsHandlerFunc(ListLogsHandler)
+	api.GetTaskCommandOutHandler = operations.GetTaskCommandOutHandlerFunc(GetTaskCommandOutHandler)
+	api.UpdateTaskCommandOutHandler = operations.UpdateTaskCommandOutHandlerFunc(UpdateTaskCommandOutHandler)
 
 	api.PreServerShutdown = func() {}
 
@@ -82,5 +85,10 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 // The middleware configuration happens before anything, this middleware also applies to serving the swagger.json document.
 // So this is a good place to plug in a panic handling middleware, logging and metrics.
 func setupGlobalMiddleware(handler http.Handler) http.Handler {
+	defer func() {
+		if ret := recover(); ret != nil {
+			fmt.Printf("Recover From Panic. %v\n", ret)
+		}
+	}()
 	return handler
 }

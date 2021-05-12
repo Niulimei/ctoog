@@ -298,6 +298,61 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /tasks/cmdout/{log_id}:
+    get:
+      summary: 任务执行详情
+      description: ''
+      operationId: GetTaskCommandOut
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "log_id"
+          in: "path"
+          required: true
+          type: "integer"
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 任务执行信息
+          schema:
+            $ref: '#/definitions/TaskCommandOut'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      summary: 更新任务执行详情
+      description: ''
+      operationId: UpdateTaskCommandOut
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "log_id"
+          in: "path"
+          required: true
+          type: "integer"
+        - name: taskCommandOut
+          in: body
+          description: 任务信息
+          required: true
+          schema:
+            $ref: '#/definitions/TaskCommandOut'
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /pvobs:
     get:
       summary: pvob列表
@@ -614,6 +669,13 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/TaskLogInfo'
+  TaskCommandOut:
+    type: object
+    properties:
+      log_id:
+        type: integer
+      content:
+        type: string
   ErrorModel:
     type: object
     properties:

@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/PuerkitoBio/urlesc"
-	log "github.com/sirupsen/logrus"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -14,6 +14,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/urlesc"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -21,6 +24,7 @@ var (
 	portFlag   int
 	serverFlag string
 )
+var stop = make(chan struct{})
 
 func init() {
 	flag.StringVar(&hostFlag, "host", "127.0.0.1", "service listens on this IP")
@@ -67,15 +71,16 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 		start := time.Now()
 		data.Starttime = start.Format("2006-01-02 15:04:05")
 		log.Debug("start cmd:", cmd.String())
-		out, err := cmd.CombinedOutput()
-		result := string(out)
-		log.Println("result:", result)
-		if err != nil {
-			//failedCount += 1
-			log.Error("cmd err:", err)
-			data.Status = "failed"
-			break
-		}
+		//out, err := cmd.CombinedOutput()
+		//result := string(out)
+		//log.Println("result:", result)
+		//if err != nil {
+		//	//failedCount += 1
+		//	log.Error("cmd err:", err)
+		//	data.Status = "failed"
+		//	break
+		//}
+		sendCommandOut(server, cmd, task)
 		end := time.Now()
 		data.Endtime = end.Format("2006-01-02 15:04:05")
 		duration := end.Sub(start).Seconds()
@@ -88,6 +93,7 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
 		log.Error(err)
+		return
 	}
 	log.Printf("playlod: %+v\n", data)
 	body := bytes.NewReader(payloadBytes)
@@ -95,6 +101,90 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 	req, err := http.NewRequest("PUT",
 		fmt.Sprintf("http://%s/api/tasks/%d?start=false", server, task.TaskId), body)
 	if err != nil {
+		log.Error("create request error:", err)
+		return
+		// handle err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "1234567")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil || resp.Body == nil {
+		// handle err
+		time.Sleep(time.Second * 3)
+		resp, err = http.DefaultClient.Do(req)
+		if err != nil || resp.Body == nil {
+			return
+		}
+	}
+	log.Info("info server success")
+	defer resp.Body.Close()
+}
+
+type commandOut struct {
+	Logid   int64  `json:"log_id"`
+	Comtent string `json:"content"`
+}
+
+func sendCommandOut(server string, cmd *exec.Cmd, task *Task) {
+	data := &commandOut{
+		Logid: task.TaskLogId,
+	}
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := cmd.Start(); err != nil {
+		log.Println(err)
+		return
+	}
+
+	s := bufio.NewScanner(io.MultiReader(stdout, stderr))
+	tk := time.NewTicker(time.Second * 1)
+	var tmp []string
+	for s.Scan() {
+		tmp = append(tmp, s.Text())
+		go func(in []string) {
+			for {
+				select {
+				case <-tk.C:
+					data.Comtent = strings.Join(in, "\n")
+					sender(server, data)
+				case <-stop:
+					return
+				}
+			}
+		}(tmp)
+	}
+	time.Sleep(time.Second * 2)
+	stop <- struct{}{}
+
+	if err := cmd.Wait(); err != nil {
+		log.Println(err)
+		return
+	}
+}
+
+func sender(server string, data *commandOut) {
+	payloadBytes, err := json.Marshal(data)
+	if err != nil {
+		log.Error(err)
+	}
+	log.Printf("playlod: %+v\n", data)
+	body := bytes.NewReader(payloadBytes)
+
+	req, err := http.NewRequest("POST",
+		fmt.Sprintf("http://%s/api/tasks/cmdout/%d", server, data.Logid), body)
+	if err != nil {
+		return
 		// handle err
 	}
 	req.Header.Set("Accept", "application/json")
@@ -105,14 +195,21 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 	if err != nil {
 		// handle err
 		time.Sleep(time.Second * 3)
-		http.DefaultClient.Do(req)
+		resp, err = http.DefaultClient.Do(req)
+		if err != nil {
+			return
+		}
 	}
 	log.Info("info server success")
 	defer resp.Body.Close()
 }
 
 func pingServer(host string, port int) {
-
+	defer func() {
+		if ret := recover(); ret != nil {
+			fmt.Printf("Recover From Panic. %v\n", ret)
+		}
+	}()
 	type Payload struct {
 		Host string `json:"host"`
 		Port int    `json:"port"`
@@ -129,17 +226,23 @@ func pingServer(host string, port int) {
 	body := bytes.NewReader(payloadBytes)
 	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/api/workers", serverFlag), body)
 	if err != nil {
+		return
 		// handle err
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Error(err)
-		// handle err
+	for {
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			log.Error(err)
+			// handle err
+		}
+		if resp.Body != nil {
+			resp.Body.Close()
+		}
+		time.Sleep(time.Second * 10)
 	}
-	defer resp.Body.Close()
 }
 
 type MatchInfo struct {
@@ -164,8 +267,14 @@ type Task struct {
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Error("read task error:", err)
+		return
+	}
+	if r.Body != nil {
+		defer r.Body.Close()
+	}
 	workerTaskModel := Task{}
 	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
 		workerTaskModel.GitUser = urlesc.QueryEscape(workerTaskModel.GitUser)

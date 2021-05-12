@@ -313,6 +313,87 @@ func init() {
         }
       }
     },
+    "/tasks/cmdout/{log_id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "任务执行详情",
+        "operationId": "GetTaskCommandOut",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "log_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务执行信息",
+            "schema": {
+              "$ref": "#/definitions/TaskCommandOut"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "更新任务执行详情",
+        "operationId": "UpdateTaskCommandOut",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "log_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "任务信息",
+            "name": "taskCommandOut",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TaskCommandOut"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/tasks/restart": {
       "post": {
         "consumes": [
@@ -700,6 +781,17 @@ func init() {
       "properties": {
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "TaskCommandOut": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "log_id": {
+          "type": "integer"
         }
       }
     },
@@ -1276,6 +1368,87 @@ func init() {
         }
       }
     },
+    "/tasks/cmdout/{log_id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "任务执行详情",
+        "operationId": "GetTaskCommandOut",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "log_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务执行信息",
+            "schema": {
+              "$ref": "#/definitions/TaskCommandOut"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "更新任务执行详情",
+        "operationId": "UpdateTaskCommandOut",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "log_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "任务信息",
+            "name": "taskCommandOut",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TaskCommandOut"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/tasks/restart": {
       "post": {
         "consumes": [
@@ -1663,6 +1836,17 @@ func init() {
       "properties": {
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "TaskCommandOut": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "log_id": {
+          "type": "integer"
         }
       }
     },

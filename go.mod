@@ -15,6 +15,7 @@ require (
 	github.com/go-openapi/swag v0.19.15
 	github.com/go-openapi/validate v0.20.2
 	github.com/google/go-cmp v0.5.5 // indirect
+	github.com/gorilla/websocket v1.4.2
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/jmoiron/sqlx v1.3.3
 	github.com/mailru/easyjson v0.7.7 // indirect
