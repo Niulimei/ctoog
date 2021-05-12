@@ -24,7 +24,7 @@ var (
 	portFlag   int
 	serverFlag string
 )
-var stop = make(chan struct{})
+var stop = make(chan struct{}, 1)
 
 func init() {
 	flag.StringVar(&hostFlag, "host", "127.0.0.1", "service listens on this IP")
@@ -52,34 +52,29 @@ func init() {
 	}
 }
 
+type commandOut struct {
+	Logid   int64  `json:"log_id"`
+	Content string `json:"content"`
+}
+
+type payload struct {
+	Logid     string `json:"logID"`
+	Status    string `json:"status"`
+	Starttime string `json:"startTime"`
+	Endtime   string `json:"endTime"`
+	Duration  string `json:"duration"`
+}
+
 func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 
-	type Payload struct {
-		Logid     string `json:"logID"`
-		Status    string `json:"status"`
-		Starttime string `json:"startTime"`
-		Endtime   string `json:"endTime"`
-		Duration  string `json:"duration"`
-	}
-
-	data := Payload{
+	data := payload{
 		Logid:  strconv.FormatInt(task.TaskLogId, 10),
 		Status: "completed",
 	}
-	//failedCount := 0
 	for _, cmd := range cmds {
 		start := time.Now()
 		data.Starttime = start.Format("2006-01-02 15:04:05")
 		log.Debug("start cmd:", cmd.String())
-		//out, err := cmd.CombinedOutput()
-		//result := string(out)
-		//log.Println("result:", result)
-		//if err != nil {
-		//	//failedCount += 1
-		//	log.Error("cmd err:", err)
-		//	data.Status = "failed"
-		//	break
-		//}
 		sendCommandOut(server, cmd, task)
 		end := time.Now()
 		data.Endtime = end.Format("2006-01-02 15:04:05")
@@ -87,9 +82,6 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 		d := strconv.FormatInt(int64(duration), 10)
 		data.Duration = d
 	}
-	//if failedCount > 0 {
-	//	data.Status = "failed"
-	//}
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
 		log.Error(err)
@@ -105,26 +97,7 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 		return
 		// handle err
 	}
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "1234567")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil || resp.Body == nil {
-		// handle err
-		time.Sleep(time.Second * 3)
-		resp, err = http.DefaultClient.Do(req)
-		if err != nil || resp.Body == nil {
-			return
-		}
-	}
-	log.Info("info server success")
-	defer resp.Body.Close()
-}
-
-type commandOut struct {
-	Logid   int64  `json:"log_id"`
-	Comtent string `json:"content"`
+	doSend(req)
 }
 
 func sendCommandOut(server string, cmd *exec.Cmd, task *Task) {
@@ -150,19 +123,19 @@ func sendCommandOut(server string, cmd *exec.Cmd, task *Task) {
 	s := bufio.NewScanner(io.MultiReader(stdout, stderr))
 	tk := time.NewTicker(time.Second * 1)
 	var tmp []string
+	go func(in *[]string) {
+		for {
+			select {
+			case <-tk.C:
+				data.Content = strings.Join(*in, "\n")
+				sender(server, data)
+			case <-stop:
+				return
+			}
+		}
+	}(&tmp)
 	for s.Scan() {
 		tmp = append(tmp, s.Text())
-		go func(in []string) {
-			for {
-				select {
-				case <-tk.C:
-					data.Comtent = strings.Join(in, "\n")
-					sender(server, data)
-				case <-stop:
-					return
-				}
-			}
-		}(tmp)
 	}
 	time.Sleep(time.Second * 2)
 	stop <- struct{}{}
@@ -187,16 +160,20 @@ func sender(server string, data *commandOut) {
 		return
 		// handle err
 	}
+	doSend(req)
+}
+
+func doSend(req *http.Request) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "1234567")
 
 	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
+	if err != nil || resp.Body == nil {
 		// handle err
 		time.Sleep(time.Second * 3)
 		resp, err = http.DefaultClient.Do(req)
-		if err != nil {
+		if err != nil || resp.Body == nil {
 			return
 		}
 	}
