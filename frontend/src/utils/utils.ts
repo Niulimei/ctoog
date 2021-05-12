@@ -13,3 +13,29 @@ export function guid() {
     return v.toString(16);
   });
 }
+
+const parseDuration = (duration: number) => {
+  const hours: number = Math.floor(duration / 3600);
+  const minutes: number = Math.floor((duration - hours * 3600) / 60);
+  const seconds: number = Math.floor(duration - hours * 3600 - minutes * 60);
+
+  return {
+    hours,
+    minutes,
+    seconds,
+  };
+};
+
+export const formatDuration = (duration: number) => {
+  const fillZero = (num: number) => num.toString().padStart(2, '0');
+  const { hours, minutes, seconds } = parseDuration(duration);
+
+  return `${fillZero(hours)}:${fillZero(minutes)}:${fillZero(seconds)}`;
+};
+
+export function humanizeDuration(duration: number) {
+  const { hours, minutes, seconds } = parseDuration(duration);
+
+  // eslint-disable-next-line no-nested-ternary
+  return hours ? `${hours} h` : minutes ? `${minutes} min` : `${seconds} sec`;
+}

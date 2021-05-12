@@ -17,7 +17,6 @@ function UserCreator(props: React.PropsWithChildren<{ onCreateSuccess?: () => vo
           props.onCreateSuccess?.();
           return true;
         } catch (err) {
-          message.error('新建用户出现异常');
           return false;
         }
       }}

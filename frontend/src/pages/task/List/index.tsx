@@ -1,15 +1,16 @@
 import React from 'react';
 import moment from 'moment';
-import { Button, message } from 'antd';
+import { useHistory } from 'umi';
 import { Task } from '@/typings/model';
 import Table from '@ant-design/pro-table';
+import { DownOutlined } from '@ant-design/icons';
 import { task as taskService } from '@/services';
-import TaskDetail from './components/TaskDetail';
 import TaskCreator from './components/TaskCreator';
+import { Button, message, Dropdown, Menu } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
 
 type Actions = Record<
-  'startTask' | 'displayDetail' | 'updateTask' | 'createTask',
+  'startTask' | 'gotoDetail' | 'updateTask' | 'createTask',
   (id: string) => void
 >;
 const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
@@ -54,23 +55,39 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
     },
     {
       title: '操作',
-      width: 80,
+      width: 120,
       align: 'center',
       // @ts-ignore
       render(item: Task.Item) {
         return (
           <>
-            <Button size="small" type="link" onClick={() => actions.displayDetail(item.id)}>
-              查看任务
+            <Button size="small" type="link" onClick={() => actions.gotoDetail(item.id)}>
+              详情
             </Button>
-            <Button size="small" type="link" onClick={() => actions.updateTask(item.id)}>
-              修改任务
-            </Button>
-            {item.status !== Task.Status.RUNNING && (
-              <Button size="small" type="link" onClick={() => actions.startTask(item.id)}>
-                启动任务
+            <Dropdown
+              overlay={
+                <Menu>
+                  <Menu.Item>
+                    <Button size="small" type="link" onClick={() => actions.updateTask(item.id)}>
+                      修改任务
+                    </Button>
+                  </Menu.Item>
+
+                  {item.status !== Task.Status.RUNNING && (
+                    <Menu.Item>
+                      <Button size="small" type="link" onClick={() => actions.startTask(item.id)}>
+                        启动任务
+                      </Button>
+                    </Menu.Item>
+                  )}
+                </Menu>
+              }
+            >
+              <Button size="small" type="link">
+                更多
+                <DownOutlined />
               </Button>
-            )}
+            </Dropdown>
           </>
         );
       },
@@ -80,17 +97,14 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
 
 const TaskList: React.FC = () => {
   const tableRef = React.useRef<any>(null);
-  const detailModalRef = React.useRef<any>(null);
   const creatorModalRef = React.useRef<any>(null);
-
-  const [taskDetail, setTaskDetail] = React.useState<Task.Detail>();
+  const [pageSize, setPageSize] = React.useState(10);
+  const history = useHistory();
 
   const actions: Actions = {
     /** 查看任务详情 */
-    async displayDetail(id: string) {
-      const res = await taskService.getTaskDetail(id);
-      setTaskDetail(res);
-      detailModalRef.current.openModal();
+    async gotoDetail(id: string) {
+      history.push(`/task/detail?id=${id}`);
     },
     /** 启动任务 */
     async startTask(id: string) {
@@ -98,7 +112,9 @@ const TaskList: React.FC = () => {
         await taskService.startTask(id);
         message.success('迁移任务启动成功');
       } catch (err) {
-        message.error('迁移任务启动出现异常');
+        // message.error('迁移任务启动出现异常');
+        // eslint-disable-next-line no-console
+        console.error(err);
       }
     },
     /** 更新任务 */
@@ -117,11 +133,16 @@ const TaskList: React.FC = () => {
         rowKey="id"
         actionRef={tableRef}
         pagination={{
-          pageSize: 10,
+          pageSize,
+          onChange(num, size) {
+            if (size) {
+              setPageSize(size);
+            }
+          },
         }}
         request={async (params) => {
           const { taskInfo, count } = await taskService.getTasks({
-            offset: params.current! - 1 || 0,
+            offset: (params.current! - 1 || 0) * pageSize,
             limit: params.pageSize || 10,
           });
           return {
@@ -145,14 +166,12 @@ const TaskList: React.FC = () => {
         ]}
         search={false}
       />
-      <TaskDetail actionRef={detailModalRef} data={taskDetail} />
       <TaskCreator
         actionRef={creatorModalRef}
         onSuccess={() => {
           tableRef.current.reload();
         }}
       />
-      ,
     </>
   );
 };

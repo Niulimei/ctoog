@@ -7,22 +7,25 @@
     routes: [
       {
         name: '任务列表',
-        icon: 'user',
         path: '/task/list',
         component: './task/List',
         exact: true,
+      },
+      {
+        name: '任务详情',
+        path: '/task/detail',
+        component: './task/Detail',
       },
     ],
   },
   {
     path: '/admin',
     name: '用户管理',
-    icon: 'table',
+    icon: 'user',
     routes: [
       {
         access: 'isAdmin',
         name: '用户列表',
-        icon: 'admin',
         path: '/admin/user',
         component: './admin/UserList',
       },
@@ -31,6 +34,7 @@
   {
     path: '/user',
     layout: false,
+    exact: false,
     routes: [
       {
         path: '/user',

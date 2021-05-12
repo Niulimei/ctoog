@@ -49,6 +49,7 @@ const Login: React.FC = () => {
         goto();
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.log(err);
     } finally {
       setSubmitting(false);

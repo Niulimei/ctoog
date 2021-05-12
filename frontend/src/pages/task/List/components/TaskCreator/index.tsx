@@ -85,6 +85,11 @@ const CustomChangeHandlers: Partial<CustomChangeHandlersType> = {
   },
 };
 
+/** pro compoent 禁用提交 */
+const DisablePasswordFieldAutocompleteProps = {
+  fieldProps: { autoComplete: 'new-password' },
+};
+
 /** 生成表单项 */
 const formFieldsGenerator = (fields: any) => {
   const renderFieldComponent = ({ component, name, required, rules, ...restProps }: any) => {
@@ -175,7 +180,9 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       onSuccess?.();
       return true;
     } catch (err) {
-      message.error(`迁移任务${actionText}出现异常`);
+      // message.error(`迁移任务${actionText}出现异常`);
+      // eslint-disable-next-line no-console
+      console.error(err);
       return false;
     }
   };
@@ -199,6 +206,18 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
     Object.entries(values).forEach(([key, val]) => {
       CustomChangeHandlers[key]?.(form, val, optionDispatch);
     });
+  };
+
+  /** matchInfo 字段不重复 */
+  const isDuplicateMatchInfoItem = (key: 'stream' | 'gitBranch', inputVal?: string) => {
+    if (!inputVal || !inputVal.trim()) return false;
+    const matchInfo = form.getFieldValue('matchInfo');
+    if (Array.isArray(matchInfo)) {
+      const values = matchInfo.map((item) => item[key]);
+      const len = values.filter((val) => val === inputVal).length;
+      if (len >= 2) return true;
+    }
+    return false;
   };
 
   return (
@@ -289,12 +308,14 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               required: true,
               component: ProFormText.Password,
               placeholder: '请输入CC密码',
+              ...DisablePasswordFieldAutocompleteProps,
             },
             {
               name: 'gitPassword',
               required: true,
               component: ProFormText.Password,
               placeholder: '请输入 Git 密码',
+              ...DisablePasswordFieldAutocompleteProps,
             },
           ],
         ])}
@@ -310,16 +331,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
                 {
                   // eslint-disable-next-line @typescript-eslint/no-shadow
                   async validator(_: any, value: string) {
-                    if (value) {
-                      const matchInfo = form.getFieldValue('matchInfo');
-                      if (Array.isArray(matchInfo)) {
-                        const streams = matchInfo.map((item) => item.stream);
-                        const len = streams.filter((stream) => stream === value).length;
-                        if (len >= 2) {
-                          throw new Error('不能出现重复的开发流');
-                        }
-                      }
-                    }
+                    if (isDuplicateMatchInfoItem('stream', value))
+                      throw new Error('不能出现重复的开发流');
                   },
                 },
               ],
@@ -333,16 +346,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
                 {
                   // eslint-disable-next-line @typescript-eslint/no-shadow
                   async validator(_: any, value: string) {
-                    if (value) {
-                      const matchInfo = form.getFieldValue('matchInfo');
-                      if (Array.isArray(matchInfo)) {
-                        const gitBranchs = matchInfo.map((item) => item.gitBranch);
-                        const len = gitBranchs.filter((branch) => branch === value).length;
-                        if (len >= 2) {
-                          throw new Error('不能出现重复的 Git 分支');
-                        }
-                      }
-                    }
+                    if (isDuplicateMatchInfoItem('gitBranch', value))
+                      throw new Error('不能出现重复的 Git 分支');
                   },
                 },
               ],

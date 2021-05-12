@@ -51,3 +51,8 @@ export const getStreams = (pvobId: string, componentId: string) => {
     `/pvobs/${encodeURIComponent(pvobId)}/components/${encodeURIComponent(componentId)}/streams`,
   );
 };
+
+/** 获取 log output */
+export const getLogOutput = (logId: string) => {
+  return request.get(`/tasks/cmdout/${logId}`);
+};

@@ -5,6 +5,8 @@ import UserCreator from '@/pages/admin/UserList/components/UserCreator';
 import { User } from '@/typings/model';
 import { user as UserService } from '@/services';
 
+const PageSize = 10;
+
 const Columns: ProColumns[] = [
   {
     title: '用户名',
@@ -24,13 +26,14 @@ function UserList() {
   return (
     <Table
       pagination={{
-        pageSize: 10,
+        pageSize: PageSize,
+        showSizeChanger: false,
       }}
       rowKey="username"
       actionRef={tableRef}
       request={async (params) => {
         const { userInfo, count } = await UserService.getUsers({
-          offset: params.current! - 1 || 0,
+          offset: (params.current! - 1 || 0) * PageSize,
           limit: params.pageSize || 10,
         });
         return {
