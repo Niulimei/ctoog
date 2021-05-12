@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/PuerkitoBio/urlesc"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -14,6 +12,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/urlesc"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -95,6 +96,7 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 	req, err := http.NewRequest("PUT",
 		fmt.Sprintf("http://%s/api/tasks/%d?start=false", server, task.TaskId), body)
 	if err != nil {
+		return
 		// handle err
 	}
 	req.Header.Set("Accept", "application/json")
@@ -102,17 +104,24 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 	req.Header.Set("Authorization", "1234567")
 
 	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
+	if err != nil || resp.Body == nil {
 		// handle err
 		time.Sleep(time.Second * 3)
-		http.DefaultClient.Do(req)
+		resp, err = http.DefaultClient.Do(req)
+		if err != nil || resp.Body == nil {
+			return
+		}
 	}
 	log.Info("info server success")
 	defer resp.Body.Close()
 }
 
 func pingServer(host string, port int) {
-
+	defer func() {
+		if ret := recover(); ret != nil {
+			fmt.Printf("Recover From Panic. %v\n", ret)
+		}
+	}()
 	type Payload struct {
 		Host string `json:"host"`
 		Port int    `json:"port"`
@@ -129,14 +138,16 @@ func pingServer(host string, port int) {
 	body := bytes.NewReader(payloadBytes)
 	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/api/workers", serverFlag), body)
 	if err != nil {
+		return
 		// handle err
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
+	if err != nil || resp.Body == nil {
 		log.Error(err)
+		return
 		// handle err
 	}
 	defer resp.Body.Close()
@@ -164,7 +175,10 @@ type Task struct {
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return
+	}
 	defer r.Body.Close()
 	workerTaskModel := Task{}
 	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
