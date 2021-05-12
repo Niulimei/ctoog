@@ -88,31 +88,12 @@ pullCCAndPush(){
     cleartool update -add_loadrules .${componentName}
   fi
   if [[ -d ${tmpGitDir} ]]; then
+    rm -rf ${tmpGitDir}
     tmpGitDirExist=true
-  else
-    initGitRepo ${gitRepoUrl} ${gitBranchName} ${tmpGitDir} ${username} ${email}
   fi
+  initGitRepo ${gitRepoUrl} ${gitBranchName} ${tmpGitDir} ${username} ${email}
   rm -rf ${tmpGitDir:?}/*
   cd ${tmpGitDir}
-  for r in $(git remote); do
-    if [[ $r == "origin" ]]; then
-      git remote remove origin
-    fi
-  done
-  git remote add origin ${gitRepoUrl}
-  git remote update
-  git fetch --all
-  git fetch -p origin
-  remoteBrList=$(git branch -r)
-  remoteBrExist=false
-  for br in ${remoteBrList}; do
-    if [[ $(basename ${br}) == "${gitBranchName}" ]]; then
-      remoteBrExist=true
-    fi
-  done
-  if ${remoteBrExist}; then
-    git pull origin ${gitBranchName}
-  fi
   echo "Copying files..."
   cp -rf ${tmpCCDir}${componentName}/* ${tmpGitDir}/
   if [[ ${containEmptyDir} == "true" ]]; then
