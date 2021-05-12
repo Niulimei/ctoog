@@ -152,7 +152,7 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 	userToken := params.Authorization
 	username, verified := utils.Verify(userToken)
 	if !verified {
-		return middleware.Error(401, "鉴权失败")
+		return middleware.Error(401, models.ErrorModel{Message: "鉴权失败"})
 	}
 	taskInfo := params.TaskInfo
 	if len(taskInfo.Dir) > 0 && !strings.HasPrefix(taskInfo.Dir, "/") {
@@ -199,7 +199,7 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	username, verified := utils.Verify(params.Authorization)
 	if !verified {
-		return middleware.Error(http.StatusUnauthorized, "鉴权失败")
+		return middleware.Error(http.StatusUnauthorized, models.ErrorModel{Message: "鉴权失败"})
 	}
 	var query, queryCount string
 	user := getUserInfo(username)
@@ -219,12 +219,12 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	err := database.DB.Select(&tasks, query, username, params.Limit, params.Offset)
 	if err != nil {
 		log.Error(err)
-		return middleware.Error(http.StatusInternalServerError, "Sql Error")
+		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: "Sql Error"})
 	}
 	err = database.DB.Get(&count, queryCount, username)
 	if err != nil {
 		log.Error(err)
-		return middleware.Error(http.StatusInternalServerError, "Sql Error")
+		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: "Sql Error"})
 	}
 	tasksPage := &models.TaskPageInfoModel{}
 	tasksPage.TaskInfo = tasks
@@ -244,7 +244,7 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		taskLogInfo := params.TaskLog
 		if err != nil {
 			log.Error(err)
-			return middleware.Error(404, "没发现任务")
+			return middleware.Error(404, models.ErrorModel{Message: "没发现任务"})
 		}
 		tx.MustExec("UPDATE task_log SET status = $1, end_time = $2, duration = $3 WHERE log_id = $4",
 			taskLogInfo.Status, taskLogInfo.EndTime, taskLogInfo.Duration, params.TaskLog.LogID)
