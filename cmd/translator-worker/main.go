@@ -134,12 +134,15 @@ func pingServer(host string, port int) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Error(err)
-		// handle err
+	for {
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			log.Error(err)
+			// handle err
+		}
+		resp.Body.Close()
+		time.Sleep(time.Second * 10)
 	}
-	defer resp.Body.Close()
 }
 
 type MatchInfo struct {

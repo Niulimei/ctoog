@@ -67,7 +67,8 @@ CREATE TABLE worker (
     id integer PRIMARY KEY autoincrement,
     worker_url varchar (256),
     status varchar (16),
-    task_count integer
+    task_count integer,
+    register_time varchar (64)
 );
 
 INSERT INTO user (username,password,role_id) VALUES("admin", "b17eccdc6c06bd8e15928d583503adf9", 1);
@@ -121,10 +122,11 @@ type TaskModel struct {
 }
 
 type WorkerModel struct {
-	Id        int64
-	WorkerUrl string `db:"worker_url"`
-	Status    string
-	TaskCount int64 `db:"task_count"`
+	Id           int64
+	WorkerUrl    string `db:"worker_url"`
+	Status       string
+	TaskCount    int64  `db:"task_count"`
+	RegisterTime string `db:"register_time"`
 }
 
 type TaskLog struct {
