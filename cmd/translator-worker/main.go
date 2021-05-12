@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/PuerkitoBio/urlesc"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -14,6 +12,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/urlesc"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -88,6 +89,7 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
 		log.Error(err)
+		return
 	}
 	log.Printf("playlod: %+v\n", data)
 	body := bytes.NewReader(payloadBytes)
@@ -95,6 +97,8 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 	req, err := http.NewRequest("PUT",
 		fmt.Sprintf("http://%s/api/tasks/%d?start=false", server, task.TaskId), body)
 	if err != nil {
+		log.Error("create request error:", err)
+		return
 		// handle err
 	}
 	req.Header.Set("Accept", "application/json")
@@ -105,14 +109,21 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 	if err != nil {
 		// handle err
 		time.Sleep(time.Second * 3)
-		http.DefaultClient.Do(req)
+		resp, err = http.DefaultClient.Do(req)
+		if err != nil {
+			return
+		}
 	}
 	log.Info("info server success")
 	defer resp.Body.Close()
 }
 
 func pingServer(host string, port int) {
-
+	defer func() {
+		if ret := recover(); ret != nil {
+			fmt.Printf("Recover From Panic. %v\n", ret)
+		}
+	}()
 	type Payload struct {
 		Host string `json:"host"`
 		Port int    `json:"port"`
@@ -129,6 +140,7 @@ func pingServer(host string, port int) {
 	body := bytes.NewReader(payloadBytes)
 	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/api/workers", serverFlag), body)
 	if err != nil {
+		return
 		// handle err
 	}
 	req.Header.Set("Accept", "application/json")
@@ -140,7 +152,9 @@ func pingServer(host string, port int) {
 			log.Error(err)
 			// handle err
 		}
-		resp.Body.Close()
+		if resp.Body != nil {
+			resp.Body.Close()
+		}
 		time.Sleep(time.Second * 10)
 	}
 }
@@ -167,8 +181,14 @@ type Task struct {
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Error("read task error:", err)
+		return
+	}
+	if r.Body != nil {
+		defer r.Body.Close()
+	}
 	workerTaskModel := Task{}
 	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
 		workerTaskModel.GitUser = urlesc.QueryEscape(workerTaskModel.GitUser)
