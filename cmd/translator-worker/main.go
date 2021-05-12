@@ -24,7 +24,7 @@ var (
 	portFlag   int
 	serverFlag string
 )
-var stop = make(chan struct{}, 1)
+var stop = make(chan struct{})
 
 func init() {
 	flag.StringVar(&hostFlag, "host", "127.0.0.1", "service listens on this IP")
@@ -198,6 +198,7 @@ func pingServer(host string, port int) {
 	}
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
+		return
 		// handle err
 	}
 	body := bytes.NewReader(payloadBytes)
@@ -212,6 +213,7 @@ func pingServer(host string, port int) {
 	for {
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
+			return
 			log.Error(err)
 			// handle err
 		}
