@@ -6,6 +6,7 @@ import (
 	"ctgb/models"
 	"ctgb/restapi/operations"
 	"ctgb/utils"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -50,7 +51,7 @@ func init() {
 func startTask(taskId int64) {
 	task := &database.TaskModel{}
 	err := database.DB.Get(task, "SELECT cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty, dir, keep"+
+		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty, dir, keep, worker_id"+
 		" FROM task WHERE id = $1", taskId)
 	if err != nil {
 		log.Error("start task but db err:", err)
@@ -58,8 +59,9 @@ func startTask(taskId int64) {
 	}
 	worker := &database.WorkerModel{}
 	newAssigned := false
-	err = nil
+	log.Info(task.WorkerId)
 	if task.WorkerId != 0 {
+		log.Debug("got worker id")
 		err = database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1 and status = 'running'", task.WorkerId)
 	} else {
 		newAssigned = true
@@ -67,7 +69,7 @@ func startTask(taskId int64) {
 	}
 	workerUrl := worker.WorkerUrl
 	if worker.WorkerUrl == "" {
-		log.Error("get worker with no url:", worker)
+		log.Error("get worker with no url:", worker, err)
 		return
 	}
 	var matchInfo []*models.TaskMatchInfo
@@ -194,7 +196,7 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", taskID)
 	task.MatchInfo = matchInfo
 	var logList []*models.TaskLogInfo
-	database.DB.Select(&logList, "SELECT duration, end_time, log_id, start_time, status FROM task_log WHERE task_id = $1 ORDER BY log_id", taskID)
+	database.DB.Select(&logList, "SELECT duration, end_time, log_id, start_time, status FROM task_log WHERE task_id = $1 ORDER BY log_id DESC", taskID)
 	taskDetail := &models.TaskDetail{TaskModel: task, LogList: logList}
 	return operations.NewGetTaskOK().WithPayload(taskDetail)
 }
@@ -299,7 +301,7 @@ func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middlew
 	out := &models.TaskCommandOut{}
 	row := database.DB.QueryRow("select log_id, content from task_command_out where log_id = ?", params.LogID)
 	err := row.Scan(&out.LogID, &out.Content)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
 			Message: "Sql Error",
