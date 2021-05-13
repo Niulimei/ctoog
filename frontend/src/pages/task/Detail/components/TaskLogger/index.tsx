@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal } from 'antd';
+import { Modal, Empty } from 'antd';
 import Logger from '@/components/Logger';
 import { useToggle, useUnmount } from 'react-use';
 import { task as taskService } from '@/services';
@@ -52,7 +52,7 @@ const TaskLogger: React.FC<IProps> = ({ actionRef }) => {
       onCancel={closeModal}
       cancelButtonProps={{ style: { display: 'none' } }}
     >
-      <Logger value={logData} />
+      {logData ? <Logger value={logData} /> : <Empty description="暂无日志信息" />}
     </Modal>
   );
 };
