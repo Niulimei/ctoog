@@ -1,15 +1,25 @@
 import React from 'react';
-import { useToggle } from 'umi';
 import classnames from 'classnames';
 import { guid } from '@/utils/utils';
+import { useToggle } from 'react-use';
 import type { Task } from '@/typings/model';
+import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 import styles from './style.less';
 
-// const PrivacyPassword: React.FC<{ value: string }> = () => {
-//   const [isHidden, toggleHidden] = useToggle(true);
-//   return <span>{value}</span>;
-// };
+const PrivacyPassword: React.FC<{ value: string }> = ({ value }) => {
+  const [isHidden, toggleHidden] = useToggle(true);
+  return (
+    <p className={styles.passwordField}>
+      <span className={styles.value}>
+        {isHidden ? Array.from(Array(value.length), () => '* ') : value}
+      </span>
+      <span className={styles.btn} onClick={toggleHidden}>
+        {isHidden ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+      </span>
+    </p>
+  );
+};
 
 const descriptionsGenerator = (fieldKeys: string[], data: any) => {
   const labels: Record<string, string> = {
@@ -43,12 +53,16 @@ const descriptionsGenerator = (fieldKeys: string[], data: any) => {
       <div className={styles.col} key={guid()}>
         {keys.map((key, index) => {
           const isLeftRow = index % 2 === 0;
-          const isPasswordField = key.includes('password');
+          const isPasswordField = /password/i.test(key);
 
           return (
             <div className={classnames(styles.row, isLeftRow && styles.left)} key={guid()}>
               <span>{labels[key]}：</span>
-              <span>{data[key] || '-'}</span>
+              {isPasswordField ? (
+                <PrivacyPassword value={data[key]} />
+              ) : (
+                <span>{data[key] || '-'}</span>
+              )}
             </div>
           );
         })}

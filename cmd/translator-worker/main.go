@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -16,7 +15,9 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/urlesc"
+	"github.com/sevlyar/go-daemon"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -25,12 +26,6 @@ var (
 	serverFlag string
 )
 var stop = make(chan struct{})
-
-func init() {
-	flag.StringVar(&hostFlag, "host", "127.0.0.1", "service listens on this IP")
-	flag.IntVar(&portFlag, "port", 8080, "service listens on this port")
-	flag.StringVar(&serverFlag, "serverAddr", "127.0.0.1", "translator server listens on this IP:port")
-}
 
 func init() {
 	// Output to stdout instead of the default stderr
@@ -294,7 +289,38 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	flag.Parse()
+	cntxt := &daemon.Context{
+		PidFileName: "translator-worker.pid",
+		PidFilePerm: 0644,
+		LogFileName: "translator-worker.log",
+		LogFilePerm: 0640,
+		WorkDir:     "./",
+		Umask:       027,
+		Args:        []string{"translator-worker"},
+	}
+
+	d, err := cntxt.Reborn()
+	if err != nil {
+		log.Fatal("Unable to run: ", err)
+	}
+	if d != nil {
+		return
+	}
+	defer cntxt.Release()
+
+	log.Print("- - - - - - - - - - - - - - -")
+	log.Print("daemon started")
+	type conf struct {
+		Host       string `yaml:"host"`
+		Port       int    `yaml:"port"`
+		ServerAddr string `yaml:"server_addr"`
+	}
+	tmp := &conf{}
+	content, _ := ioutil.ReadFile("./translator-worker.yaml")
+	yaml.Unmarshal(content, tmp)
+	serverFlag = tmp.ServerAddr
+	hostFlag = tmp.Host
+	portFlag = tmp.Port
 	go pingServer(hostFlag, portFlag)
 	http.HandleFunc("/new_task", taskHandler) //	设置访问路由
 	log.Fatal(http.ListenAndServe(hostFlag+":"+strconv.Itoa(portFlag), nil))

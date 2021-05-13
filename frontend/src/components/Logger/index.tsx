@@ -1,29 +1,39 @@
+/* eslint-disable react/no-array-index-key */
 import React from 'react';
-import { UnControlled as CodeMirror } from 'react-codemirror2';
-import type { IUnControlledCodeMirror } from 'react-codemirror2';
+import Log from './Log';
 
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/material.css';
+import './style.less';
 
-require('codemirror/mode/shell/shell');
+interface ILoggerProps {
+  value?: string;
+  actionRef?: React.ForwardedRef<{
+    clear: () => void;
+  }>;
+}
 
-const defaultCodeMirrorOptions = {
-  lineNumbers: true,
-  readOnly: true,
-  theme: 'material',
-  mode: 'shell',
-  cursorHeight: 0,
-  workDelay: 100,
-};
+const Logger: React.FC<ILoggerProps> = ({ value, actionRef }) => {
+  const codeRef = React.useRef<any>(null);
+  const lexerRef = React.useRef<Log | null>(null);
 
-const Logger: React.FC<IUnControlledCodeMirror> = (props) => {
+  React.useImperativeHandle(actionRef, () => ({
+    clear: () => {
+      lexerRef.current?.clearOutput();
+    },
+  }));
+
+  React.useEffect(() => {
+    lexerRef.current = new Log(codeRef.current);
+  }, []);
+
+  React.useEffect(() => {
+    lexerRef.current?.clearOutput();
+    lexerRef.current?.write(value || '');
+  }, [value]);
+
   return (
-    <CodeMirror
-      options={{
-        ...defaultCodeMirrorOptions,
-      }}
-      {...props}
-    />
+    <div>
+      <div ref={codeRef} className="logger__dark" />
+    </div>
   );
 };
 

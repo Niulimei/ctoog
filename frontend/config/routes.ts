@@ -12,6 +12,7 @@
         exact: true,
       },
       {
+        hideInMenu: true,
         name: '任务详情',
         path: '/task/detail',
         component: './task/Detail',

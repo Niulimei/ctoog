@@ -6,6 +6,7 @@ import (
 	"ctgb/models"
 	"ctgb/restapi/operations"
 	"ctgb/utils"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -300,7 +301,7 @@ func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middlew
 	out := &models.TaskCommandOut{}
 	row := database.DB.QueryRow("select log_id, content from task_command_out where log_id = ?", params.LogID)
 	err := row.Scan(&out.LogID, &out.Content)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
 			Message: "Sql Error",

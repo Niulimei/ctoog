@@ -1,17 +1,17 @@
 import React from 'react';
-import { Modal } from 'antd';
+import { Modal, Empty } from 'antd';
 import Logger from '@/components/Logger';
 import { useToggle, useUnmount } from 'react-use';
 import { task as taskService } from '@/services';
 
 interface IProps {
   actionRef?: React.ForwardedRef<{
-    open: (id: string) => void;
+    open: (id: string, needAutoRefresh?: boolean) => void;
   }>;
 }
 
 /** 日志刷新间隔 */
-const RefreshLogInterval = 1500;
+const RefreshLogInterval = 2000;
 
 const TaskLogger: React.FC<IProps> = ({ actionRef }) => {
   const timerRef = React.useRef<any>();
@@ -19,7 +19,7 @@ const TaskLogger: React.FC<IProps> = ({ actionRef }) => {
   const [visible, toggleVisible] = useToggle(false);
 
   React.useImperativeHandle(actionRef, () => ({
-    open: async (id: string) => {
+    open: async (id, autoRefresh = false) => {
       const setLogOutput = async () => {
         const { content } = await taskService.getLogOutput(id);
         setLogData(content);
@@ -27,9 +27,11 @@ const TaskLogger: React.FC<IProps> = ({ actionRef }) => {
 
       await setLogOutput();
       toggleVisible(true);
-      timerRef.current = setInterval(() => {
-        setLogOutput();
-      }, RefreshLogInterval);
+      if (autoRefresh) {
+        timerRef.current = setInterval(() => {
+          setLogOutput();
+        }, RefreshLogInterval);
+      }
     },
   }));
 
@@ -52,7 +54,7 @@ const TaskLogger: React.FC<IProps> = ({ actionRef }) => {
       onCancel={closeModal}
       cancelButtonProps={{ style: { display: 'none' } }}
     >
-      <Logger value={logData} />
+      {logData ? <Logger value={logData} /> : <Empty description="暂无日志信息" />}
     </Modal>
   );
 };
