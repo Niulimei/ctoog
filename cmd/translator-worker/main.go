@@ -201,20 +201,20 @@ func pingServer(host string, port int) {
 		return
 		// handle err
 	}
-	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/api/workers", serverFlag), body)
-	if err != nil {
-		return
-		// handle err
-	}
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
-
 	for {
-		resp, err := http.DefaultClient.Do(req)
+		body := bytes.NewReader(payloadBytes)
+		req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/api/workers", serverFlag), body)
 		if err != nil {
 			return
+			// handle err
+		}
+		req.Header.Set("Accept", "application/json")
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
 			log.Error(err)
+			return
 			// handle err
 		}
 		if resp.Body != nil {
