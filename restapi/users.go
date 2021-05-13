@@ -108,6 +108,7 @@ func LoginHandler(params operations.LoginParams) middleware.Responder {
 	row := database.DB.QueryRow("SELECT password FROM user WHERE username=?", params.UserInfo.Username)
 	err := row.Scan(&passwordInDB)
 	if err != nil {
+		utils.RecordLog(utils.Error, utils.Login, "", "user "+params.UserInfo.Username+" does not exist.", http.StatusNotFound)
 		return operations.NewLoginInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusNotFound,
 			Message: "User Does Not Exist",
@@ -120,6 +121,7 @@ func LoginHandler(params operations.LoginParams) middleware.Responder {
 			Token: token,
 		})
 	} else {
+		utils.RecordLog(utils.Error, utils.Login, "", "user "+params.UserInfo.Username+" password wrong.", http.StatusUnauthorized)
 		return operations.NewLoginInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusUnauthorized,
 			Message: "Wrong Password",

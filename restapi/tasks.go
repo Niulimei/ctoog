@@ -124,6 +124,7 @@ func startTask(taskId int64) {
 		req.Header.Set("Content-Type", "application/json")
 		client := http.Client{}
 		resp, err := client.Do(req)
+		utils.RecordLog(utils.Info, utils.StartTask, "", fmt.Sprintf("TaskId: %d, TaskLogId: %d", taskId, taskLogId), 0)
 		if err != nil || resp.StatusCode != http.StatusCreated {
 			log.Error(fmt.Errorf("不能发送任务给%d", worker.Id), err)
 			database.DB.MustExec("UPDATE task_log SET status = 'failed' WHERE log_id = $1", taskLogId)
@@ -179,6 +180,7 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 	}
 	tx.Commit()
 	go startTask(taskId)
+	utils.RecordLog(utils.Info, utils.AddTask, "", fmt.Sprintf("TaskId: %d", taskId), 0)
 	return operations.NewCreateTaskCreated().WithPayload(&models.OK{Message: "ok"})
 }
 
@@ -252,6 +254,7 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		tx.MustExec("UPDATE task SET status = $1, last_completed_date_time = $2 WHERE id = $3",
 			taskLogInfo.Status, taskLogInfo.EndTime, taskId)
 		//tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
+		utils.RecordLog(utils.Info, utils.UpdateTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
 	} else {
 		log.Debug("update params:", params.TaskLog)
 		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, "+
@@ -268,8 +271,10 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 					taskId, match.Stream, match.GitBranch)
 			}
 		}
+		utils.RecordLog(utils.Info, utils.UpdateTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
 		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
 		go startTask(taskIdInt)
+		utils.RecordLog(utils.Info, utils.StartTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
 	}
 	log.Debug("task update commit:", tx.Commit())
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
@@ -284,6 +289,7 @@ func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responde
 	if task.Status != "running" {
 		go startTask(taskId)
 	}
+	utils.RecordLog(utils.Info, utils.RestartTask, "", "", 0)
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
 		Message: "ok",
 	})

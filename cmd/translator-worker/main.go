@@ -52,44 +52,41 @@ func init() {
 	}
 }
 
+type commandOut struct {
+	Logid   int64  `json:"log_id"`
+	Content string `json:"content"`
+}
+
+type payload struct {
+	Logid     string `json:"logID"`
+	Status    string `json:"status"`
+	Starttime string `json:"startTime"`
+	Endtime   string `json:"endTime"`
+	Duration  string `json:"duration"`
+}
+
 func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 
-	type Payload struct {
-		Logid     string `json:"logID"`
-		Status    string `json:"status"`
-		Starttime string `json:"startTime"`
-		Endtime   string `json:"endTime"`
-		Duration  string `json:"duration"`
-	}
-
-	data := Payload{
+	data := payload{
 		Logid:  strconv.FormatInt(task.TaskLogId, 10),
 		Status: "completed",
 	}
-	//failedCount := 0
+	start := time.Now()
 	for _, cmd := range cmds {
-		start := time.Now()
 		data.Starttime = start.Format("2006-01-02 15:04:05")
 		log.Debug("start cmd:", cmd.String())
-		//out, err := cmd.CombinedOutput()
-		//result := string(out)
-		//log.Println("result:", result)
-		//if err != nil {
-		//	//failedCount += 1
-		//	log.Error("cmd err:", err)
-		//	data.Status = "failed"
-		//	break
-		//}
-		sendCommandOut(server, cmd, task)
-		end := time.Now()
-		data.Endtime = end.Format("2006-01-02 15:04:05")
-		duration := end.Sub(start).Seconds()
-		d := strconv.FormatInt(int64(duration), 10)
-		data.Duration = d
+		err := sendCommandOut(server, cmd, task)
+		if err != nil {
+			log.Error("cmd err:", err)
+			data.Status = "failed"
+			break
+		}
 	}
-	//if failedCount > 0 {
-	//	data.Status = "failed"
-	//}
+	end := time.Now()
+	data.Endtime = end.Format("2006-01-02 15:04:05")
+	duration := end.Sub(start).Seconds()
+	d := strconv.FormatInt(int64(duration), 10)
+	data.Duration = d
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
 		log.Error(err)
@@ -105,72 +102,54 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 		return
 		// handle err
 	}
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "1234567")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil || resp.Body == nil {
-		// handle err
-		time.Sleep(time.Second * 3)
-		resp, err = http.DefaultClient.Do(req)
-		if err != nil || resp.Body == nil {
-			return
-		}
-	}
-	log.Info("info server success")
-	defer resp.Body.Close()
+	doSend(req)
 }
 
-type commandOut struct {
-	Logid   int64  `json:"log_id"`
-	Comtent string `json:"content"`
-}
-
-func sendCommandOut(server string, cmd *exec.Cmd, task *Task) {
+func sendCommandOut(server string, cmd *exec.Cmd, task *Task) error {
 	data := &commandOut{
 		Logid: task.TaskLogId,
 	}
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 
 	if err := cmd.Start(); err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 
 	s := bufio.NewScanner(io.MultiReader(stdout, stderr))
 	tk := time.NewTicker(time.Second * 1)
 	var tmp []string
+	go func(in *[]string) {
+		for {
+			select {
+			case <-tk.C:
+				data.Content = strings.Join(*in, "\n")
+				sender(server, data)
+			case <-stop:
+				return
+			}
+		}
+	}(&tmp)
 	for s.Scan() {
 		tmp = append(tmp, s.Text())
-		go func(in []string) {
-			for {
-				select {
-				case <-tk.C:
-					data.Comtent = strings.Join(in, "\n")
-					sender(server, data)
-				case <-stop:
-					return
-				}
-			}
-		}(tmp)
 	}
 	time.Sleep(time.Second * 2)
 	stop <- struct{}{}
 
 	if err := cmd.Wait(); err != nil {
 		log.Println(err)
-		return
+		return err
 	}
+	return nil
 }
 
 func sender(server string, data *commandOut) {
@@ -187,16 +166,20 @@ func sender(server string, data *commandOut) {
 		return
 		// handle err
 	}
+	doSend(req)
+}
+
+func doSend(req *http.Request) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "1234567")
 
 	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
+	if err != nil || resp.Body == nil {
 		// handle err
 		time.Sleep(time.Second * 3)
 		resp, err = http.DefaultClient.Do(req)
-		if err != nil {
+		if err != nil || resp.Body == nil {
 			return
 		}
 	}
@@ -221,21 +204,23 @@ func pingServer(host string, port int) {
 	}
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
-		// handle err
-	}
-	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/api/workers", serverFlag), body)
-	if err != nil {
 		return
 		// handle err
 	}
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
-
 	for {
+		body := bytes.NewReader(payloadBytes)
+		req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/api/workers", serverFlag), body)
+		if err != nil {
+			return
+			// handle err
+		}
+		req.Header.Set("Accept", "application/json")
+		req.Header.Set("Content-Type", "application/json")
+
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			log.Error(err)
+			return
 			// handle err
 		}
 		if resp.Body != nil {

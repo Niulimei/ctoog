@@ -4,10 +4,11 @@ import (
 	"ctgb/database"
 	"ctgb/models"
 	"ctgb/restapi/operations"
-	"github.com/go-openapi/runtime/middleware"
-	log "github.com/sirupsen/logrus"
 	"strconv"
 	"time"
+
+	"github.com/go-openapi/runtime/middleware"
+	log "github.com/sirupsen/logrus"
 )
 
 func CleanDeadWorker() {
@@ -28,10 +29,12 @@ func CleanDeadWorker() {
 }
 
 func init() {
-	for {
-		CleanDeadWorker()
-		time.Sleep(time.Second * 30)
-	}
+	go func() {
+		for {
+			CleanDeadWorker()
+			time.Sleep(time.Second * 30)
+		}
+	}()
 }
 
 func PingWorkerHandler(params operations.PingWorkerParams) middleware.Responder {
@@ -44,9 +47,9 @@ func PingWorkerHandler(params operations.PingWorkerParams) middleware.Responder 
 	now := time.Now().Format("2006-01-02 15:04:05")
 	if err != nil {
 		database.DB.Exec("INSERT INTO worker (worker_url, status, task_count, register_time) "+
-			"VALUES ($1, $2, $3)", url, "running", 0, now)
+			"VALUES ($1, $2, $3, $4)", url, "running", 0, now)
 	} else {
-		database.DB.Exec("UPDATE worker SET status = 'running', register_time = $1 WHERE id = $2", worker.Id, now)
+		database.DB.Exec("UPDATE worker SET status = 'running', register_time = $1 WHERE id = $2", now, worker.Id)
 	}
 	return operations.NewPingWorkerCreated().WithPayload(&models.OK{Message: "ok"})
 }
