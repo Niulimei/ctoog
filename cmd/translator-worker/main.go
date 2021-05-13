@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"ctgb/utils"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -289,6 +290,39 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	usage := "Usage: ./translator-worker start | stop | status"
+	if len(os.Args) > 1 {
+		command := os.Args[1]
+		switch command {
+		case "start":
+			fmt.Println("translator-worker is starting.")
+			break
+		case "stop":
+			pid, _ := ioutil.ReadFile("./translator-worker.pid")
+			if string(pid) == "" {
+				fmt.Println("translator-worker is not running.")
+			} else if _, err := utils.Exec("ps " + string(pid)); err != nil {
+				fmt.Println("translator-worker is not running.")
+			} else {
+				utils.Exec("kill " + string(pid))
+				fmt.Println("translator-worker has been stopped.")
+			}
+			return
+		case "status":
+			pid, _ := ioutil.ReadFile("./translator-worker.pid")
+			if string(pid) == "" {
+				fmt.Println("translator-worker is not running.")
+			} else if _, err := utils.Exec("ps " + string(pid)); err != nil {
+				fmt.Println("translator-worker is not running.")
+			} else {
+				fmt.Println("translator-worker is running.")
+			}
+			return
+		default:
+			fmt.Println(usage)
+			return
+		}
+	}
 	cntxt := &daemon.Context{
 		PidFileName: "translator-worker.pid",
 		PidFilePerm: 0644,

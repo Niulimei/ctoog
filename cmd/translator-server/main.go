@@ -3,6 +3,8 @@
 package main
 
 import (
+	"ctgb/utils"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -21,7 +23,39 @@ import (
 // Make sure not to overwrite this file after you generated it because all your edits would be lost!
 
 func main() {
-
+	usage := "Usage: ./translator-server start | stop | status"
+	if len(os.Args) > 1 {
+		command := os.Args[1]
+		switch command {
+		case "start":
+			fmt.Println("translator-server is starting.")
+			break
+		case "stop":
+			pid, _ := ioutil.ReadFile("./translator-server.pid")
+			if string(pid) == "" {
+				fmt.Println("translator-server is not running.")
+			} else if _, err := utils.Exec("ps " + string(pid)); err != nil {
+				fmt.Println("translator-server is not running.")
+			} else {
+				utils.Exec("kill " + string(pid))
+				fmt.Println("translator-server has been stopped.")
+			}
+			return
+		case "status":
+			pid, _ := ioutil.ReadFile("./translator-server.pid")
+			if string(pid) == "" {
+				fmt.Println("translator-server is not running.")
+			} else if _, err := utils.Exec("ps " + string(pid)); err != nil {
+				fmt.Println("translator-server is not running.")
+			} else {
+				fmt.Println("translator-server is running.")
+			}
+			return
+		default:
+			fmt.Println(usage)
+			return
+		}
+	}
 	cntxt := &daemon.Context{
 		PidFileName: "translator-server.pid",
 		PidFilePerm: 0644,
