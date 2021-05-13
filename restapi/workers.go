@@ -28,10 +28,12 @@ func CleanDeadWorker() {
 }
 
 func init() {
-	for {
-		CleanDeadWorker()
-		time.Sleep(time.Second * 30)
-	}
+	go func() {
+		for {
+			CleanDeadWorker()
+			time.Sleep(time.Second * 30)
+		}
+	}()
 }
 
 func PingWorkerHandler(params operations.PingWorkerParams) middleware.Responder {
