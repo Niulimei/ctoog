@@ -196,7 +196,7 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", taskID)
 	task.MatchInfo = matchInfo
 	var logList []*models.TaskLogInfo
-	database.DB.Select(&logList, "SELECT duration, end_time, log_id, start_time, status FROM task_log WHERE task_id = $1 ORDER BY log_id", taskID)
+	database.DB.Select(&logList, "SELECT duration, end_time, log_id, start_time, status FROM task_log WHERE task_id = $1 ORDER BY log_id DESC", taskID)
 	taskDetail := &models.TaskDetail{TaskModel: task, LogList: logList}
 	return operations.NewGetTaskOK().WithPayload(taskDetail)
 }
