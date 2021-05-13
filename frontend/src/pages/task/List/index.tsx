@@ -135,7 +135,6 @@ const TaskList: React.FC = () => {
         actionRef={tableRef}
         pagination={{
           pageSize: params.pageSize,
-          total: params.total,
           onChange(num, size = 10) {
             setParams({
               current: num,
@@ -148,6 +147,7 @@ const TaskList: React.FC = () => {
             offset: (current! - 1 || 0) * pageSize,
             limit: pageSize || 10,
           });
+
           return {
             data: taskInfo,
             success: true,
