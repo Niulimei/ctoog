@@ -3,8 +3,12 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/sevlyar/go-daemon"
+	"gopkg.in/yaml.v2"
 
 	"github.com/go-openapi/loads"
 	flags "github.com/jessevdk/go-flags"
@@ -18,6 +22,34 @@ import (
 
 func main() {
 
+	cntxt := &daemon.Context{
+		PidFileName: "translator-server.pid",
+		PidFilePerm: 0644,
+		LogFileName: "translator-server.log",
+		LogFilePerm: 0640,
+		WorkDir:     "./",
+		Umask:       027,
+		Args:        []string{"translator-server"},
+	}
+
+	d, err := cntxt.Reborn()
+	if err != nil {
+		log.Fatal("Unable to run: ", err)
+	}
+	if d != nil {
+		return
+	}
+	defer cntxt.Release()
+
+	log.Print("- - - - - - - - - - - - - - -")
+	log.Print("daemon started")
+	type conf struct {
+		Host string `yaml:"host"`
+		Port int    `yaml:"port"`
+	}
+	tmp := &conf{}
+	content, _ := ioutil.ReadFile("./translator-server.yaml")
+	yaml.Unmarshal(content, tmp)
 	swaggerSpec, err := loads.Embedded(restapi.SwaggerJSON, restapi.FlatSwaggerJSON)
 	if err != nil {
 		log.Fatalln(err)
@@ -49,7 +81,8 @@ func main() {
 	}
 
 	server.ConfigureAPI()
-
+	server.Host = tmp.Host
+	server.Port = tmp.Port
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
 	}
