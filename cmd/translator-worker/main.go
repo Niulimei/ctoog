@@ -71,17 +71,22 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 		Logid:  strconv.FormatInt(task.TaskLogId, 10),
 		Status: "completed",
 	}
+	start := time.Now()
 	for _, cmd := range cmds {
-		start := time.Now()
 		data.Starttime = start.Format("2006-01-02 15:04:05")
 		log.Debug("start cmd:", cmd.String())
-		sendCommandOut(server, cmd, task)
-		end := time.Now()
-		data.Endtime = end.Format("2006-01-02 15:04:05")
-		duration := end.Sub(start).Seconds()
-		d := strconv.FormatInt(int64(duration), 10)
-		data.Duration = d
+		err := sendCommandOut(server, cmd, task)
+		if err != nil {
+			log.Error("cmd err:", err)
+			data.Status = "failed"
+			break
+		}
 	}
+	end := time.Now()
+	data.Endtime = end.Format("2006-01-02 15:04:05")
+	duration := end.Sub(start).Seconds()
+	d := strconv.FormatInt(int64(duration), 10)
+	data.Duration = d
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
 		log.Error(err)
@@ -100,24 +105,24 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 	doSend(req)
 }
 
-func sendCommandOut(server string, cmd *exec.Cmd, task *Task) {
+func sendCommandOut(server string, cmd *exec.Cmd, task *Task) error {
 	data := &commandOut{
 		Logid: task.TaskLogId,
 	}
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 
 	if err := cmd.Start(); err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 
 	s := bufio.NewScanner(io.MultiReader(stdout, stderr))
@@ -142,8 +147,9 @@ func sendCommandOut(server string, cmd *exec.Cmd, task *Task) {
 
 	if err := cmd.Wait(); err != nil {
 		log.Println(err)
-		return
+		return err
 	}
+	return nil
 }
 
 func sender(server string, data *commandOut) {
