@@ -7,7 +7,7 @@ import type { ProColumns } from '@ant-design/pro-table';
 
 interface IProps {
   data?: Task.Detail['logList'];
-  onDisplayLog?: (id: string) => void;
+  onDisplayLog?: (task: Task.Log) => void;
 }
 
 const TaskLogTable: React.FC<IProps> = ({ data, onDisplayLog }) => {
@@ -44,9 +44,9 @@ const TaskLogTable: React.FC<IProps> = ({ data, onDisplayLog }) => {
       title: '操作',
       align: 'center',
       // @ts-ignore
-      render({ logID }: Task.Log) {
+      render(item: Task.Log) {
         return (
-          <Button onClick={() => onDisplayLog?.(logID)} type="link">
+          <Button onClick={() => onDisplayLog?.(item)} type="link">
             查看日志
           </Button>
         );

@@ -61,7 +61,9 @@ const TaskDetail = () => {
           <>
             <TaskLogger actionRef={taskLoggerRef} />
             <TaskLogTable
-              onDisplayLog={(id) => taskLoggerRef.current.open(id)}
+              onDisplayLog={(task: Task.Log) =>
+                taskLoggerRef.current.open(task.logID, task.status !== 'completed')
+              }
               data={taskDetail?.logList}
             />
           </>
