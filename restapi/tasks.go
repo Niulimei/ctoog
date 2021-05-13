@@ -50,7 +50,7 @@ func init() {
 func startTask(taskId int64) {
 	task := &database.TaskModel{}
 	err := database.DB.Get(task, "SELECT cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty, dir, keep"+
+		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty, dir, keep, worker_id"+
 		" FROM task WHERE id = $1", taskId)
 	if err != nil {
 		log.Error("start task but db err:", err)
@@ -58,8 +58,9 @@ func startTask(taskId int64) {
 	}
 	worker := &database.WorkerModel{}
 	newAssigned := false
-	err = nil
+	log.Info(task.WorkerId)
 	if task.WorkerId != 0 {
+		log.Debug("got worker id")
 		err = database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1 and status = 'running'", task.WorkerId)
 	} else {
 		newAssigned = true
@@ -67,7 +68,7 @@ func startTask(taskId int64) {
 	}
 	workerUrl := worker.WorkerUrl
 	if worker.WorkerUrl == "" {
-		log.Error("get worker with no url:", worker)
+		log.Error("get worker with no url:", worker, err)
 		return
 	}
 	var matchInfo []*models.TaskMatchInfo

@@ -220,11 +220,10 @@ func pingServer(host string, port int) {
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			log.Error(err)
-			return
-			// handle err
-		}
-		if resp.Body != nil {
-			resp.Body.Close()
+		} else {
+			if resp.Body != nil {
+				resp.Body.Close()
+			}
 		}
 		time.Sleep(time.Second * 10)
 	}
