@@ -6,6 +6,7 @@ import Table from '@ant-design/pro-table';
 import { DownOutlined } from '@ant-design/icons';
 import { task as taskService } from '@/services';
 import TaskCreator from './components/TaskCreator';
+import { useCacheRequestParams } from '@/utils/hooks';
 import { Button, message, Dropdown, Menu } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
 
@@ -98,8 +99,8 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
 const TaskList: React.FC = () => {
   const tableRef = React.useRef<any>(null);
   const creatorModalRef = React.useRef<any>(null);
-  const [pageSize, setPageSize] = React.useState(10);
   const history = useHistory();
+  const { params, setParams } = useCacheRequestParams('taskList');
 
   const actions: Actions = {
     /** 查看任务详情 */
@@ -133,17 +134,19 @@ const TaskList: React.FC = () => {
         rowKey="id"
         actionRef={tableRef}
         pagination={{
-          pageSize,
-          onChange(num, size) {
-            if (size) {
-              setPageSize(size);
-            }
+          pageSize: params.pageSize,
+          total: params.total,
+          onChange(num, size = 10) {
+            setParams({
+              current: num,
+              pageSize: size,
+            });
           },
         }}
-        request={async (params) => {
+        request={async ({ pageSize = 10, current }) => {
           const { taskInfo, count } = await taskService.getTasks({
-            offset: (params.current! - 1 || 0) * pageSize,
-            limit: params.pageSize || 10,
+            offset: (current! - 1 || 0) * pageSize,
+            limit: pageSize || 10,
           });
           return {
             data: taskInfo,
