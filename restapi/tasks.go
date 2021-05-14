@@ -55,6 +55,7 @@ func startTask(taskId int64) {
 		" FROM task WHERE id = $1", taskId)
 	if err != nil {
 		log.Error("start task but db err:", err)
+		database.DB.MustExec("UPDATE task SET status = 'failed' WHERE id = $1", taskId)
 		return
 	}
 	worker := &database.WorkerModel{}
@@ -70,6 +71,7 @@ func startTask(taskId int64) {
 	workerUrl := worker.WorkerUrl
 	if worker.WorkerUrl == "" {
 		log.Error("get worker with no url:", worker, err)
+		database.DB.MustExec("UPDATE task SET status = 'failed' WHERE id = $1", taskId)
 		return
 	}
 	var matchInfo []*models.TaskMatchInfo
@@ -136,19 +138,24 @@ func startTask(taskId int64) {
 		}
 	} else {
 		log.Error(err)
+		database.DB.MustExec("UPDATE task SET status = 'failed' WHERE id = $1", taskId)
 		return
 	}
 
+	tx := database.DB.MustBegin()
 	if newAssigned {
-		tx := database.DB.MustBegin()
 		tx.MustExec(
 			"UPDATE task SET status = 'running', worker_id = $1 WHERE id = $2", worker.Id, taskId,
 		)
 		tx.MustExec(
 			"UPDATE worker SET task_count = task_count + 1 WHERE id = $1", worker.Id,
 		)
-		tx.Commit()
+	} else {
+		tx.MustExec(
+			"UPDATE task SET status = 'running' WHERE id = $1", taskId,
+		)
 	}
+	tx.Commit()
 	return
 }
 
@@ -289,6 +296,7 @@ func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responde
 	task := &database.TaskModel{}
 	database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
 	if task.Status != "running" {
+		database.DB.MustExec("UPDATE task SET status = 'running' WHERE id = $1", taskId)
 		go startTask(taskId)
 	}
 	utils.RecordLog(utils.Info, utils.RestartTask, "", "", 0)
