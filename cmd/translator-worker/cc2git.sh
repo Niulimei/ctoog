@@ -100,14 +100,18 @@ pullCCAndPush(){
   if [[ ${containEmptyDir} == "true" ]]; then
     find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
   fi
+#  bash changeCharSet.sh ${tmpGitDir}
   git add -A .
+  echo "Pushing code..."
   if $tmpCCDirExist && $tmpGitDirExist; then
-    git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')"
+#    git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')"
+    set +e
+    git push origin ${gitBranchName}
+    set -e
   else
     git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')"
+    git push origin ${gitBranchName}
   fi
-  echo "Pushing code..."
-  git push origin ${gitBranchName}
 }
 
 postClean(){
