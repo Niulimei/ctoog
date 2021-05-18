@@ -197,6 +197,18 @@ paths:
           required: true
           default: 0
           type: integer
+        - name: pvob
+          in: query
+          required: false
+          type: string
+        - name: component
+          in: query
+          required: false
+          type: string
+        - name: stream
+          in: query
+          required: false
+          type: string
         - name: Authorization
           in: header
           required: true
@@ -239,6 +251,33 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /tasks/cache/{id}:
+    delete:
+      summary: 任务缓存删除
+      description: ''
+      operationId: DeleteTaskCache
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: integer
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /tasks/{id}:
     get:
       summary: 任务详情
@@ -262,6 +301,32 @@ paths:
           description: 任务信息
           schema:
             $ref: '#/definitions/TaskDetail'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      summary: 任务删除
+      description: ''
+      operationId: DeleteTask
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: integer
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
         '500':
           description: 内部错误
           schema:

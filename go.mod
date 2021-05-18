@@ -6,6 +6,7 @@ require (
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-delve/delve v1.6.0 // indirect
 	github.com/go-openapi/analysis v0.20.1 // indirect
 	github.com/go-openapi/errors v0.20.0
 	github.com/go-openapi/loads v0.20.2
@@ -22,7 +23,9 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.7
 	github.com/sevlyar/go-daemon v0.1.5
 	github.com/sirupsen/logrus v1.6.0
-	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
-	golang.org/x/sys v0.0.0-20210426230700-d19ff857e887 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	go.mongodb.org/mongo-driver v1.5.2 // indirect
+	golang.org/x/net v0.0.0-20210510120150-4163338589ed
+	golang.org/x/sys v0.0.0-20210514084401-e8d321eab015 // indirect
+	golang.org/x/tools v0.1.1 // indirect
+	gopkg.in/yaml.v2 v2.4.0
 )

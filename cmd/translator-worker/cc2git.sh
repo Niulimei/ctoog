@@ -9,9 +9,8 @@
 
 export LANG="zh_CN.UTF-8"
 set -e
-
-ccTmpRootPath="/home/tmp/pvobs_view"
-gitTmpRootPath="/home/tmp/git"
+workdir=$(cd $(dirname $0); pwd)
+source ${workdir}/common.sh
 
 initGitRepo(){
   echo "Initializing git repository..."
@@ -24,6 +23,7 @@ initGitRepo(){
   mkdir -p ${tmpGitDir}
   cd ${tmpGitDir}
   git init
+  git config --local core.longpaths true
   git config user.name "${username}"
   git config user.email "${email}"
   git config push.default simple
@@ -100,35 +100,31 @@ pullCCAndPush(){
   if [[ ${containEmptyDir} == "true" ]]; then
     find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
   fi
-#  bash changeCharSet.sh ${tmpGitDir}
+  bash ${workdir}/changeCharSet.sh ${tmpGitDir}
   git add -A .
   echo "Pushing code..."
   if $tmpCCDirExist && $tmpGitDirExist; then
-#    git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')"
-    set +e
-    git push origin ${gitBranchName}
-    set -e
+    lastMessage=$(git status | tail -n 2)
+    #nothing to commit, working tree clean
+    noCommit='nothing to commit'
+    if [[ $lastMessage =~ $noCommit ]]; then
+      set +e
+      git push origin ${gitBranchName}
+      set -e
+    else
+      git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')"
+      git push origin ${gitBranchName}
+    fi
   else
     git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')"
     git push origin ${gitBranchName}
   fi
 }
 
-postClean(){
-  rm -rf ${gitTmpRootPath:?}/*
-  views=$(ls ${ccTmpRootPath})
-  for view in ${views}; do
-    cleartool rmview ${ccTmpRootPath}/${view}
-  done
-  rm -rf ${ccTmpRootPath:?}/*
-}
-
 main(){
   mkdir -p ${ccTmpRootPath}
   mkdir -p ${gitTmpRootPath}
-  git config --global core.longpaths true
   pullCCAndPush $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10}
-  #postClean
 }
 
 main $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10}

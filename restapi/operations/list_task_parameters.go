@@ -49,6 +49,10 @@ type ListTaskParams struct {
 	*/
 	Authorization string
 	/*
+	  In: query
+	*/
+	Component *string
+	/*
 	  Required: true
 	  In: query
 	  Default: 0
@@ -60,6 +64,14 @@ type ListTaskParams struct {
 	  Default: 0
 	*/
 	Offset int64
+	/*
+	  In: query
+	*/
+	Pvob *string
+	/*
+	  In: query
+	*/
+	Stream *string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -77,6 +89,11 @@ func (o *ListTaskParams) BindRequest(r *http.Request, route *middleware.MatchedR
 		res = append(res, err)
 	}
 
+	qComponent, qhkComponent, _ := qs.GetOK("component")
+	if err := o.bindComponent(qComponent, qhkComponent, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	qLimit, qhkLimit, _ := qs.GetOK("limit")
 	if err := o.bindLimit(qLimit, qhkLimit, route.Formats); err != nil {
 		res = append(res, err)
@@ -84,6 +101,16 @@ func (o *ListTaskParams) BindRequest(r *http.Request, route *middleware.MatchedR
 
 	qOffset, qhkOffset, _ := qs.GetOK("offset")
 	if err := o.bindOffset(qOffset, qhkOffset, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qPvob, qhkPvob, _ := qs.GetOK("pvob")
+	if err := o.bindPvob(qPvob, qhkPvob, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qStream, qhkStream, _ := qs.GetOK("stream")
+	if err := o.bindStream(qStream, qhkStream, route.Formats); err != nil {
 		res = append(res, err)
 	}
 	if len(res) > 0 {
@@ -108,6 +135,24 @@ func (o *ListTaskParams) bindAuthorization(rawData []string, hasKey bool, format
 		return err
 	}
 	o.Authorization = raw
+
+	return nil
+}
+
+// bindComponent binds and validates parameter Component from query.
+func (o *ListTaskParams) bindComponent(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Component = &raw
 
 	return nil
 }
@@ -160,6 +205,42 @@ func (o *ListTaskParams) bindOffset(rawData []string, hasKey bool, formats strfm
 		return errors.InvalidType("offset", "query", "int64", raw)
 	}
 	o.Offset = value
+
+	return nil
+}
+
+// bindPvob binds and validates parameter Pvob from query.
+func (o *ListTaskParams) bindPvob(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Pvob = &raw
+
+	return nil
+}
+
+// bindStream binds and validates parameter Stream from query.
+func (o *ListTaskParams) bindStream(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Stream = &raw
 
 	return nil
 }

@@ -246,6 +246,45 @@ type Task struct {
 	Keep         string
 }
 
+type TaskDelInfo struct {
+	TaskId     int64  `json:"task_id"`
+	CcPassword string `json:"cc_password"`
+	CcUser     string `json:"cc_user"`
+}
+
+func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Error("read task error:", err)
+		return
+	}
+	if r.Body != nil {
+		defer r.Body.Close()
+	}
+	workerTaskModel := TaskDelInfo{}
+	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
+		cwd, _ := os.Getwd()
+		cmdStr := fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/cleanCache.sh %d"`,
+			workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.TaskId)
+		//fmt.Println(cmdStr)
+		cmd := exec.Command("/bin/bash", "-c", cmdStr)
+		out, err := cmd.Output()
+		if err != nil {
+			log.Error(err)
+			w.WriteHeader(500)
+			w.Write(out)
+			return
+		}
+	} else {
+		log.Error(err)
+		w.WriteHeader(500)
+		w.Write([]byte("fail"))
+		return
+	}
+	w.WriteHeader(200)
+	w.Write([]byte("success"))
+}
+
 func taskHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -357,5 +396,6 @@ func main() {
 	portFlag = tmp.Port
 	go pingServer(hostFlag, portFlag)
 	http.HandleFunc("/new_task", taskHandler) //	设置访问路由
+	http.HandleFunc("/delete_task", deleteTaskHandler)
 	log.Fatal(http.ListenAndServe(hostFlag+":"+strconv.Itoa(portFlag), nil))
 }

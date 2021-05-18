@@ -14,17 +14,19 @@ const (
 )
 
 const (
-	GetTask     Action = "GET_TASK"
-	AddTask     Action = "ADD_TASK"
-	UpdateTask  Action = "UPDATE_TASK"
-	DeleteTask  Action = "DELETE_TASK"
-	StartTask   Action = "START_TASK"
-	RestartTask Action = "RESTART_TASK"
-	GetUser     Action = "GET_USER"
-	AddUser     Action = "ADD_USER"
-	UpdateUser  Action = "UPDATE_USER"
-	DeleteUser  Action = "DELETE_USER"
-	Login       Action = "LOGIN"
+	GetTask         Action = "GET_TASK"
+	AddTask         Action = "ADD_TASK"
+	UpdateTask      Action = "UPDATE_TASK"
+	DeleteTask      Action = "DELETE_TASK"
+	DeleteTaskCache Action = "DELETE_TASK_CACHE"
+	StartTask       Action = "START_TASK"
+	RestartTask     Action = "RESTART_TASK"
+	GetUser         Action = "GET_USER"
+	AddUser         Action = "ADD_USER"
+	UpdateUser      Action = "UPDATE_USER"
+	DeleteUser      Action = "DELETE_USER"
+	Login           Action = "LOGIN"
+	Auth            Action = "AUTH"
 )
 
 type Action string

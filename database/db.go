@@ -82,7 +82,7 @@ CREATE TABLE schedule (
     status varchar (16),
     schedule varchar (16),
     task_id integer,
-    creator varchar (128),
+    creator varchar (128)
 );
 
 
