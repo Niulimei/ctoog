@@ -142,11 +142,28 @@ const TaskList: React.FC = () => {
       }
       if (info.file.status === 'done') {
         message.success(`${info.file.name} 上传成功！`);
+        // 调用接口
       } else if (info.file.status === 'error') {
         message.error(`${info.file.name} 上传失败！.`);
       }
     },
   };
+
+  /** 限制上传excel的判断字符串 */
+  const excelTypeStr = `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel `
+
+  /** 上传前的钩子函数 */
+  const validateExcel = (file: any) => {
+
+    return new Promise<boolean>((resolve, reject) => {
+      if (file.name.slice(-5).toLowerCase() === '.xlsx' || file.name.slice(-4).toLowerCase() === '.xls') {
+        resolve(true)
+      } else {
+        reject()
+        message.error('只能上传.XLS.XLSX格式的文件!')
+      }
+    })
+  }
 
   return (
     <>
@@ -178,7 +195,7 @@ const TaskList: React.FC = () => {
         columns={getColumns(actions)}
         toolBarRender={() => [
           /** 批量上传 */
-          <Upload multiple showUploadList={false} {...props}>
+          <Upload accept={excelTypeStr} beforeUpload={validateExcel} showUploadList={false} {...props}>
             <Button icon={<UploadOutlined />}>批量上传</Button>
           </Upload>,
           <Button
