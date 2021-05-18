@@ -16,6 +16,7 @@ require (
 	github.com/go-openapi/validate v0.20.2
 	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/jessevdk/go-flags v1.5.0
+	github.com/jinzhu/copier v0.3.0 // indirect
 	github.com/jmoiron/sqlx v1.3.3
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect

@@ -625,7 +625,7 @@ paths:
           in: header
           required: true
           type: string
-        - name: scheduleInfo
+        - name: planInfo
           in: body
           description: 迁移计划信息
           required: true

@@ -197,6 +197,36 @@ type ScheduleModel struct {
 	Creator  string
 }
 
+type PlanModel struct {
+	ID               int64
+	Status           string
+	OriginType       string `db:"origin_type"`
+	Pvob             string
+	Component        string
+	Dir              string
+	OriginURL        string `db:"origin_url"`
+	TranslateType    string `db:"translate_type"`
+	TargetURL        string `db:"target_url"`
+	Subsystem        string
+	ConfigLib        string `db:"config_lib"`
+	Group            string
+	Team             string
+	Supporter        string
+	SupporterTel     string `db:"supporter_tel"`
+	Creator          string
+	Tip              string
+	ProjectType      string `db:"project_type"`
+	Purpose          string
+	PlanStartTime    string `db:"plan_start_time"`
+	PlanSwitchTime   string `db:"plan_switch_time"`
+	ActualStartTime  string `db:"actual_start_time"`
+	ActualSwitchTime string `db:"actual_switch_time"`
+	Effect           string
+	Extra1           string
+	Extra2           string
+	Extra3           string
+}
+
 func init() {
 	var err error
 	var isInitAlready = true

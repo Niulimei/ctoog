@@ -51,7 +51,7 @@ type UpdatePlanParams struct {
 	  Required: true
 	  In: body
 	*/
-	ScheduleInfo *models.PlanModel
+	PlanInfo *models.PlanModel
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -93,7 +93,7 @@ func (o *UpdatePlanParams) BindRequest(r *http.Request, route *middleware.Matche
 			}
 
 			if len(res) == 0 {
-				o.ScheduleInfo = &body
+				o.PlanInfo = &body
 			}
 		}
 	} else {
