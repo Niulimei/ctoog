@@ -208,32 +208,65 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	return operations.NewGetTaskOK().WithPayload(taskDetail)
 }
 
+var taskColumns = []string{"pvob", "component", "git_url", "id", "last_completed_date_time", "status", "include_empty", "git_email", "dir", "keep"}
+
+func buildTaskWhereSQL(queryParams map[string]string) (string, []interface{}, error) {
+	l := len(queryParams)
+	if l > 0 {
+		sqlKeys := make([]string, 0, l)
+		sqlValues := make([]interface{}, 0, l)
+
+		placeholderIndex := int32(1)
+		for k, v := range queryParams {
+			switch k {
+			case "pvob", "component", "status":
+				sqlKeys, sqlValues, placeholderIndex = utils.GeneWhereLike(k, v, placeholderIndex, sqlKeys, sqlValues)
+			}
+		}
+		return utils.GeneWhereSQL(sqlKeys, sqlValues)
+	}
+	return "", nil, nil
+}
+
+func buildParams(params operations.ListTaskParams) map[string]string {
+	var ret = make(map[string]string)
+	if params.Pvob != nil && *params.Pvob != "" {
+		ret["pvob"] = *params.Pvob
+	}
+	if params.Component != nil && *params.Component != "" {
+		ret["component"] = *params.Component
+	}
+	if params.Status != nil && *params.Status != "" {
+		ret["status"] = *params.Status
+	}
+	return ret
+}
+
 func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	username, verified := utils.Verify(params.Authorization)
 	if !verified {
 		return middleware.Error(http.StatusUnauthorized, models.ErrorModel{Message: "鉴权失败"})
 	}
-	var query, queryCount string
-	user := getUserInfo(username)
-	if user.RoleID == int64(AdminRole) {
-		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-			" status, include_empty, git_email, dir, keep" +
-			" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
-		queryCount = "SELECT count(id) FROM task;"
-	} else {
-		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-			" status, include_empty, git_email, dir, keep" +
-			" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
-		queryCount = "SELECT count(id) FROM task WHERE creator = $1;"
+	whereSQL, _, sqlErr := buildTaskWhereSQL(buildParams(params))
+	if nil != sqlErr {
+		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: ""})
 	}
+
+	user := getUserInfo(username)
+	if user.RoleID != int64(AdminRole) {
+		whereSQL += fmt.Sprintf(" and creator=%s", username)
+	}
+	prepSQL := utils.PreparingQurySQL(taskColumns, "task", int(params.Offset), int(params.Limit), "last_completed_date_time DESC", whereSQL)
+
 	var tasks []*models.TaskInfoModel
 	var count int64
-	err := database.DB.Select(&tasks, query, username, params.Limit, params.Offset)
+	err := database.DB.Select(&tasks, prepSQL, params.Limit, params.Offset)
 	if err != nil {
 		log.Error(err)
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: "Sql Error"})
 	}
-	err = database.DB.Get(&count, queryCount, username)
+	queryCount := "select count(id) from task where 1=1 " + whereSQL
+	err = database.DB.Get(&count, queryCount)
 	if err != nil {
 		log.Error(err)
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: "Sql Error"})
@@ -327,6 +360,12 @@ func UpdateTaskCommandOutHandler(params operations.UpdateTaskCommandOutParams) m
 }
 
 func DeleteTaskHandler(params operations.DeleteTaskParams) middleware.Responder {
+	if !CheckPermission(params.Authorization) {
+		return operations.NewDeleteTaskInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusUnauthorized,
+			Message: "",
+		})
+	}
 	code := deleteCache(params.ID)
 	if code != http.StatusOK {
 		return operations.NewDeleteTaskInternalServerError().WithPayload(&models.ErrorModel{
@@ -334,6 +373,7 @@ func DeleteTaskHandler(params operations.DeleteTaskParams) middleware.Responder 
 			Message: "Delete Task Cache Fail.",
 		})
 	}
+	utils.RecordLog(utils.Error, utils.DeleteTaskCache, "", fmt.Sprintf("TaskId: %d", params.ID), 0)
 	_, err := database.DB.Exec("delete from task where id=?", params.ID)
 	if err != nil {
 		return operations.NewDeleteTaskInternalServerError().WithPayload(&models.ErrorModel{
@@ -341,12 +381,19 @@ func DeleteTaskHandler(params operations.DeleteTaskParams) middleware.Responder 
 			Message: "Delete Task Fail.",
 		})
 	}
+	utils.RecordLog(utils.Error, utils.DeleteTask, "", fmt.Sprintf("TaskId: %d", params.ID), 0)
 	return operations.NewDeleteTaskOK().WithPayload(&models.OK{
 		Message: "ok",
 	})
 }
 
 func DeleteTaskCacheHandler(params operations.DeleteTaskCacheParams) middleware.Responder {
+	if !CheckPermission(params.Authorization) {
+		return operations.NewDeleteTaskCacheInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusUnauthorized,
+			Message: "",
+		})
+	}
 	code := deleteCache(params.ID)
 	if code != http.StatusOK {
 		return operations.NewDeleteTaskCacheInternalServerError().WithPayload(&models.ErrorModel{
@@ -354,6 +401,7 @@ func DeleteTaskCacheHandler(params operations.DeleteTaskCacheParams) middleware.
 			Message: "Delete Task Cache Fail.",
 		})
 	}
+	utils.RecordLog(utils.Error, utils.DeleteTaskCache, "", fmt.Sprintf("TaskId: %d", params.ID), http.StatusUnauthorized)
 	return operations.NewDeleteTaskCacheOK().WithPayload(&models.OK{
 		Message: "ok",
 	})

@@ -19,7 +19,7 @@ type ListTaskURL struct {
 	Limit     int64
 	Offset    int64
 	Pvob      *string
-	Stream    *string
+	Status    *string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -81,12 +81,12 @@ func (o *ListTaskURL) Build() (*url.URL, error) {
 		qs.Set("pvob", pvobQ)
 	}
 
-	var streamQ string
-	if o.Stream != nil {
-		streamQ = *o.Stream
+	var statusQ string
+	if o.Status != nil {
+		statusQ = *o.Status
 	}
-	if streamQ != "" {
-		qs.Set("stream", streamQ)
+	if statusQ != "" {
+		qs.Set("status", statusQ)
 	}
 
 	_result.RawQuery = qs.Encode()

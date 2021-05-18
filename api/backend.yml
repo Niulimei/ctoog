@@ -205,7 +205,7 @@ paths:
           in: query
           required: false
           type: string
-        - name: stream
+        - name: status
           in: query
           required: false
           type: string

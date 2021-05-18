@@ -18,9 +18,11 @@ const (
 )
 
 func CreateUserHandler(params operations.CreateUserParams) middleware.Responder {
-	checkRet := CheckPermission(params.Authorization)
-	if checkRet != nil {
-		return checkRet
+	if !CheckPermission(params.Authorization) {
+		return operations.NewCreateUserInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusUnauthorized,
+			Message: "",
+		})
 	}
 	var id int
 	row := database.DB.QueryRow("SELECT id FROM user WHERE username=?", params.UserInfo.Username)
@@ -71,9 +73,11 @@ func GetUserHandler(param operations.GetUserParams) middleware.Responder {
 }
 
 func ListUsersHandler(param operations.ListUserParams) middleware.Responder {
-	checkRet := CheckPermission(param.Authorization)
-	if checkRet != nil {
-		return checkRet
+	if !CheckPermission(param.Authorization) {
+		return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusUnauthorized,
+			Message: "",
+		})
 	}
 	rows, err := database.DB.Query("SELECT count(1) over() AS total_rows,username,role_id FROM user ORDER BY id LIMIT ? OFFSET ?", param.Limit, param.Offset)
 	if err != nil {

@@ -71,7 +71,7 @@ type ListTaskParams struct {
 	/*
 	  In: query
 	*/
-	Stream *string
+	Status *string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -109,8 +109,8 @@ func (o *ListTaskParams) BindRequest(r *http.Request, route *middleware.MatchedR
 		res = append(res, err)
 	}
 
-	qStream, qhkStream, _ := qs.GetOK("stream")
-	if err := o.bindStream(qStream, qhkStream, route.Formats); err != nil {
+	qStatus, qhkStatus, _ := qs.GetOK("status")
+	if err := o.bindStatus(qStatus, qhkStatus, route.Formats); err != nil {
 		res = append(res, err)
 	}
 	if len(res) > 0 {
@@ -227,8 +227,8 @@ func (o *ListTaskParams) bindPvob(rawData []string, hasKey bool, formats strfmt.
 	return nil
 }
 
-// bindStream binds and validates parameter Stream from query.
-func (o *ListTaskParams) bindStream(rawData []string, hasKey bool, formats strfmt.Registry) error {
+// bindStatus binds and validates parameter Status from query.
+func (o *ListTaskParams) bindStatus(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
@@ -240,7 +240,7 @@ func (o *ListTaskParams) bindStream(rawData []string, hasKey bool, formats strfm
 	if raw == "" { // empty values pass all other validations
 		return nil
 	}
-	o.Stream = &raw
+	o.Status = &raw
 
 	return nil
 }

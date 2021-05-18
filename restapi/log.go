@@ -13,9 +13,11 @@ import (
 )
 
 func ListLogsHandler(param operations.ListLogsParams) middleware.Responder {
-	checkRet := CheckPermission(param.Authorization)
-	if checkRet != nil {
-		return checkRet
+	if !CheckPermission(param.Authorization) {
+		return operations.NewListLogsInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusUnauthorized,
+			Message: "",
+		})
 	}
 	var rows *sql.Rows
 	var err error

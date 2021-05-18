@@ -399,7 +399,7 @@ func init() {
           },
           {
             "type": "string",
-            "name": "stream",
+            "name": "status",
             "in": "query"
           },
           {
@@ -1722,7 +1722,7 @@ func init() {
           },
           {
             "type": "string",
-            "name": "stream",
+            "name": "status",
             "in": "query"
           },
           {

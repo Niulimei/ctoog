@@ -266,7 +266,7 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 		cwd, _ := os.Getwd()
 		cmdStr := fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/cleanCache.sh %d"`,
 			workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.TaskId)
-		//fmt.Println(cmdStr)
+		fmt.Println(cmdStr)
 		cmd := exec.Command("/bin/bash", "-c", cmdStr)
 		out, err := cmd.Output()
 		if err != nil {
