@@ -452,6 +452,100 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /schedules:
+    post:
+      summary: 创建定时任务
+      description: ''
+      operationId: CreateSchedule
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: workerInfo
+          in: body
+          description: schedule信息
+          required: true
+          schema:
+            $ref: '#/definitions/ScheduleModel'
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    get:
+      summary: 定时任务列表
+      description: ''
+      operationId: ListSchedule
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: limit
+          in: query
+          required: true
+          default: 0
+          type: integer
+        - name: offset
+          in: query
+          required: true
+          default: 0
+          type: integer
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 定时任务列表
+          schema:
+            $ref: '#/definitions/SchedulePageInfoModel'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /schedules/{id}:
+    put:
+      summary: 更新定时任务
+      description: ''
+      operationId: UpdateSchedule
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+        - name: scheduleInfo
+          in: body
+          description: 定时任务信息
+          required: true
+          schema:
+            $ref: '#/definitions/ScheduleModel'
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
 definitions:
   UserPageInfoModel:
     type: object
@@ -694,6 +788,30 @@ definitions:
       port:
         type: integer
         example: 80
+  ScheduleModel:
+    type: object
+    properties:
+      id:
+        type: integer
+      task_id:
+        type: integer
+      schedule:
+        type: string
+      status:
+        type: string
+  SchedulePageInfoModel:
+    type: object
+    properties:
+      taskInfo:
+        type: array
+        items:
+          $ref: '#/definitions/ScheduleModel'
+      limit:
+        type: integer
+      offset:
+        type: integer
+      count:
+        type: integer
   OK:
     type: object
     properties:

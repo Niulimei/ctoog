@@ -77,6 +77,15 @@ CREATE TABLE worker (
     register_time varchar (64)
 );
 
+CREATE TABLE schedule (
+    id integer PRIMARY KEY autoincrement,
+    status varchar (16),
+    schedule varchar (16),
+    task_id integer,
+    creator varchar (128),
+);
+
+
 INSERT INTO user (username,password,role_id) VALUES("admin", "b17eccdc6c06bd8e15928d583503adf9", 1);
 `
 
@@ -149,6 +158,14 @@ type MatchInfo struct {
 	TaskId    string `db:"task_id"`
 	Stream    string `db:"stream"`
 	GitBranch string `db:"git_branch"`
+}
+
+type ScheduleModel struct {
+	Id       int64
+	Status   string
+	TaskId   int64 `db:"task_ik"`
+	Schedule string
+	Creator  string
 }
 
 func init() {
