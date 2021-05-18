@@ -7,7 +7,7 @@ import TaskLogger from './components/TaskLogger';
 import { task as taskService } from '@/services';
 import TaskLogTable from './components/TaskLogTable';
 import { PageContainer } from '@ant-design/pro-layout';
-import { useHistory } from 'react-router-dom';
+import { history } from 'umi';
 import { message } from 'antd';
 
 
@@ -42,13 +42,20 @@ const TaskDetail = () => {
   const [taskDetail, setTaskDetail] = React.useState<Task.Detail>();
   const { id: taskId } = (location as any).query;
   const taskLoggerRef = React.useRef<any>();
-  const history = useHistory();
-
+  const [isLoading, setisLoading] = React.useState(false)
 
   /** 删除缓存 */
   const deleteCache = async () => {
-    await taskService.deleteCache(taskId)
-    message.success('删除缓存成功！');
+    setisLoading(true)
+    try {
+      await taskService.deleteCache(taskId)
+      message.success('删除缓存成功！');
+    } catch (error) {
+      message.error('删除缓存失败！')
+    }finally{
+      setisLoading(false)
+    }
+    
   }
   /** 删除任务 */
   const deleteTask = async () => {
@@ -78,7 +85,7 @@ const TaskDetail = () => {
         breadcrumb,
       }}
       footer={[
-        <Button onClick={deleteCache} >删除缓存</Button>,
+        <Button loading={isLoading} onClick={deleteCache} >删除缓存</Button>,
         <Button onClick={amendTask} type="primary">修改任务</Button>,
         <Button onClick={deleteTask} danger type="primary">删除任务</Button>,
       ]}
