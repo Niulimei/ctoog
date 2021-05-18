@@ -115,6 +115,220 @@ func init() {
         }
       }
     },
+    "/plans": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "迁移计划列表",
+        "operationId": "ListPlan",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "offset",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "迁移计划列表",
+            "schema": {
+              "$ref": "#/definitions/PlanPageInfoModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "创建迁移计划",
+        "operationId": "CreatePlan",
+        "parameters": [
+          {
+            "description": "计划信息",
+            "name": "planInfo",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PlanModel"
+            }
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/plans/{id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "迁移计划详情",
+        "operationId": "GetPlan",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "迁移计划信息",
+            "schema": {
+              "$ref": "#/definitions/PlanModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "更新迁移计划",
+        "operationId": "UpdatePlan",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "description": "迁移计划信息",
+            "name": "scheduleInfo",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PlanModel"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "删除迁移计划",
+        "operationId": "DeletePlan",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/pvobs": {
       "get": {
         "consumes": [
@@ -919,6 +1133,116 @@ func init() {
       "properties": {
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "PlanModel": {
+      "type": "object",
+      "properties": {
+        "actual_start_time": {
+          "type": "string"
+        },
+        "actual_switch_time": {
+          "type": "string"
+        },
+        "component": {
+          "type": "string"
+        },
+        "configLib": {
+          "description": "配置库",
+          "type": "string"
+        },
+        "dir": {
+          "type": "string"
+        },
+        "effect": {
+          "description": "影响范围",
+          "type": "string"
+        },
+        "group": {
+          "description": "事业群",
+          "type": "string"
+        },
+        "id": {
+          "description": "计划编号",
+          "type": "integer"
+        },
+        "originType": {
+          "description": "源仓库类型（cc、gerrit、私服）",
+          "type": "string"
+        },
+        "originUrl": {
+          "description": "gerrit或者私服的git地址",
+          "type": "string"
+        },
+        "plan_start_time": {
+          "type": "string"
+        },
+        "plan_switch_time": {
+          "type": "string"
+        },
+        "projectType": {
+          "description": "工程类型",
+          "type": "string"
+        },
+        "purpose": {
+          "description": "业务用途",
+          "type": "string"
+        },
+        "pvob": {
+          "type": "string"
+        },
+        "status": {
+          "description": "状态",
+          "type": "string"
+        },
+        "subsystem": {
+          "description": "物理子系统",
+          "type": "string"
+        },
+        "supporter": {
+          "description": "对接人姓名",
+          "type": "string"
+        },
+        "supporterTel": {
+          "description": "对接人电话",
+          "type": "integer"
+        },
+        "targetUrl": {
+          "description": "目标git地址",
+          "type": "string"
+        },
+        "team": {
+          "description": "项目组",
+          "type": "string"
+        },
+        "tip": {
+          "description": "备注",
+          "type": "string"
+        },
+        "translateType": {
+          "description": "自己迁移还是工作组迁移",
+          "type": "string"
+        }
+      }
+    },
+    "PlanPageInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "taskInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PlanModel"
+          }
         }
       }
     },
@@ -1345,6 +1669,220 @@ func init() {
         }
       }
     },
+    "/plans": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "迁移计划列表",
+        "operationId": "ListPlan",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "offset",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "迁移计划列表",
+            "schema": {
+              "$ref": "#/definitions/PlanPageInfoModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "创建迁移计划",
+        "operationId": "CreatePlan",
+        "parameters": [
+          {
+            "description": "计划信息",
+            "name": "planInfo",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PlanModel"
+            }
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/plans/{id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "迁移计划详情",
+        "operationId": "GetPlan",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "迁移计划信息",
+            "schema": {
+              "$ref": "#/definitions/PlanModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "更新迁移计划",
+        "operationId": "UpdatePlan",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "description": "迁移计划信息",
+            "name": "scheduleInfo",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PlanModel"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "删除迁移计划",
+        "operationId": "DeletePlan",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/pvobs": {
       "get": {
         "consumes": [
@@ -2149,6 +2687,116 @@ func init() {
       "properties": {
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "PlanModel": {
+      "type": "object",
+      "properties": {
+        "actual_start_time": {
+          "type": "string"
+        },
+        "actual_switch_time": {
+          "type": "string"
+        },
+        "component": {
+          "type": "string"
+        },
+        "configLib": {
+          "description": "配置库",
+          "type": "string"
+        },
+        "dir": {
+          "type": "string"
+        },
+        "effect": {
+          "description": "影响范围",
+          "type": "string"
+        },
+        "group": {
+          "description": "事业群",
+          "type": "string"
+        },
+        "id": {
+          "description": "计划编号",
+          "type": "integer"
+        },
+        "originType": {
+          "description": "源仓库类型（cc、gerrit、私服）",
+          "type": "string"
+        },
+        "originUrl": {
+          "description": "gerrit或者私服的git地址",
+          "type": "string"
+        },
+        "plan_start_time": {
+          "type": "string"
+        },
+        "plan_switch_time": {
+          "type": "string"
+        },
+        "projectType": {
+          "description": "工程类型",
+          "type": "string"
+        },
+        "purpose": {
+          "description": "业务用途",
+          "type": "string"
+        },
+        "pvob": {
+          "type": "string"
+        },
+        "status": {
+          "description": "状态",
+          "type": "string"
+        },
+        "subsystem": {
+          "description": "物理子系统",
+          "type": "string"
+        },
+        "supporter": {
+          "description": "对接人姓名",
+          "type": "string"
+        },
+        "supporterTel": {
+          "description": "对接人电话",
+          "type": "integer"
+        },
+        "targetUrl": {
+          "description": "目标git地址",
+          "type": "string"
+        },
+        "team": {
+          "description": "项目组",
+          "type": "string"
+        },
+        "tip": {
+          "description": "备注",
+          "type": "string"
+        },
+        "translateType": {
+          "description": "自己迁移还是工作组迁移",
+          "type": "string"
+        }
+      }
+    },
+    "PlanPageInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "taskInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PlanModel"
+          }
         }
       }
     },

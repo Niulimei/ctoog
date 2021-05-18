@@ -546,6 +546,152 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /plans:
+    post:
+      summary: 创建迁移计划
+      description: ''
+      operationId: CreatePlan
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: planInfo
+          in: body
+          description: 计划信息
+          required: true
+          schema:
+            $ref: '#/definitions/PlanModel'
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    get:
+      summary: 迁移计划列表
+      description: ''
+      operationId: ListPlan
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: limit
+          in: query
+          required: true
+          default: 0
+          type: integer
+        - name: offset
+          in: query
+          required: true
+          default: 0
+          type: integer
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 迁移计划列表
+          schema:
+            $ref: '#/definitions/PlanPageInfoModel'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /plans/{id}:
+    put:
+      summary: 更新迁移计划
+      description: ''
+      operationId: UpdatePlan
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+        - name: scheduleInfo
+          in: body
+          description: 迁移计划信息
+          required: true
+          schema:
+            $ref: '#/definitions/PlanModel'
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    get:
+      summary: 迁移计划详情
+      description: ''
+      operationId: GetPlan
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 迁移计划信息
+          schema:
+            $ref: '#/definitions/PlanModel'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      summary: 删除迁移计划
+      description: ''
+      operationId: DeletePlan
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
 definitions:
   UserPageInfoModel:
     type: object
@@ -806,6 +952,84 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ScheduleModel'
+      limit:
+        type: integer
+      offset:
+        type: integer
+      count:
+        type: integer
+  PlanModel:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: 计划编号
+      status:
+        type: string
+        description: 状态
+      originType:
+        type: string
+        description: 源仓库类型（cc、gerrit、私服）
+      pvob:
+        type: string
+      component:
+        type: string
+      dir:
+        type: string
+      originUrl:
+        type: string
+        description: gerrit或者私服的git地址
+      translateType:
+        type: string
+        description: 自己迁移还是工作组迁移
+      targetUrl:
+        type: string
+        description: 目标git地址
+      subsystem:
+        type: string
+        description: 物理子系统
+      configLib:
+        type: string
+        description: 配置库
+      group:
+        type: string
+        description: 事业群
+      team:
+        type: string
+        description: 项目组
+      supporter:
+        type: string
+        description: 对接人姓名
+      supporterTel:
+        type: integer
+        description: 对接人电话
+      tip:
+        type: string
+        description: 备注
+      projectType:
+        type: string
+        description: 工程类型
+      purpose:
+        type: string
+        description: 业务用途
+      effect:
+        type: string
+        description: 影响范围
+      plan_start_time:
+        type: string
+      plan_switch_time:
+        type: string
+      actual_start_time:
+        type: string
+      actual_switch_time:
+        type: string
+  PlanPageInfoModel:
+    type: object
+    properties:
+      taskInfo:
+        type: array
+        items:
+          $ref: '#/definitions/PlanModel'
       limit:
         type: integer
       offset:

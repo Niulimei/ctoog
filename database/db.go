@@ -82,9 +82,38 @@ CREATE TABLE schedule (
     status varchar (16),
     schedule varchar (16),
     task_id integer,
-    creator varchar (128),
+    creator varchar (128)
 );
 
+CREATE TABLE plan (
+    id integer PRIMARY KEY autoincrement,
+    status varchar (16), 
+    origin_type varchar(8),
+    pvob varchar(256),
+    component varchar (256),
+    dir varchar (256),
+    origin_url varchar(256),
+    translate_type varchar(8),
+    target_url varchar(256),
+    subsystem varchar(256),
+    config_lib varchar(256),
+    group varchar(256),
+    team varchar(256),
+    supporter varchar(256),
+    supporter_tel varchar(16),
+    creator varchar(256),
+    tip text,
+    project_type vartchar(8),
+    purpose text,
+    plan_start_time varchar(64),
+    plan_switch_time varchar(64),
+    actual_start_time varchar(64),
+    actual_switch_time varchar(64),
+    effect text,
+    extra1 text,
+    extra2 text,
+    extra3 text,
+);
 
 INSERT INTO user (username,password,role_id) VALUES("admin", "b17eccdc6c06bd8e15928d583503adf9", 1);
 `
