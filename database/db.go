@@ -97,7 +97,7 @@ CREATE TABLE plan (
     target_url varchar(256),
     subsystem varchar(256),
     config_lib varchar(256),
-    group varchar(256),
+    business_group varchar(256),
     team varchar(256),
     supporter varchar(256),
     supporter_tel varchar(16),
@@ -112,7 +112,7 @@ CREATE TABLE plan (
     effect text,
     extra1 text,
     extra2 text,
-    extra3 text,
+    extra3 text
 );
 
 INSERT INTO user (username,password,role_id) VALUES("admin", "b17eccdc6c06bd8e15928d583503adf9", 1);
@@ -209,7 +209,7 @@ type PlanModel struct {
 	TargetURL        string `db:"target_url"`
 	Subsystem        string
 	ConfigLib        string `db:"config_lib"`
-	Group            string
+	Group            string `db:"business_group"`
 	Team             string
 	Supporter        string
 	SupporterTel     string `db:"supporter_tel"`

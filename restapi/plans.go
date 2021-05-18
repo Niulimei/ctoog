@@ -81,7 +81,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 		database.DB.NamedExec(
 			"UPDATE plan SET origin_type = :origin_type, pvob = :pvob, component = :component, dir = :dir," +
 				"origin_url = :origin_url, translate_type = :translate_type, target_url = :target_url, " +
-				"subsystem = :subsystem, config_lib = :config_lib, group = :group, team = :team, supporter = :supporter," +
+				"subsystem = :subsystem, config_lib = :config_lib, business_group = :group, team = :team, supporter = :supporter," +
 				"supporter_tel = :supporter_tel, creator = :creator, tip = :tip, project_type = :project_type, " +
 				"purpose = :purpose, plan_start_time = :plan_start_time, plan_switch_time = :plan_switch_time, " +
 				"effect = :effect WHERE id = :id", plan,
