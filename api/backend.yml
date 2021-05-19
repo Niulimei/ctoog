@@ -1001,7 +1001,7 @@ definitions:
         type: string
         description: 对接人姓名
       supporterTel:
-        type: integer
+        type: string
         description: 对接人电话
       tip:
         type: string

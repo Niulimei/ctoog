@@ -72,7 +72,7 @@ type PlanModel struct {
 	Supporter string `json:"supporter,omitempty"`
 
 	// 对接人电话
-	SupporterTel int64 `json:"supporterTel,omitempty"`
+	SupporterTel string `json:"supporterTel,omitempty"`
 
 	// 目标git地址
 	TargetURL string `json:"targetUrl,omitempty"`

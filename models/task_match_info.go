@@ -7,7 +7,6 @@ package models
 
 import (
 	"context"
-
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
@@ -18,10 +17,10 @@ import (
 type TaskMatchInfo struct {
 
 	// git branch
-	GitBranch string `json:"gitBranch,omitempty" db:"git_branch"`
+	GitBranch JsonNullString `json:"gitBranch,omitempty" db:"git_branch"`
 
 	// stream
-	Stream string `json:"stream,omitempty"`
+	Stream JsonNullString `json:"stream,omitempty"`
 }
 
 // Validate validates this task match info

@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -174,6 +175,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 	planParams := params.PlanInfo
 	var plan database.PlanModel
 	err := database.DB.Get(&plan, "SELECT * FROM plan WHERE id = $1", planId)
+	var taskId int64
 	if err != nil || plan.ID == 0 {
 		log.Error("Get plan err:", err)
 		return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
@@ -189,11 +191,11 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 			})
 		}
 		tx, _ := database.DB.Begin()
-		if planParams.Status == "已迁移" {
-			tx.Exec("UPDATE status = $1, actual_start_time = $2 WHERE id = $3",
+		if planParams.Status == "已迁移" || planParams.Status == "未迁移" {
+			tx.Exec("UPDATE plan SET status = $1, actual_start_time = $2 WHERE id = $3",
 				planParams.Status, planParams.ActualStartTime, planId)
 		} else if planParams.Status == "已切换" {
-			tx.Exec("UPDATE status = $1, actual_switch_time = $2 WHERE id = $3",
+			tx.Exec("UPDATE plan SET status = $1, actual_switch_time = $2 WHERE id = $3",
 				planParams.Status, planParams.ActualSwitchTime, planId)
 		} else if planParams.Status == "迁移中" {
 			userToken := params.Authorization
@@ -204,16 +206,17 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 					Message: "鉴权失败",
 				})
 			}
-			tx.Exec("UPDATE status = $1 WHERE id = $2",
+			tx.Exec("UPDATE plan SET status = $1 WHERE id = $2",
 				planParams.Status, planId)
-			tx.Exec("INSERT INTO task (pvob, component, git_url,"+
+			newTaskResult, _ := tx.Exec("INSERT INTO task (pvob, component, git_url,"+
 				"status, last_completed_date_time, creator, dir, worker_id)"+
 				" VALUES ($1, $2, $3, 'init', '', $4, $5, 0)",
 				plan.Pvob, plan.Component, plan.TargetURL, username, plan.Dir)
+			taskId, _ = newTaskResult.LastInsertId()
 		}
 		tx.Commit()
 	} else {
-		err = copier.Copy(plan, planParams)
+		err = copier.Copy(&plan, planParams)
 		if err != nil {
 			log.Error(err)
 			return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
@@ -221,16 +224,27 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 				Message: err.Error(),
 			})
 		}
-		database.DB.NamedExec(
-			"UPDATE plan SET origin_type = :origin_type, pvob = :pvob, component = :component, dir = :dir,"+
+		plan.ID = planId
+		log.Debug("plan", plan)
+		_, err := database.DB.NamedExec(
+			"UPDATE plan SET origin_type = :origin_type, "+
 				"origin_url = :origin_url, translate_type = :translate_type, target_url = :target_url, "+
-				"subsystem = :subsystem, config_lib = :config_lib, business_group = :group, team = :team, supporter = :supporter,"+
+				"subsystem = :subsystem, config_lib = :config_lib, business_group = :business_group, team = :team, supporter = :supporter,"+
 				"supporter_tel = :supporter_tel, tip = :tip, project_type = :project_type, "+
 				"purpose = :purpose, plan_start_time = :plan_start_time, plan_switch_time = :plan_switch_time, "+
 				"effect = :effect WHERE id = :id", plan,
 		)
+		if err != nil {
+			log.Error("update plan failed:", err)
+		}
 	}
-	return operations.NewUpdatePlanCreated().WithPayload(&models.OK{
-		Message: "ok",
-	})
+	if taskId == 0 {
+		return operations.NewUpdatePlanCreated().WithPayload(&models.OK{
+			Message: "ok",
+		})
+	} else {
+		return operations.NewUpdatePlanCreated().WithPayload(&models.OK{
+			Message: strconv.FormatInt(taskId, 10),
+		})
+	}
 }

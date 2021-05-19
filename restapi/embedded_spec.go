@@ -1206,7 +1206,7 @@ func init() {
         },
         "supporterTel": {
           "description": "对接人电话",
-          "type": "integer"
+          "type": "string"
         },
         "targetUrl": {
           "description": "目标git地址",
@@ -2760,7 +2760,7 @@ func init() {
         },
         "supporterTel": {
           "description": "对接人电话",
-          "type": "integer"
+          "type": "string"
         },
         "targetUrl": {
           "description": "目标git地址",

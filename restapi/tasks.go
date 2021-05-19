@@ -121,7 +121,7 @@ func startTask(taskId int64) {
 		}
 		for _, match := range matchInfo {
 			workerTaskModel.Matches =
-				append(workerTaskModel.Matches, InnerMatchInfo{Stream: match.Stream, Branch: match.GitBranch})
+				append(workerTaskModel.Matches, InnerMatchInfo{Stream: match.Stream.String, Branch: match.GitBranch.String})
 		}
 		workerTaskModelByte, _ := json.Marshal(workerTaskModel)
 		req, _ := http.NewRequest(http.MethodPost, "http://"+workerUrl+"/new_task", bytes.NewBuffer(workerTaskModelByte))
@@ -166,8 +166,8 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		return middleware.Error(401, models.ErrorModel{Message: "鉴权失败"})
 	}
 	taskInfo := params.TaskInfo
-	if len(taskInfo.Dir) > 0 && !strings.HasPrefix(taskInfo.Dir, "/") {
-		taskInfo.Dir = "/" + taskInfo.Dir
+	if len(taskInfo.Dir.String) > 0 && !strings.HasPrefix(taskInfo.Dir.String, "/") {
+		taskInfo.Dir.String = "/" + taskInfo.Dir.String
 	}
 	r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
 		"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id)"+
@@ -196,9 +196,9 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	taskID := params.ID
 	task := &models.TaskModel{}
-	database.DB.Get(task, "SELECT cc_password,"+
+	log.Info(database.DB.Get(task, "SELECT cc_password,"+
 		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep"+
-		" FROM task WHERE id = $1", taskID)
+		" FROM task WHERE id = $1", taskID))
 	var matchInfo []*models.TaskMatchInfo
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", taskID)
 	task.MatchInfo = matchInfo
@@ -267,10 +267,10 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 	} else {
 		log.Debug("update params:", params.TaskLog)
 		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, "+
-			"git_url = $6, git_user = $7, git_password = $8, git_email = $9, include_empty = $10 WHERE id = $11",
+			"git_url = $6, git_user = $7, git_password = $8, git_email = $9, include_empty = $10, keep = $11 WHERE id = $12",
 			params.TaskLog.Pvob, params.TaskLog.Component, params.TaskLog.Dir, params.TaskLog.CcUser,
 			params.TaskLog.CcPassword, params.TaskLog.GitURL, params.TaskLog.GitUser, params.TaskLog.GitPassword,
-			params.TaskLog.GitEmail, params.TaskLog.IncludeEmpty, params.ID)
+			params.TaskLog.GitEmail, params.TaskLog.IncludeEmpty, params.TaskLog.Keep, params.ID)
 		if len(params.TaskLog.MatchInfo) > 0 {
 			tx.MustExec("DELETE FROM match_info WHERE task_id = $1", taskId)
 			for _, match := range params.TaskLog.MatchInfo {

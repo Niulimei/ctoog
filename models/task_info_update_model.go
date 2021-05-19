@@ -69,6 +69,9 @@ type TaskInfoUpdateModel struct {
 
 	// status
 	Status string `json:"status,omitempty"`
+
+	// keep
+	Keep string `json:"keep,omitempty"`
 }
 
 // Validate validates this task info update model
