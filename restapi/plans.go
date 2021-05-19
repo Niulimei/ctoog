@@ -16,7 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var planColumns = []string{"id", "status", "origin_type", "pvob", "component", "dir", "origin_url", "translate_type", "target_url", "subsystem", "config_lib", "business_group", "team", "supporter", "supporter_tel", "creator", "tip", "project_type", "purpose", "plan_start_time", "plan_switch_time", "actual_start_time", "actual_switch_time", "effect", "extra1", "extra2", "extra3"}
+var planColumns = []string{"id", "status", "origin_type", "pvob", "component", "dir", "origin_url", "translate_type", "target_url", "subsystem", "config_lib", "business_group", "team", "supporter", "supporter_tel", "creator", "tip", "project_type", "purpose", "plan_start_time", "plan_switch_time", "actual_start_time", "actual_switch_time", "effect", "task_id", "extra1", "extra2", "extra3"}
 
 func buildParams(params operations.ListPlanParams) map[string]string {
 	//TODO
@@ -117,6 +117,7 @@ func CreatePlanHandler(params operations.CreatePlanParams) middleware.Responder 
 		plan.ActualStartTime,
 		plan.ActualSwitchTime,
 		plan.Effect,
+		plan.TaskID,
 		plan.Extra1,
 		plan.Extra2,
 		plan.Extra3,
@@ -153,7 +154,22 @@ func GetPlanHandler(params operations.GetPlanParams) middleware.Responder {
 }
 
 func DeletePlanHandler(params operations.DeletePlanParams) middleware.Responder {
-	_, err := database.DB.Exec("delete from plan where id=?", params.ID)
+	var taskID int64
+	err := database.DB.Get(&taskID, "select task_id from plan where id=?", params.ID)
+	if err != nil {
+		return operations.NewDeletePlanInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+	_, err = database.DB.Exec("delete from task where id=?", taskID)
+	if err != nil {
+		return operations.NewDeletePlanInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Sql Error",
+		})
+	}
+	_, err = database.DB.Exec("delete from plan where id=?", params.ID)
 	if err != nil {
 		return operations.NewDeletePlanInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
@@ -170,7 +186,6 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 	planParams := params.PlanInfo
 	var plan database.PlanModel
 	err := database.DB.Get(&plan, "SELECT * FROM plan WHERE id = $1", planId)
-	var taskId int64
 	if err != nil || plan.ID == 0 {
 		log.Error("Get plan err:", err)
 		return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
@@ -178,6 +193,8 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 			Message: "没有发现计划",
 		})
 	}
+	var taskID int64
+	var errID error
 	if planParams.Status != "" {
 		if plan.TargetURL == "" {
 			return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
@@ -196,11 +213,30 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 			username := params.HTTPRequest.Header.Get("username")
 			tx.Exec("UPDATE plan SET status = $1 WHERE id = $2",
 				planParams.Status, planId)
-			newTaskResult, _ := tx.Exec("INSERT INTO task (pvob, component, git_url,"+
+			r, err := tx.Exec("INSERT OR REPLACE INTO task (id, pvob, component, git_url,"+
 				"status, last_completed_date_time, creator, dir, worker_id)"+
-				" VALUES ($1, $2, $3, 'init', '', $4, $5, 0)",
+				" VALUES (?, ?, ?, ?, 'init', '', ?, ?, 0)", plan.TaskID,
 				plan.Pvob, plan.Component, plan.TargetURL, username, plan.Dir)
-			taskId, _ = newTaskResult.LastInsertId()
+			if err != nil {
+				return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
+					Code:    500,
+					Message: err.Error(),
+				})
+			}
+			taskID, errID = r.LastInsertId()
+			if errID != nil {
+				return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
+					Code:    500,
+					Message: err.Error(),
+				})
+			}
+			_, err = tx.Exec("UPDATE plan SET task_id=? where id=?", taskID, planId)
+			if err != nil {
+				return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
+					Code:    500,
+					Message: err.Error(),
+				})
+			}
 		}
 		tx.Commit()
 	} else {
@@ -226,13 +262,13 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 			log.Error("update plan failed:", err)
 		}
 	}
-	if taskId == 0 {
+	if taskID == 0 {
 		return operations.NewUpdatePlanCreated().WithPayload(&models.OK{
 			Message: "ok",
 		})
 	} else {
 		return operations.NewUpdatePlanCreated().WithPayload(&models.OK{
-			Message: strconv.FormatInt(taskId, 10),
+			Message: strconv.FormatInt(taskID, 10),
 		})
 	}
 }

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/sevlyar/go-daemon"
 	"gopkg.in/yaml.v2"
