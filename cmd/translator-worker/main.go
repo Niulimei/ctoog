@@ -350,6 +350,7 @@ func main() {
 				return
 			} else {
 				fmt.Println("translator-worker is starting.")
+				time.Sleep(time.Millisecond * 500)
 				break
 			}
 		case "status":
