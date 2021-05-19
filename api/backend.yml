@@ -1026,7 +1026,7 @@ definitions:
   PlanPageInfoModel:
     type: object
     properties:
-      taskInfo:
+      planInfo:
         type: array
         items:
           $ref: '#/definitions/PlanModel'

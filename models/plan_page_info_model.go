@@ -29,7 +29,7 @@ type PlanPageInfoModel struct {
 	Offset int64 `json:"offset,omitempty"`
 
 	// task info
-	TaskInfo []*PlanModel `json:"taskInfo"`
+	PlanInfo []*PlanModel `json:"planInfo"`
 }
 
 // Validate validates this plan page info model
@@ -47,17 +47,17 @@ func (m *PlanPageInfoModel) Validate(formats strfmt.Registry) error {
 }
 
 func (m *PlanPageInfoModel) validateTaskInfo(formats strfmt.Registry) error {
-	if swag.IsZero(m.TaskInfo) { // not required
+	if swag.IsZero(m.PlanInfo) { // not required
 		return nil
 	}
 
-	for i := 0; i < len(m.TaskInfo); i++ {
-		if swag.IsZero(m.TaskInfo[i]) { // not required
+	for i := 0; i < len(m.PlanInfo); i++ {
+		if swag.IsZero(m.PlanInfo[i]) { // not required
 			continue
 		}
 
-		if m.TaskInfo[i] != nil {
-			if err := m.TaskInfo[i].Validate(formats); err != nil {
+		if m.PlanInfo[i] != nil {
+			if err := m.PlanInfo[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("taskInfo" + "." + strconv.Itoa(i))
 				}
@@ -86,10 +86,10 @@ func (m *PlanPageInfoModel) ContextValidate(ctx context.Context, formats strfmt.
 
 func (m *PlanPageInfoModel) contextValidateTaskInfo(ctx context.Context, formats strfmt.Registry) error {
 
-	for i := 0; i < len(m.TaskInfo); i++ {
+	for i := 0; i < len(m.PlanInfo); i++ {
 
-		if m.TaskInfo[i] != nil {
-			if err := m.TaskInfo[i].ContextValidate(ctx, formats); err != nil {
+		if m.PlanInfo[i] != nil {
+			if err := m.PlanInfo[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("taskInfo" + "." + strconv.Itoa(i))
 				}
