@@ -160,11 +160,7 @@ func startTask(taskId int64) {
 }
 
 func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder {
-	userToken := params.Authorization
-	username, verified := utils.Verify(userToken)
-	if !verified {
-		return middleware.Error(401, models.ErrorModel{Message: "鉴权失败"})
-	}
+	username := params.HTTPRequest.Header.Get("username")
 	taskInfo := params.TaskInfo
 	if len(taskInfo.Dir) > 0 && !strings.HasPrefix(taskInfo.Dir, "/") {
 		taskInfo.Dir = "/" + taskInfo.Dir
@@ -243,10 +239,7 @@ func buildParams(params operations.ListTaskParams) map[string]string {
 }
 
 func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
-	username, verified := utils.Verify(params.Authorization)
-	if !verified {
-		return middleware.Error(http.StatusUnauthorized, models.ErrorModel{Message: "鉴权失败"})
-	}
+	username := params.HTTPRequest.Header.Get("username")
 	whereSQL, _, sqlErr := buildTaskWhereSQL(buildParams(params))
 	if nil != sqlErr {
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: ""})
@@ -360,12 +353,6 @@ func UpdateTaskCommandOutHandler(params operations.UpdateTaskCommandOutParams) m
 }
 
 func DeleteTaskHandler(params operations.DeleteTaskParams) middleware.Responder {
-	if !CheckPermission(params.Authorization) {
-		return operations.NewDeleteTaskInternalServerError().WithPayload(&models.ErrorModel{
-			Code:    http.StatusUnauthorized,
-			Message: "",
-		})
-	}
 	code := deleteCache(params.ID)
 	if code != http.StatusOK {
 		return operations.NewDeleteTaskInternalServerError().WithPayload(&models.ErrorModel{
@@ -388,12 +375,6 @@ func DeleteTaskHandler(params operations.DeleteTaskParams) middleware.Responder 
 }
 
 func DeleteTaskCacheHandler(params operations.DeleteTaskCacheParams) middleware.Responder {
-	if !CheckPermission(params.Authorization) {
-		return operations.NewDeleteTaskCacheInternalServerError().WithPayload(&models.ErrorModel{
-			Code:    http.StatusUnauthorized,
-			Message: "",
-		})
-	}
 	code := deleteCache(params.ID)
 	if code != http.StatusOK {
 		return operations.NewDeleteTaskCacheInternalServerError().WithPayload(&models.ErrorModel{
