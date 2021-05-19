@@ -162,6 +162,13 @@ func DeletePlanHandler(params operations.DeletePlanParams) middleware.Responder 
 			Message: err.Error(),
 		})
 	}
+	code := DeleteCache(taskID)
+	if code != http.StatusOK {
+		return operations.NewDeleteTaskInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Delete Task Cache Fail.",
+		})
+	}
 	_, err = database.DB.Exec("delete from task where id=?", taskID)
 	if err != nil {
 		return operations.NewDeletePlanInternalServerError().WithPayload(&models.ErrorModel{

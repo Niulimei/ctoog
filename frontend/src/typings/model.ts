@@ -51,3 +51,34 @@ export namespace Task {
     duration: string;
   };
 }
+
+export namespace Plan {
+  export type Base = {
+    originType: string;
+    pvob: string;
+    component: string;
+    dir: string;
+    originUrl: string;
+    translateType: string;
+    targetUrl: string;
+    subsystem: string;
+    configLib: string;
+    group: string;
+    team: string;
+    supporter: string;
+    supporterTel: number;
+    tip: string;
+    projectType: string;
+    purpose: string;
+    effect: string;
+    plan_start_time: string;
+    plan_switch_time: string;
+  };
+  export type Item = Base & {
+    id: string;
+    status: string;
+    actual_start_time: string;
+    actual_switch_time: string;
+    task_id?: string;
+  };
+}

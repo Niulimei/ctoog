@@ -9,6 +9,7 @@ import styles from './style.less';
 
 const PrivacyPassword: React.FC<{ value: string }> = ({ value }) => {
   const [isHidden, toggleHidden] = useToggle(true);
+  if (!value) return <span>-</span>;
   return (
     <p className={styles.passwordField}>
       <span className={styles.value}>

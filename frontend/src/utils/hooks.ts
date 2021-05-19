@@ -1,4 +1,6 @@
 import React from 'react';
+import { task } from '@/services';
+import { useLocalObservable } from 'mobx-react';
 
 interface RequestParams {
   current?: number;
@@ -44,5 +46,58 @@ export const useCacheRequestParams = (key: string) => {
       setParams(data);
       storage.set(data);
     },
+  };
+};
+
+type OptionItem = Record<string, string>;
+type OptionType = 'component' | 'pvob' | 'stream';
+const initialOptionState = { component: {}, pvob: {}, stream: {} } as Record<
+  OptionType,
+  OptionItem
+>;
+/** 获取 options item */
+export const useClearCaseSelectEnum = () => {
+  const { set, ...restState } = useLocalObservable(() => ({
+    ...initialOptionState,
+    set(type: OptionType, options: OptionItem) {
+      this[type] = options;
+    },
+  }));
+
+  const listToOptions = (list: any[]) => {
+    // return { mockData: 'mockData' };
+    if (!Array.isArray(list)) return {};
+    return list.reduce(
+      (res, item) => ({
+        ...res,
+        [item]: item,
+      }),
+      {},
+    ) as OptionItem;
+  };
+
+  return {
+    async dispatch(type: OptionType, payload: Partial<Record<OptionType, string>>) {
+      let res;
+      switch (type) {
+        case 'pvob':
+          res = await task.getPvobs();
+          set('pvob', listToOptions(res));
+          break;
+        case 'component':
+          if (!payload.pvob) throw Error('pvob is required');
+          res = await task.getComponents(payload.pvob);
+          set('component', listToOptions(res));
+          break;
+        case 'stream':
+          if (!payload.pvob || !payload.component) throw Error('pvob is required');
+          res = await task.getStreams(payload.pvob, payload.component);
+          set('stream', listToOptions(res));
+          break;
+        default:
+          break;
+      }
+    },
+    valueEnum: restState,
   };
 };

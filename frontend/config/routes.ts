@@ -6,6 +6,12 @@
     access: 'isLogin',
     routes: [
       {
+        name: '计划列表',
+        path: '/task/plan',
+        component: './task/Plan',
+        exact: true,
+      },
+      {
         name: '任务列表',
         path: '/task/list',
         component: './task/List',
@@ -51,7 +57,7 @@
   },
   {
     path: '/',
-    redirect: '/task/list',
+    redirect: '/task/plan',
   },
   {
     component: './404',
