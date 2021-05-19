@@ -120,10 +120,10 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
                       </Button>
                     </Menu.Item>
                   )}
-                  {item.originType === 'ClearCase' && item.taskId && (
+                  {item.originType === 'ClearCase' && item.task_id && (
                     <Menu.Item>
                       <Button size="small" type="link" onClick={() => actions.gotoTaskDetail(item)}>
-                        跳转到任务详情页
+                        跳转任务详情页
                       </Button>
                     </Menu.Item>
                   )}

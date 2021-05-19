@@ -79,6 +79,6 @@ export namespace Plan {
     status: string;
     actual_start_time: string;
     actual_switch_time: string;
-    taskId?: string;
+    task_id?: string;
   };
 }

@@ -1,5 +1,4 @@
 import request from '@/utils/request';
-import type { Plan } from '@/typings/model';
 
 /** 创建计划计划 */
 export const createPlan = (data: any) => {
