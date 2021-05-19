@@ -5,6 +5,7 @@ import (
 	"ctgb/models"
 	"ctgb/restapi/operations"
 	"ctgb/utils"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"strings"
@@ -85,46 +86,45 @@ func CreatePlanHandler(params operations.CreatePlanParams) middleware.Responder 
 	}
 	var plan database.PlanModel
 
-	err := copier.Copy(plan, params.PlanInfo)
+	err := copier.Copy(&plan, params.PlanInfo)
 	if err != nil {
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: ""})
 	}
 	plan.Creator = username
 	var ph []string
-	for i := 1; i <= len(planColumns); i++ {
+	for i := 1; i <= len(planColumns[1:]); i++ {
 		ph = append(ph, "?")
 	}
-	_, err = database.DB.Exec(
-		fmt.Sprintf("INSERT INTO plan (%s) VALUES (%s)",
-			strings.Join(planColumns, ","), strings.Join(ph, ","),
-			plan.ID,
-			plan.Status,
-			plan.OriginType,
-			plan.Pvob,
-			plan.Component,
-			plan.Dir,
-			plan.OriginURL,
-			plan.TranslateType,
-			plan.TargetURL,
-			plan.Subsystem,
-			plan.ConfigLib,
-			plan.Group,
-			plan.Team,
-			plan.Supporter,
-			plan.SupporterTel,
-			plan.Creator,
-			plan.Tip,
-			plan.ProjectType,
-			plan.Purpose,
-			plan.PlanStartTime,
-			plan.PlanSwitchTime,
-			plan.ActualStartTime,
-			plan.ActualSwitchTime,
-			plan.Effect,
-			plan.Extra1,
-			plan.Extra2,
-			plan.Extra3,
-		))
+	sqlStr := fmt.Sprintf("INSERT INTO plan (%s) VALUES (%s)",
+		strings.Join(planColumns[1:], ","), strings.Join(ph, ","))
+	_, err = database.DB.Exec(sqlStr,
+		plan.Status,
+		plan.OriginType,
+		plan.Pvob,
+		plan.Component,
+		plan.Dir,
+		plan.OriginURL,
+		plan.TranslateType,
+		plan.TargetURL,
+		plan.Subsystem,
+		plan.ConfigLib,
+		plan.Group,
+		plan.Team,
+		plan.Supporter,
+		plan.SupporterTel,
+		plan.Creator,
+		plan.Tip,
+		plan.ProjectType,
+		plan.Purpose,
+		plan.PlanStartTime,
+		plan.PlanSwitchTime,
+		plan.ActualStartTime,
+		plan.ActualSwitchTime,
+		plan.Effect,
+		plan.Extra1,
+		plan.Extra2,
+		plan.Extra3,
+	)
 	if err != nil {
 		return operations.NewDeletePlanInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
@@ -137,23 +137,23 @@ func CreatePlanHandler(params operations.CreatePlanParams) middleware.Responder 
 }
 
 func GetPlanHandler(params operations.GetPlanParams) middleware.Responder {
-	var plan *database.PlanModel
+	var plan = &database.PlanModel{}
 	err := database.DB.Get(plan, "select * from plan where id=?", params.ID)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return operations.NewGetPlanInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
 			Message: "Sql Error",
 		})
 	}
-	var planModel *models.PlanModel
-	err = copier.Copy(planModel, plan)
+	var planModel models.PlanModel
+	err = copier.Copy(&planModel, plan)
 	if err != nil {
 		return operations.NewGetPlanInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
 			Message: err.Error(),
 		})
 	}
-	return operations.NewGetPlanOK().WithPayload(planModel)
+	return operations.NewGetPlanOK().WithPayload(&planModel)
 }
 
 func DeletePlanHandler(params operations.DeletePlanParams) middleware.Responder {
