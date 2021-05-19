@@ -57,6 +57,12 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		DeletePlanHandler: DeletePlanHandlerFunc(func(params DeletePlanParams) middleware.Responder {
 			return middleware.NotImplemented("operation DeletePlan has not yet been implemented")
 		}),
+		DeleteTaskHandler: DeleteTaskHandlerFunc(func(params DeleteTaskParams) middleware.Responder {
+			return middleware.NotImplemented("operation DeleteTask has not yet been implemented")
+		}),
+		DeleteTaskCacheHandler: DeleteTaskCacheHandlerFunc(func(params DeleteTaskCacheParams) middleware.Responder {
+			return middleware.NotImplemented("operation DeleteTaskCache has not yet been implemented")
+		}),
 		GetPlanHandler: GetPlanHandlerFunc(func(params GetPlanParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetPlan has not yet been implemented")
 		}),
@@ -160,6 +166,10 @@ type TranslatorAPI struct {
 	CreateUserHandler CreateUserHandler
 	// DeletePlanHandler sets the operation handler for the delete plan operation
 	DeletePlanHandler DeletePlanHandler
+	// DeleteTaskHandler sets the operation handler for the delete task operation
+	DeleteTaskHandler DeleteTaskHandler
+	// DeleteTaskCacheHandler sets the operation handler for the delete task cache operation
+	DeleteTaskCacheHandler DeleteTaskCacheHandler
 	// GetPlanHandler sets the operation handler for the get plan operation
 	GetPlanHandler GetPlanHandler
 	// GetTaskHandler sets the operation handler for the get task operation
@@ -289,6 +299,12 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.DeletePlanHandler == nil {
 		unregistered = append(unregistered, "DeletePlanHandler")
+	}
+	if o.DeleteTaskHandler == nil {
+		unregistered = append(unregistered, "DeleteTaskHandler")
+	}
+	if o.DeleteTaskCacheHandler == nil {
+		unregistered = append(unregistered, "DeleteTaskCacheHandler")
 	}
 	if o.GetPlanHandler == nil {
 		unregistered = append(unregistered, "GetPlanHandler")
@@ -455,6 +471,14 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/plans/{id}"] = NewDeletePlan(o.context, o.DeletePlanHandler)
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/tasks/{id}"] = NewDeleteTask(o.context, o.DeleteTaskHandler)
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/tasks/cache/{id}"] = NewDeleteTaskCache(o.context, o.DeleteTaskCacheHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

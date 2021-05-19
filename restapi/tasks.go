@@ -204,6 +204,26 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	return operations.NewGetTaskOK().WithPayload(taskDetail)
 }
 
+var taskColumns = []string{"pvob", "component", "git_url", "id", "last_completed_date_time", "status", "include_empty", "git_email", "dir", "keep"}
+
+func buildTaskWhereSQL(queryParams map[string]string) (string, []interface{}, error) {
+	l := len(queryParams)
+	if l > 0 {
+		sqlKeys := make([]string, 0, l)
+		sqlValues := make([]interface{}, 0, l)
+
+		placeholderIndex := int32(1)
+		for k, v := range queryParams {
+			switch k {
+			case "pvob", "component", "status":
+				sqlKeys, sqlValues, placeholderIndex = utils.GeneWhereLike(k, v, placeholderIndex, sqlKeys, sqlValues)
+			}
+		}
+		return utils.GeneWhereSQL(sqlKeys, sqlValues)
+	}
+	return "", nil, nil
+}
+
 func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	username := params.HTTPRequest.Header.Get("username")
 	var query, queryCount string
@@ -317,4 +337,93 @@ func UpdateTaskCommandOutHandler(params operations.UpdateTaskCommandOutParams) m
 	return operations.NewUpdateTaskCommandOutCreated().WithPayload(&models.OK{
 		Message: "ok",
 	})
+}
+
+func DeleteTaskHandler(params operations.DeleteTaskParams) middleware.Responder {
+	code := deleteCache(params.ID)
+	if code != http.StatusOK {
+		return operations.NewDeleteTaskInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Delete Task Cache Fail.",
+		})
+	}
+	utils.RecordLog(utils.Error, utils.DeleteTaskCache, "", fmt.Sprintf("TaskId: %d", params.ID), 0)
+	_, err := database.DB.Exec("delete from task where id=?", params.ID)
+	if err != nil {
+		return operations.NewDeleteTaskInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Delete Task Fail.",
+		})
+	}
+	utils.RecordLog(utils.Error, utils.DeleteTask, "", fmt.Sprintf("TaskId: %d", params.ID), 0)
+	return operations.NewDeleteTaskOK().WithPayload(&models.OK{
+		Message: "ok",
+	})
+}
+
+func DeleteTaskCacheHandler(params operations.DeleteTaskCacheParams) middleware.Responder {
+	code := deleteCache(params.ID)
+	if code != http.StatusOK {
+		return operations.NewDeleteTaskCacheInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Delete Task Cache Fail.",
+		})
+	}
+	utils.RecordLog(utils.Error, utils.DeleteTaskCache, "", fmt.Sprintf("TaskId: %d", params.ID), http.StatusUnauthorized)
+	return operations.NewDeleteTaskCacheOK().WithPayload(&models.OK{
+		Message: "ok",
+	})
+}
+
+type TaskDelInfo struct {
+	TaskId     int64  `json:"task_id"`
+	CcPassword string `json:"cc_password"`
+	CcUser     string `json:"cc_user"`
+	WorkerURL  string `json:"worker_url,omitempty"`
+}
+
+func getTaskInfo(taskID int64) *TaskDelInfo {
+	row := database.DB.QueryRow("select cc_user,cc_password,worker_id from task where id=?", taskID)
+	if row == nil || row.Err() != nil {
+		return nil
+	}
+	var u, p string
+	var wID int64
+	err := row.Scan(&u, &p, &wID)
+	if err != nil {
+		return nil
+	}
+
+	row1 := database.DB.QueryRow("select worker_url from worker where id=?", wID)
+	if row1 == nil || row1.Err() != nil {
+		return nil
+	}
+	var wUrl string
+	err1 := row1.Scan(&wUrl)
+	if err1 != nil {
+		return nil
+	}
+	return &TaskDelInfo{
+		TaskId:     taskID,
+		CcPassword: p,
+		CcUser:     u,
+		WorkerURL:  wUrl,
+	}
+}
+
+func deleteCache(taskID int64) int {
+	taskInfo := getTaskInfo(taskID)
+	if taskInfo == nil {
+		return http.StatusInternalServerError
+	}
+	workerUrl := taskInfo.WorkerURL
+	taskInfo.WorkerURL = ""
+	workerTaskModelByte, _ := json.Marshal(taskInfo)
+	req, _ := http.NewRequest(http.MethodPost, "http://"+workerUrl+"/delete_task", bytes.NewBuffer(workerTaskModelByte))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return http.StatusInternalServerError
+	}
+	return http.StatusOK
 }

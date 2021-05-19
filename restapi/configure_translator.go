@@ -60,6 +60,9 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	api.UpdatePlanHandler = operations.UpdatePlanHandlerFunc(UpdatePlanHandler)
 	api.DeletePlanHandler = operations.DeletePlanHandlerFunc(DeletePlanHandler)
 	api.CreatePlanHandler = operations.CreatePlanHandlerFunc(CreatePlanHandler)
+	api.DeleteTaskHandler = operations.DeleteTaskHandlerFunc(DeleteTaskHandler)
+	api.DeleteTaskCacheHandler = operations.DeleteTaskCacheHandlerFunc(DeleteTaskCacheHandler)
+
 	api.PreServerShutdown = func() {}
 
 	api.ServerShutdown = func() {}

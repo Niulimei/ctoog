@@ -603,6 +603,21 @@ func init() {
           },
           {
             "type": "string",
+            "name": "pvob",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "name": "component",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "type": "string",
             "name": "Authorization",
             "in": "header",
             "required": true
@@ -651,6 +666,46 @@ func init() {
         ],
         "responses": {
           "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/tasks/cache/{id}": {
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "任务缓存删除",
+        "operationId": "DeleteTaskCache",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
             "description": "成功",
             "schema": {
               "$ref": "#/definitions/OK"
@@ -862,6 +917,44 @@ func init() {
         ],
         "responses": {
           "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "任务删除",
+        "operationId": "DeleteTask",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
             "description": "成功",
             "schema": {
               "$ref": "#/definitions/OK"
@@ -2163,6 +2256,21 @@ func init() {
           },
           {
             "type": "string",
+            "name": "pvob",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "name": "component",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "type": "string",
             "name": "Authorization",
             "in": "header",
             "required": true
@@ -2211,6 +2319,46 @@ func init() {
         ],
         "responses": {
           "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/tasks/cache/{id}": {
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "任务缓存删除",
+        "operationId": "DeleteTaskCache",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
             "description": "成功",
             "schema": {
               "$ref": "#/definitions/OK"
@@ -2422,6 +2570,44 @@ func init() {
         ],
         "responses": {
           "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "任务删除",
+        "operationId": "DeleteTask",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
             "description": "成功",
             "schema": {
               "$ref": "#/definitions/OK"
