@@ -41,10 +41,7 @@ func buildPlanWhereSQL(queryParams map[string]string) (string, []interface{}, er
 }
 
 func ListPlanHandler(params operations.ListPlanParams) middleware.Responder {
-	username, verified := utils.Verify(params.Authorization)
-	if !verified {
-		return middleware.Error(http.StatusUnauthorized, models.ErrorModel{Message: "鉴权失败"})
-	}
+	username := params.HTTPRequest.Header.Get("username")
 	whereSQL, _, sqlErr := buildPlanWhereSQL(buildParams(params))
 	if nil != sqlErr {
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: ""})
@@ -81,10 +78,7 @@ func ListPlanHandler(params operations.ListPlanParams) middleware.Responder {
 }
 
 func CreatePlanHandler(params operations.CreatePlanParams) middleware.Responder {
-	username, verified := utils.Verify(params.Authorization)
-	if !verified {
-		return middleware.Error(http.StatusUnauthorized, models.ErrorModel{Message: "鉴权失败"})
-	}
+	username := params.HTTPRequest.Header.Get("username")
 	var plan database.PlanModel
 
 	err := copier.Copy(&plan, params.PlanInfo)
@@ -92,6 +86,7 @@ func CreatePlanHandler(params operations.CreatePlanParams) middleware.Responder 
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: ""})
 	}
 	plan.Creator = username
+	plan.Status = "未迁移"
 	var ph []string
 	for i := 1; i <= len(planColumns[1:]); i++ {
 		ph = append(ph, "?")
@@ -198,14 +193,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 			tx.Exec("UPDATE plan SET status = $1, actual_switch_time = $2 WHERE id = $3",
 				planParams.Status, planParams.ActualSwitchTime, planId)
 		} else if planParams.Status == "迁移中" {
-			userToken := params.Authorization
-			username, verified := utils.Verify(userToken)
-			if !verified {
-				return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
-					Code:    401,
-					Message: "鉴权失败",
-				})
-			}
+			username := params.HTTPRequest.Header.Get("username")
 			tx.Exec("UPDATE plan SET status = $1 WHERE id = $2",
 				planParams.Status, planId)
 			newTaskResult, _ := tx.Exec("INSERT INTO task (pvob, component, git_url,"+

@@ -842,6 +842,8 @@ definitions:
         type: string
       includeEmpty:
         type: boolean
+      keep:
+        type: string
       matchInfo:
         type: array
         items:

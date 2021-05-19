@@ -7,6 +7,7 @@ import (
 	"ctgb/utils"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"ctgb/restapi/operations"
 
@@ -83,7 +84,16 @@ func configureServer(s *http.Server, scheme, addr string) {
 // The middleware configuration is for the handler executors. These do not apply to the swagger.json document.
 // The middleware executes after routing but before authentication, binding and validation.
 func setupMiddlewares(handler http.Handler) http.Handler {
-	return handler
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token := r.Header.Get("Authorization")
+		username, valid := utils.Verify(token)
+		if !valid && !strings.HasSuffix(r.RequestURI, "/login") {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		r.Header.Set("username", username)
+		handler.ServeHTTP(w, r)
+	})
 }
 
 // The middleware configuration happens before anything, this middleware also applies to serving the swagger.json document.

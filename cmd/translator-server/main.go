@@ -44,14 +44,14 @@ func init() {
 // Make sure not to overwrite this file after you generated it because all your edits would be lost!
 
 func main() {
-	usage := "Usage: ./translator-server start | stop | status"
+	usage := "Usage: ./translator-server start | stop | status | restart"
 	if len(os.Args) > 1 {
 		command := os.Args[1]
 		switch command {
 		case "start":
 			fmt.Println("translator-server is starting.")
 			break
-		case "stop":
+		case "stop", "restart":
 			pid, _ := ioutil.ReadFile("./translator-server.pid")
 			if string(pid) == "" {
 				fmt.Println("translator-server is not running.")
@@ -61,7 +61,12 @@ func main() {
 				utils.Exec("kill " + string(pid))
 				fmt.Println("translator-server has been stopped.")
 			}
-			return
+			if command == "stop" {
+				return
+			} else {
+				fmt.Println("translator-server is starting.")
+				break
+			}
 		case "status":
 			pid, _ := ioutil.ReadFile("./translator-server.pid")
 			if string(pid) == "" {

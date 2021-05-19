@@ -160,11 +160,7 @@ func startTask(taskId int64) {
 }
 
 func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder {
-	userToken := params.Authorization
-	username, verified := utils.Verify(userToken)
-	if !verified {
-		return middleware.Error(401, models.ErrorModel{Message: "鉴权失败"})
-	}
+	username := params.HTTPRequest.Header.Get("username")
 	taskInfo := params.TaskInfo
 	if len(taskInfo.Dir.String) > 0 && !strings.HasPrefix(taskInfo.Dir.String, "/") {
 		taskInfo.Dir.String = "/" + taskInfo.Dir.String
@@ -209,10 +205,7 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 }
 
 func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
-	username, verified := utils.Verify(params.Authorization)
-	if !verified {
-		return middleware.Error(http.StatusUnauthorized, models.ErrorModel{Message: "鉴权失败"})
-	}
+	username := params.HTTPRequest.Header.Get("username")
 	var query, queryCount string
 	user := getUserInfo(username)
 	if user.RoleID == int64(AdminRole) {
