@@ -8,7 +8,7 @@
 export default {
   dev: {
     '/api/': {
-      target: 'http://192.168.100.10:8993/#/task/list',
+      target: 'http://192.168.100.10:8993',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },

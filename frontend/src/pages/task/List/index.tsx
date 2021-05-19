@@ -6,7 +6,7 @@ import Table from '@ant-design/pro-table';
 /** UploadOutlined */
 import { DownOutlined } from '@ant-design/icons';
 import { task as taskService } from '@/services';
-import TaskCreator from './components/TaskCreator';
+import TaskCreator from '../TaskCreator';
 import { useCacheRequestParams } from '@/utils/hooks';
 /** Upload */
 import { Button, message, Dropdown, Menu } from 'antd';
@@ -22,12 +22,14 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
       title: '任务编号',
       dataIndex: 'id',
       width: 80,
+      hideInSearch: true,
     },
     {
       title: 'CC PVOB',
       dataIndex: 'pvob',
       ellipsis: true,
       width: 120,
+      // search:
     },
     {
       title: 'CC Component',
@@ -40,6 +42,7 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
       dataIndex: 'gitRepo',
       ellipsis: true,
       width: 180,
+      hideInSearch: true,
     },
     {
       title: '当前状态',
@@ -52,14 +55,16 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
       title: '最后一次完成时间',
       ellipsis: true,
       width: 130,
-      renderText(item: Task.Item) {
-        return moment(item.lastCompleteDateTime).format('MM-DD HH:mm');
+      renderText({ lastCompleteDateTime }: Task.Item) {
+        return lastCompleteDateTime ? moment(lastCompleteDateTime).format('MM-DD HH:mm') : '-';
       },
+      hideInSearch: true,
     },
     {
       title: '操作',
       width: 120,
       align: 'center',
+      hideInSearch: true,
       // @ts-ignore
       render(item: Task.Item) {
         return (
@@ -115,7 +120,6 @@ const TaskList: React.FC = () => {
         await taskService.startTask(id);
         message.success('迁移任务启动成功');
       } catch (err) {
-        // message.error('迁移任务启动出现异常');
         // eslint-disable-next-line no-console
         console.error(err);
       }
@@ -178,6 +182,7 @@ const TaskList: React.FC = () => {
             });
           },
         }}
+        search={false}
         request={async ({ pageSize = 10, current }) => {
           const { taskInfo, count } = await taskService.getTasks({
             offset: (current! - 1 || 0) * pageSize,
@@ -207,7 +212,6 @@ const TaskList: React.FC = () => {
             新建迁移任务
           </Button>,
         ]}
-        search={false}
       />
       <TaskCreator
         actionRef={creatorModalRef}

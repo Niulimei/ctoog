@@ -6,9 +6,9 @@ import classnames from 'classnames';
 import { guid } from '@/utils/utils';
 import type { FormInstance } from 'antd/es/form';
 import { task as taskService } from '@/services';
+import { useClearCaseSelectEnum } from '@/utils/hooks';
 import { Button, message, Form, Checkbox, Input } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { renderCardTitle, useSelectOptions } from '../../helper';
 import { ModalForm, ProFormSelect as FormSelect, ProFormText } from '@ant-design/pro-form';
 
 import styles from './style.less';
@@ -17,7 +17,7 @@ interface IModalCreatorProps {
   /** 创建成功回调 */
   onSuccess?: () => void;
   actionRef?: React.MutableRefObject<{
-    openModal: (mode?: 'create' | 'update', id?: string) => void;
+    openModal: (mode?: 'create' | 'update' | 'planUpdate', id?: string) => void;
   }>;
 }
 
@@ -31,6 +31,10 @@ interface IFormFields {
   gitPassword: string;
   matchInfo: { stream: string; gitBranch: string }[];
 }
+
+const renderCardTitle = (title: string) => {
+  return <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>{title}</h3>;
+};
 
 // 绑定 getPopupContainer
 const ProFormSelect = ({ children, ...props }: React.ComponentProps<any>) => {
@@ -131,7 +135,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   const { onSuccess, actionRef } = props;
   const [branchFieldNum, setBranchFieldNum] = React.useState(1);
   const [form] = Form.useForm<IFormFields>();
-  const { dispatch: optionDispatch, options } = useSelectOptions();
+  const { dispatch: optionDispatch, valueEnum } = useClearCaseSelectEnum();
   const [visible, toggleVisible] = useToggle(false);
   const modalRef = React.useRef<{ taskId: string }>({ taskId: '' });
 
@@ -139,14 +143,15 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
    * 1. 回填表单数据
    * 2. pvob component matchInfo 为可修改配置，其他表单项只读
    */
-  const [isUpdateMode, setIsUpdateMode] = useToggle(false);
+  const [mode, setMode] = React.useState<'create' | 'update' | 'planUpdate'>();
+  const isUpdateMode = (data = mode) => data && ['update', 'planUpdate'].includes(data);
 
   React.useImperativeHandle(actionRef, () => {
     return {
-      async openModal(mode, id) {
+      async openModal(modalMode, id) {
         form.resetFields();
-        setIsUpdateMode(mode === 'update');
-        if (mode === 'update' && id) {
+        setMode(modalMode);
+        if (isUpdateMode(modalMode) && id) {
           modalRef.current.taskId = id;
           const { taskModel: fieldValues } = await taskService.getTaskDetail(id);
           const { pvob, component, matchInfo } = fieldValues;
@@ -154,7 +159,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
           optionDispatch('stream', { component, pvob });
 
           form.setFieldsValue(fieldValues);
-          setBranchFieldNum(matchInfo.length);
+          setBranchFieldNum(matchInfo ? matchInfo.length : 1);
           toggleVisible(true);
         } else {
           toggleVisible(true);
@@ -167,11 +172,11 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
     optionDispatch('pvob', {});
   });
 
-  const actionText = isUpdateMode ? '更新' : '新建';
+  const actionText = isUpdateMode() ? '更新' : '新建';
 
   const finishHandler = async (values: any) => {
     try {
-      if (isUpdateMode) {
+      if (isUpdateMode()) {
         await taskService.updateTask(modalRef.current.taskId, values);
       } else {
         await taskService.createTask(values);
@@ -241,21 +246,9 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               required: true,
               component: ProFormSelect,
               placeholder: '请选择 PVOB',
-              valueEnum: options.pvob,
+              valueEnum: valueEnum.pvob,
               // props
               showSearch: true,
-              // async request(data: any) {
-              //   const { keyWords } = data;
-              //   return transform(
-              //     options.pvob,
-              //     (result, val) => {
-              //       if (!keyWords || new RegExp(keyWords, 'i').test(val)) {
-              //         result.push({ label: val, value: val });
-              //       }
-              //     },
-              //     [] as Record<'label' | 'value', string>[],
-              //   );
-              // },
             },
             {
               name: 'gitURL',
@@ -268,9 +261,10 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             {
               name: 'component',
               required: true,
+              showSearch: true,
               component: ProFormSelect,
               placeholder: '请选择组件',
-              valueEnum: options.component,
+              valueEnum: valueEnum.component,
             },
             {
               name: 'gitEmail',
@@ -285,7 +279,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               name: 'dir',
               component: ProFormText,
               placeholder: '请输入组件子目录，如果为空则迁移整个组件',
-              valueEnum: options.component,
+              valueEnum: valueEnum.component,
             },
           ],
           [
@@ -326,7 +320,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               name: ['matchInfo', index, 'stream'],
               component: ProFormSelect,
               placeholder: '请选择开发流',
-              valueEnum: options.stream,
+              valueEnum: valueEnum.stream,
+              showSearch: true,
               rules: [
                 {
                   // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -341,7 +336,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               name: ['matchInfo', index, 'gitBranch'],
               component: ProFormText,
               placeholder: '请输入Git对应分支',
-              valueEnum: options.stream,
+              valueEnum: valueEnum.stream,
               rules: [
                 {
                   // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -397,7 +392,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             >
               <Input
                 size="small"
-                disabled={isUpdateMode}
+                disabled={mode === 'update'}
                 style={{ width: 128, marginLeft: 12 }}
                 placeholder="请输入占位文件名"
               />
