@@ -91,6 +91,7 @@ func CreatePlanHandler(params operations.CreatePlanParams) middleware.Responder 
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: ""})
 	}
 	plan.Creator = username
+	plan.Status = "未迁移"
 	var ph []string
 	for i := 1; i <= len(planColumns[1:]); i++ {
 		ph = append(ph, "?")
