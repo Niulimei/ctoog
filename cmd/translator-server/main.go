@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 	"strings"
 
 	"github.com/sevlyar/go-daemon"
@@ -65,6 +66,7 @@ func main() {
 				return
 			} else {
 				fmt.Println("translator-server is starting.")
+				time.Sleep(time.Millisecond * 500)
 				break
 			}
 		case "status":
