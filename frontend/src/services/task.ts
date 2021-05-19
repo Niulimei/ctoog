@@ -56,3 +56,16 @@ export const getStreams = (pvobId: string, componentId: string) => {
 export const getLogOutput = (logId: string) => {
   return request.get(`/tasks/cmdout/${logId}`);
 };
+
+/** 按钮删除任务 */
+export const deleteTask = (taskId: string) => {
+  return request.delete(`/tasks/${taskId}`)
+  
+}
+
+/** 按钮删除缓存 */
+export const deleteCache = (taskId: string) => {
+  return request.delete(`/tasks/cache/${taskId}`)
+}
+
+
