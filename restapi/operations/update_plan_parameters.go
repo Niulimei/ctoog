@@ -77,9 +77,9 @@ func (o *UpdatePlanParams) BindRequest(r *http.Request, route *middleware.Matche
 		var body models.PlanModel
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("scheduleInfo", "body", ""))
+				res = append(res, errors.Required("planInfo", "body", ""))
 			} else {
-				res = append(res, errors.NewParseError("scheduleInfo", "body", "", err))
+				res = append(res, errors.NewParseError("planInfo", "body", "", err))
 			}
 		} else {
 			// validate body object
@@ -97,7 +97,7 @@ func (o *UpdatePlanParams) BindRequest(r *http.Request, route *middleware.Matche
 			}
 		}
 	} else {
-		res = append(res, errors.Required("scheduleInfo", "body", ""))
+		res = append(res, errors.Required("planInfo", "body", ""))
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

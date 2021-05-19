@@ -267,7 +267,7 @@ func init() {
           },
           {
             "description": "迁移计划信息",
-            "name": "scheduleInfo",
+            "name": "planInfo",
             "in": "body",
             "required": true,
             "schema": {
@@ -1238,7 +1238,7 @@ func init() {
         "offset": {
           "type": "integer"
         },
-        "taskInfo": {
+        "planInfo": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/PlanModel"
@@ -1378,6 +1378,9 @@ func init() {
         },
         "includeEmpty": {
           "type": "boolean"
+        },
+        "keep": {
+          "type": "string"
         },
         "lastCompleteDateTime": {
           "type": "string"
@@ -1821,7 +1824,7 @@ func init() {
           },
           {
             "description": "迁移计划信息",
-            "name": "scheduleInfo",
+            "name": "planInfo",
             "in": "body",
             "required": true,
             "schema": {
@@ -2792,7 +2795,7 @@ func init() {
         "offset": {
           "type": "integer"
         },
-        "taskInfo": {
+        "planInfo": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/PlanModel"
@@ -2932,6 +2935,9 @@ func init() {
         },
         "includeEmpty": {
           "type": "boolean"
+        },
+        "keep": {
+          "type": "string"
         },
         "lastCompleteDateTime": {
           "type": "string"

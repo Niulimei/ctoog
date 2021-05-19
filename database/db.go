@@ -110,6 +110,7 @@ CREATE TABLE plan (
     actual_start_time varchar(64),
     actual_switch_time varchar(64),
     effect text,
+    task_id integer,
     extra1 text,
     extra2 text,
     extra3 text
@@ -222,6 +223,7 @@ type PlanModel struct {
 	ActualStartTime  string `db:"actual_start_time"`
 	ActualSwitchTime string `db:"actual_switch_time"`
 	Effect           string
+	TaskID           int64 `db:"task_id"`
 	Extra1           string
 	Extra2           string
 	Extra3           string
