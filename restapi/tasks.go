@@ -340,7 +340,7 @@ func UpdateTaskCommandOutHandler(params operations.UpdateTaskCommandOutParams) m
 }
 
 func DeleteTaskHandler(params operations.DeleteTaskParams) middleware.Responder {
-	code := deleteCache(params.ID)
+	code := DeleteCache(params.ID)
 	if code != http.StatusOK {
 		return operations.NewDeleteTaskInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
@@ -362,7 +362,7 @@ func DeleteTaskHandler(params operations.DeleteTaskParams) middleware.Responder 
 }
 
 func DeleteTaskCacheHandler(params operations.DeleteTaskCacheParams) middleware.Responder {
-	code := deleteCache(params.ID)
+	code := DeleteCache(params.ID)
 	if code != http.StatusOK {
 		return operations.NewDeleteTaskCacheInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
@@ -411,7 +411,7 @@ func getTaskInfo(taskID int64) *TaskDelInfo {
 	}
 }
 
-func deleteCache(taskID int64) int {
+func DeleteCache(taskID int64) int {
 	taskInfo := getTaskInfo(taskID)
 	if taskInfo == nil {
 		return http.StatusInternalServerError
