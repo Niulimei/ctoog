@@ -7,6 +7,8 @@ package models
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -14,46 +16,127 @@ import (
 	"github.com/go-openapi/swag"
 )
 
+type JsonNullInt64 struct {
+	sql.NullInt64
+}
+
+func (v JsonNullInt64) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.Int64)
+	} else {
+		return json.Marshal(nil)
+	}
+}
+
+func (v *JsonNullInt64) UnmarshalJSON(data []byte) error {
+	// Unmarshalling into a pointer will let us detect null
+	var x *int64
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	if x != nil {
+		v.Valid = true
+		v.Int64 = *x
+	} else {
+		v.Valid = false
+	}
+	return nil
+}
+
+type JsonNullString struct {
+	sql.NullString
+}
+
+func (v JsonNullString) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.String)
+	} else {
+		return json.Marshal(nil)
+	}
+}
+
+func (v *JsonNullString) UnmarshalJSON(data []byte) error {
+	// Unmarshalling into a pointer will let us detect null
+	var x *string
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	if x != nil {
+		v.Valid = true
+		v.String = *x
+	} else {
+		v.Valid = false
+	}
+	return nil
+}
+
+type JsonNullBool struct {
+	sql.NullString
+}
+
+func (v JsonNullBool) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.String)
+	} else {
+		return json.Marshal(nil)
+	}
+}
+
+func (v *JsonNullBool) UnmarshalJSON(data []byte) error {
+	// Unmarshalling into a pointer will let us detect null
+	var x *string
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	if x != nil {
+		v.Valid = true
+		v.String = *x
+	} else {
+		v.Valid = false
+	}
+	return nil
+}
+
 // TaskModel task model
 //
 // swagger:model TaskModel
 type TaskModel struct {
 
 	// cc password
-	CcPassword string `json:"ccPassword,omitempty" db:"cc_password"`
+	CcPassword JsonNullString `json:"ccPassword,omitempty" db:"cc_password"`
 
 	// cc user
-	CcUser string `json:"ccUser,omitempty" db:"cc_user"`
+	CcUser JsonNullString `json:"ccUser,omitempty" db:"cc_user"`
 
 	// component
-	Component string `json:"component,omitempty"`
+	Component JsonNullString `json:"component,omitempty"`
 
 	// dir
-	Dir string `json:"dir,omitempty"`
+	Dir JsonNullString `json:"dir,omitempty"`
 
 	// git email
-	GitEmail string `json:"gitEmail,omitempty" db:"git_email"`
+	GitEmail JsonNullString `json:"gitEmail,omitempty" db:"git_email"`
 
 	// git password
-	GitPassword string `json:"gitPassword,omitempty" db:"git_password"`
+	GitPassword JsonNullString `json:"gitPassword,omitempty" db:"git_password"`
 
 	// git URL
-	GitURL string `json:"gitURL,omitempty" db:"git_url"`
+	GitURL JsonNullString `json:"gitURL,omitempty" db:"git_url"`
 
 	// git user
-	GitUser string `json:"gitUser,omitempty" db:"git_user"`
+	GitUser JsonNullString `json:"gitUser,omitempty" db:"git_user"`
 
 	// include empty
-	IncludeEmpty bool `json:"includeEmpty,omitempty" db:"include_empty"`
+	IncludeEmpty JsonNullBool `json:"includeEmpty,omitempty" db:"include_empty"`
 
 	// keep
-	Keep string `json:"keep,omitempty"`
+	Keep JsonNullString `json:"keep,omitempty"`
 
 	// match info
 	MatchInfo []*TaskMatchInfo `json:"matchInfo"`
 
 	// pvob
-	Pvob string `json:"pvob,omitempty"`
+	Pvob JsonNullString `json:"pvob,omitempty"`
 }
 
 // Validate validates this task model

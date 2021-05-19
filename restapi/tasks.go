@@ -121,7 +121,7 @@ func startTask(taskId int64) {
 		}
 		for _, match := range matchInfo {
 			workerTaskModel.Matches =
-				append(workerTaskModel.Matches, InnerMatchInfo{Stream: match.Stream, Branch: match.GitBranch})
+				append(workerTaskModel.Matches, InnerMatchInfo{Stream: match.Stream.String, Branch: match.GitBranch.String})
 		}
 		workerTaskModelByte, _ := json.Marshal(workerTaskModel)
 		req, _ := http.NewRequest(http.MethodPost, "http://"+workerUrl+"/new_task", bytes.NewBuffer(workerTaskModelByte))
@@ -162,8 +162,8 @@ func startTask(taskId int64) {
 func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder {
 	username := params.HTTPRequest.Header.Get("username")
 	taskInfo := params.TaskInfo
-	if len(taskInfo.Dir) > 0 && !strings.HasPrefix(taskInfo.Dir, "/") {
-		taskInfo.Dir = "/" + taskInfo.Dir
+	if len(taskInfo.Dir.String) > 0 && !strings.HasPrefix(taskInfo.Dir.String, "/") {
+		taskInfo.Dir.String = "/" + taskInfo.Dir.String
 	}
 	r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
 		"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id)"+
@@ -192,9 +192,9 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	taskID := params.ID
 	task := &models.TaskModel{}
-	database.DB.Get(task, "SELECT cc_password,"+
+	log.Info(database.DB.Get(task, "SELECT cc_password,"+
 		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep"+
-		" FROM task WHERE id = $1", taskID)
+		" FROM task WHERE id = $1", taskID))
 	var matchInfo []*models.TaskMatchInfo
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", taskID)
 	task.MatchInfo = matchInfo
@@ -224,42 +224,29 @@ func buildTaskWhereSQL(queryParams map[string]string) (string, []interface{}, er
 	return "", nil, nil
 }
 
-func buildParams(params operations.ListTaskParams) map[string]string {
-	var ret = make(map[string]string)
-	if params.Pvob != nil && *params.Pvob != "" {
-		ret["pvob"] = *params.Pvob
-	}
-	if params.Component != nil && *params.Component != "" {
-		ret["component"] = *params.Component
-	}
-	if params.Status != nil && *params.Status != "" {
-		ret["status"] = *params.Status
-	}
-	return ret
-}
-
 func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	username := params.HTTPRequest.Header.Get("username")
-	whereSQL, _, sqlErr := buildTaskWhereSQL(buildParams(params))
-	if nil != sqlErr {
-		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: ""})
-	}
-
+	var query, queryCount string
 	user := getUserInfo(username)
-	if user.RoleID != int64(AdminRole) {
-		whereSQL += fmt.Sprintf(" and creator=%s", username)
+	if user.RoleID == int64(AdminRole) {
+		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
+			" status, include_empty, git_email, dir, keep" +
+			" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
+		queryCount = "SELECT count(id) FROM task;"
+	} else {
+		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
+			" status, include_empty, git_email, dir, keep" +
+			" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
+		queryCount = "SELECT count(id) FROM task WHERE creator = $1;"
 	}
-	prepSQL := utils.PreparingQurySQL(taskColumns, "task", int(params.Offset), int(params.Limit), "last_completed_date_time DESC", whereSQL)
-
 	var tasks []*models.TaskInfoModel
 	var count int64
-	err := database.DB.Select(&tasks, prepSQL, params.Limit, params.Offset)
+	err := database.DB.Select(&tasks, query, username, params.Limit, params.Offset)
 	if err != nil {
 		log.Error(err)
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: "Sql Error"})
 	}
-	queryCount := "select count(id) from task where 1=1 " + whereSQL
-	err = database.DB.Get(&count, queryCount)
+	err = database.DB.Get(&count, queryCount, username)
 	if err != nil {
 		log.Error(err)
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: "Sql Error"})
@@ -293,10 +280,10 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 	} else {
 		log.Debug("update params:", params.TaskLog)
 		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, "+
-			"git_url = $6, git_user = $7, git_password = $8, git_email = $9, include_empty = $10 WHERE id = $11",
+			"git_url = $6, git_user = $7, git_password = $8, git_email = $9, include_empty = $10, keep = $11 WHERE id = $12",
 			params.TaskLog.Pvob, params.TaskLog.Component, params.TaskLog.Dir, params.TaskLog.CcUser,
 			params.TaskLog.CcPassword, params.TaskLog.GitURL, params.TaskLog.GitUser, params.TaskLog.GitPassword,
-			params.TaskLog.GitEmail, params.TaskLog.IncludeEmpty, params.ID)
+			params.TaskLog.GitEmail, params.TaskLog.IncludeEmpty, params.TaskLog.Keep, params.ID)
 		if len(params.TaskLog.MatchInfo) > 0 {
 			tx.MustExec("DELETE FROM match_info WHERE task_id = $1", taskId)
 			for _, match := range params.TaskLog.MatchInfo {

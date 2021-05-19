@@ -52,6 +52,9 @@ type TaskInfoUpdateModel struct {
 	// include empty
 	IncludeEmpty bool `json:"includeEmpty,omitempty"`
 
+	// keep
+	Keep string `json:"keep,omitempty"`
+
 	// last complete date time
 	LastCompleteDateTime string `json:"lastCompleteDateTime,omitempty"`
 

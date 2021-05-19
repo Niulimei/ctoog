@@ -42,6 +42,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
+		CreatePlanHandler: CreatePlanHandlerFunc(func(params CreatePlanParams) middleware.Responder {
+			return middleware.NotImplemented("operation CreatePlan has not yet been implemented")
+		}),
 		CreateScheduleHandler: CreateScheduleHandlerFunc(func(params CreateScheduleParams) middleware.Responder {
 			return middleware.NotImplemented("operation CreateSchedule has not yet been implemented")
 		}),
@@ -51,11 +54,17 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		CreateUserHandler: CreateUserHandlerFunc(func(params CreateUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation CreateUser has not yet been implemented")
 		}),
+		DeletePlanHandler: DeletePlanHandlerFunc(func(params DeletePlanParams) middleware.Responder {
+			return middleware.NotImplemented("operation DeletePlan has not yet been implemented")
+		}),
 		DeleteTaskHandler: DeleteTaskHandlerFunc(func(params DeleteTaskParams) middleware.Responder {
 			return middleware.NotImplemented("operation DeleteTask has not yet been implemented")
 		}),
 		DeleteTaskCacheHandler: DeleteTaskCacheHandlerFunc(func(params DeleteTaskCacheParams) middleware.Responder {
 			return middleware.NotImplemented("operation DeleteTaskCache has not yet been implemented")
+		}),
+		GetPlanHandler: GetPlanHandlerFunc(func(params GetPlanParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetPlan has not yet been implemented")
 		}),
 		GetTaskHandler: GetTaskHandlerFunc(func(params GetTaskParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetTask has not yet been implemented")
@@ -68,6 +77,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		}),
 		ListLogsHandler: ListLogsHandlerFunc(func(params ListLogsParams) middleware.Responder {
 			return middleware.NotImplemented("operation ListLogs has not yet been implemented")
+		}),
+		ListPlanHandler: ListPlanHandlerFunc(func(params ListPlanParams) middleware.Responder {
+			return middleware.NotImplemented("operation ListPlan has not yet been implemented")
 		}),
 		ListPvobHandler: ListPvobHandlerFunc(func(params ListPvobParams) middleware.Responder {
 			return middleware.NotImplemented("operation ListPvob has not yet been implemented")
@@ -95,6 +107,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		}),
 		RestartTaskHandler: RestartTaskHandlerFunc(func(params RestartTaskParams) middleware.Responder {
 			return middleware.NotImplemented("operation RestartTask has not yet been implemented")
+		}),
+		UpdatePlanHandler: UpdatePlanHandlerFunc(func(params UpdatePlanParams) middleware.Responder {
+			return middleware.NotImplemented("operation UpdatePlan has not yet been implemented")
 		}),
 		UpdateScheduleHandler: UpdateScheduleHandlerFunc(func(params UpdateScheduleParams) middleware.Responder {
 			return middleware.NotImplemented("operation UpdateSchedule has not yet been implemented")
@@ -141,16 +156,22 @@ type TranslatorAPI struct {
 	//   - application/json
 	JSONProducer runtime.Producer
 
+	// CreatePlanHandler sets the operation handler for the create plan operation
+	CreatePlanHandler CreatePlanHandler
 	// CreateScheduleHandler sets the operation handler for the create schedule operation
 	CreateScheduleHandler CreateScheduleHandler
 	// CreateTaskHandler sets the operation handler for the create task operation
 	CreateTaskHandler CreateTaskHandler
 	// CreateUserHandler sets the operation handler for the create user operation
 	CreateUserHandler CreateUserHandler
+	// DeletePlanHandler sets the operation handler for the delete plan operation
+	DeletePlanHandler DeletePlanHandler
 	// DeleteTaskHandler sets the operation handler for the delete task operation
 	DeleteTaskHandler DeleteTaskHandler
 	// DeleteTaskCacheHandler sets the operation handler for the delete task cache operation
 	DeleteTaskCacheHandler DeleteTaskCacheHandler
+	// GetPlanHandler sets the operation handler for the get plan operation
+	GetPlanHandler GetPlanHandler
 	// GetTaskHandler sets the operation handler for the get task operation
 	GetTaskHandler GetTaskHandler
 	// GetTaskCommandOutHandler sets the operation handler for the get task command out operation
@@ -159,6 +180,8 @@ type TranslatorAPI struct {
 	GetUserHandler GetUserHandler
 	// ListLogsHandler sets the operation handler for the list logs operation
 	ListLogsHandler ListLogsHandler
+	// ListPlanHandler sets the operation handler for the list plan operation
+	ListPlanHandler ListPlanHandler
 	// ListPvobHandler sets the operation handler for the list pvob operation
 	ListPvobHandler ListPvobHandler
 	// ListPvobComponentHandler sets the operation handler for the list pvob component operation
@@ -177,6 +200,8 @@ type TranslatorAPI struct {
 	PingWorkerHandler PingWorkerHandler
 	// RestartTaskHandler sets the operation handler for the restart task operation
 	RestartTaskHandler RestartTaskHandler
+	// UpdatePlanHandler sets the operation handler for the update plan operation
+	UpdatePlanHandler UpdatePlanHandler
 	// UpdateScheduleHandler sets the operation handler for the update schedule operation
 	UpdateScheduleHandler UpdateScheduleHandler
 	// UpdateTaskHandler sets the operation handler for the update task operation
@@ -260,6 +285,9 @@ func (o *TranslatorAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.CreatePlanHandler == nil {
+		unregistered = append(unregistered, "CreatePlanHandler")
+	}
 	if o.CreateScheduleHandler == nil {
 		unregistered = append(unregistered, "CreateScheduleHandler")
 	}
@@ -269,11 +297,17 @@ func (o *TranslatorAPI) Validate() error {
 	if o.CreateUserHandler == nil {
 		unregistered = append(unregistered, "CreateUserHandler")
 	}
+	if o.DeletePlanHandler == nil {
+		unregistered = append(unregistered, "DeletePlanHandler")
+	}
 	if o.DeleteTaskHandler == nil {
 		unregistered = append(unregistered, "DeleteTaskHandler")
 	}
 	if o.DeleteTaskCacheHandler == nil {
 		unregistered = append(unregistered, "DeleteTaskCacheHandler")
+	}
+	if o.GetPlanHandler == nil {
+		unregistered = append(unregistered, "GetPlanHandler")
 	}
 	if o.GetTaskHandler == nil {
 		unregistered = append(unregistered, "GetTaskHandler")
@@ -286,6 +320,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.ListLogsHandler == nil {
 		unregistered = append(unregistered, "ListLogsHandler")
+	}
+	if o.ListPlanHandler == nil {
+		unregistered = append(unregistered, "ListPlanHandler")
 	}
 	if o.ListPvobHandler == nil {
 		unregistered = append(unregistered, "ListPvobHandler")
@@ -313,6 +350,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.RestartTaskHandler == nil {
 		unregistered = append(unregistered, "RestartTaskHandler")
+	}
+	if o.UpdatePlanHandler == nil {
+		unregistered = append(unregistered, "UpdatePlanHandler")
 	}
 	if o.UpdateScheduleHandler == nil {
 		unregistered = append(unregistered, "UpdateScheduleHandler")
@@ -414,6 +454,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/plans"] = NewCreatePlan(o.context, o.CreatePlanHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/schedules"] = NewCreateSchedule(o.context, o.CreateScheduleHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
@@ -426,11 +470,19 @@ func (o *TranslatorAPI) initHandlerCache() {
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
+	o.handlers["DELETE"]["/plans/{id}"] = NewDeletePlan(o.context, o.DeletePlanHandler)
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
 	o.handlers["DELETE"]["/tasks/{id}"] = NewDeleteTask(o.context, o.DeleteTaskHandler)
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/tasks/cache/{id}"] = NewDeleteTaskCache(o.context, o.DeleteTaskCacheHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/plans/{id}"] = NewGetPlan(o.context, o.GetPlanHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -447,6 +499,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/logs"] = NewListLogs(o.context, o.ListLogsHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/plans"] = NewListPlan(o.context, o.ListPlanHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -483,6 +539,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/tasks/restart"] = NewRestartTask(o.context, o.RestartTaskHandler)
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/plans/{id}"] = NewUpdatePlan(o.context, o.UpdatePlanHandler)
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}

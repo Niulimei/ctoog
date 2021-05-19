@@ -18,34 +18,34 @@ import (
 type TaskInfoModel struct {
 
 	// component
-	Component string `json:"component,omitempty"`
+	Component JsonNullString `json:"component,omitempty"`
 
 	// dir
-	Dir string `json:"dir,omitempty"`
+	Dir JsonNullString `json:"dir,omitempty"`
 
 	// git email
-	GitEmail string `json:"gitEmail,omitempty" db:"git_email"`
+	GitEmail JsonNullString `json:"gitEmail,omitempty" db:"git_email"`
 
 	// git repo
-	GitRepo string `json:"gitRepo,omitempty" db:"git_url"`
+	GitRepo JsonNullString `json:"gitRepo,omitempty" db:"git_url"`
 
 	// id
-	ID int64 `json:"id,omitempty"`
+	ID JsonNullInt64 `json:"id,omitempty"`
 
 	// include empty
-	IncludeEmpty bool `json:"includeEmpty,omitempty" db:"include_empty"`
+	IncludeEmpty JsonNullBool `json:"includeEmpty,omitempty" db:"include_empty"`
 
 	// keep
-	Keep string `json:"keep,omitempty"`
+	Keep JsonNullString `json:"keep,omitempty"`
 
 	// last complete date time
-	LastCompleteDateTime string `json:"lastCompleteDateTime,omitempty" db:"last_completed_date_time"`
+	LastCompleteDateTime JsonNullString `json:"lastCompleteDateTime,omitempty" db:"last_completed_date_time"`
 
 	// pvob
-	Pvob string `json:"pvob,omitempty"`
+	Pvob JsonNullString `json:"pvob,omitempty"`
 
 	// status
-	Status string `json:"status,omitempty"`
+	Status JsonNullString `json:"status,omitempty"`
 }
 
 // Validate validates this task info model

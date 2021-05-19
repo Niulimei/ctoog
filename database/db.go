@@ -85,6 +85,36 @@ CREATE TABLE schedule (
     creator varchar (128)
 );
 
+CREATE TABLE plan (
+    id integer PRIMARY KEY autoincrement,
+    status varchar (16), 
+    origin_type varchar(8),
+    pvob varchar(256),
+    component varchar (256),
+    dir varchar (256),
+    origin_url varchar(256),
+    translate_type varchar(8),
+    target_url varchar(256),
+    subsystem varchar(256),
+    config_lib varchar(256),
+    business_group varchar(256),
+    team varchar(256),
+    supporter varchar(256),
+    supporter_tel varchar(16),
+    creator varchar(256),
+    tip text,
+    project_type vartchar(8),
+    purpose text,
+    plan_start_time varchar(64),
+    plan_switch_time varchar(64),
+    actual_start_time varchar(64),
+    actual_switch_time varchar(64),
+    effect text,
+    task_id integer,
+    extra1 text,
+    extra2 text,
+    extra3 text
+);
 
 INSERT INTO user (username,password,role_id) VALUES("admin", "b17eccdc6c06bd8e15928d583503adf9", 1);
 `
@@ -166,6 +196,37 @@ type ScheduleModel struct {
 	TaskId   int64 `db:"task_ik"`
 	Schedule string
 	Creator  string
+}
+
+type PlanModel struct {
+	ID               int64
+	Status           string
+	OriginType       string `db:"origin_type"`
+	Pvob             string
+	Component        string
+	Dir              string
+	OriginURL        string `db:"origin_url"`
+	TranslateType    string `db:"translate_type"`
+	TargetURL        string `db:"target_url"`
+	Subsystem        string
+	ConfigLib        string `db:"config_lib"`
+	Group            string `db:"business_group"`
+	Team             string
+	Supporter        string
+	SupporterTel     string `db:"supporter_tel"`
+	Creator          string
+	Tip              string
+	ProjectType      string `db:"project_type"`
+	Purpose          string
+	PlanStartTime    string `db:"plan_start_time"`
+	PlanSwitchTime   string `db:"plan_switch_time"`
+	ActualStartTime  string `db:"actual_start_time"`
+	ActualSwitchTime string `db:"actual_switch_time"`
+	Effect           string
+	TaskID           int64 `db:"task_id"`
+	Extra1           string
+	Extra2           string
+	Extra3           string
 }
 
 func init() {
