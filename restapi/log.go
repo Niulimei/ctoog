@@ -13,9 +13,11 @@ import (
 )
 
 func ListLogsHandler(param operations.ListLogsParams) middleware.Responder {
-	checkRet := CheckPermission(param.Authorization)
-	if checkRet != nil {
-		return checkRet
+	if !CheckPermission(param.Authorization) {
+		return operations.NewListLogsInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusUnauthorized,
+			Message: "",
+		})
 	}
 	var rows *sql.Rows
 	var err error
@@ -30,7 +32,7 @@ func ListLogsHandler(param operations.ListLogsParams) middleware.Responder {
 			whereStr, param.Params.Limit, param.Params.Offset))
 	}
 	if err != nil && err != sql.ErrNoRows {
-		return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
+		return operations.NewListLogsInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
 			Message: "Sql Error",
 		})
@@ -42,7 +44,7 @@ func ListLogsHandler(param operations.ListLogsParams) middleware.Responder {
 		tmp := &models.LogInfoModel{}
 		if err := rows.Scan(&count, &tmp.Time, &tmp.Level,
 			&tmp.User, &tmp.Action, &tmp.Position, &tmp.Message, &tmp.Errcode); err != nil {
-			return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
+			return operations.NewListLogsInternalServerError().WithPayload(&models.ErrorModel{
 				Code:    http.StatusInternalServerError,
 				Message: "Sql Error",
 			})

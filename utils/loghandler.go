@@ -25,6 +25,7 @@ const (
 	UpdateUser  Action = "UPDATE_USER"
 	DeleteUser  Action = "DELETE_USER"
 	Login       Action = "LOGIN"
+	Auth        Action = "AUTH"
 )
 
 type Action string
