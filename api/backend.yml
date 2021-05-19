@@ -1025,6 +1025,8 @@ definitions:
         type: string
       actual_switch_time:
         type: string
+      task_id:
+        type: integer
   PlanPageInfoModel:
     type: object
     properties:

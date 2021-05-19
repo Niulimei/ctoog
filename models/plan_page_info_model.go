@@ -28,7 +28,7 @@ type PlanPageInfoModel struct {
 	// offset
 	Offset int64 `json:"offset,omitempty"`
 
-	// task info
+	// plan info
 	PlanInfo []*PlanModel `json:"planInfo"`
 }
 
@@ -36,7 +36,7 @@ type PlanPageInfoModel struct {
 func (m *PlanPageInfoModel) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateTaskInfo(formats); err != nil {
+	if err := m.validatePlanInfo(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -46,7 +46,7 @@ func (m *PlanPageInfoModel) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *PlanPageInfoModel) validateTaskInfo(formats strfmt.Registry) error {
+func (m *PlanPageInfoModel) validatePlanInfo(formats strfmt.Registry) error {
 	if swag.IsZero(m.PlanInfo) { // not required
 		return nil
 	}
@@ -59,7 +59,7 @@ func (m *PlanPageInfoModel) validateTaskInfo(formats strfmt.Registry) error {
 		if m.PlanInfo[i] != nil {
 			if err := m.PlanInfo[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("taskInfo" + "." + strconv.Itoa(i))
+					return ve.ValidateName("planInfo" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -74,7 +74,7 @@ func (m *PlanPageInfoModel) validateTaskInfo(formats strfmt.Registry) error {
 func (m *PlanPageInfoModel) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.contextValidateTaskInfo(ctx, formats); err != nil {
+	if err := m.contextValidatePlanInfo(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -84,14 +84,14 @@ func (m *PlanPageInfoModel) ContextValidate(ctx context.Context, formats strfmt.
 	return nil
 }
 
-func (m *PlanPageInfoModel) contextValidateTaskInfo(ctx context.Context, formats strfmt.Registry) error {
+func (m *PlanPageInfoModel) contextValidatePlanInfo(ctx context.Context, formats strfmt.Registry) error {
 
 	for i := 0; i < len(m.PlanInfo); i++ {
 
 		if m.PlanInfo[i] != nil {
 			if err := m.PlanInfo[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("taskInfo" + "." + strconv.Itoa(i))
+					return ve.ValidateName("planInfo" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

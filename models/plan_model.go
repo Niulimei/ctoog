@@ -77,6 +77,9 @@ type PlanModel struct {
 	// 目标git地址
 	TargetURL string `json:"targetUrl,omitempty"`
 
+	// task id
+	TaskID int64 `json:"task_id,omitempty"`
+
 	// 项目组
 	Team string `json:"team,omitempty"`
 

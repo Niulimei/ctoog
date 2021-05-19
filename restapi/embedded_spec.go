@@ -1212,6 +1212,9 @@ func init() {
           "description": "目标git地址",
           "type": "string"
         },
+        "task_id": {
+          "type": "integer"
+        },
         "team": {
           "description": "项目组",
           "type": "string"
@@ -2768,6 +2771,9 @@ func init() {
         "targetUrl": {
           "description": "目标git地址",
           "type": "string"
+        },
+        "task_id": {
+          "type": "integer"
         },
         "team": {
           "description": "项目组",

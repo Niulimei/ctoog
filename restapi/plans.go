@@ -194,7 +194,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 		})
 	}
 	var taskID int64
-	var errID error
+	taskID = plan.TaskID
 	if planParams.Status != "" {
 		if plan.TargetURL == "" {
 			return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
@@ -213,29 +213,33 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 			username := params.HTTPRequest.Header.Get("username")
 			tx.Exec("UPDATE plan SET status = $1 WHERE id = $2",
 				planParams.Status, planId)
-			r, err := tx.Exec("INSERT OR REPLACE INTO task (id, pvob, component, git_url,"+
-				"status, last_completed_date_time, creator, dir, worker_id)"+
-				" VALUES (?, ?, ?, ?, 'init', '', ?, ?, 0)", plan.TaskID,
-				plan.Pvob, plan.Component, plan.TargetURL, username, plan.Dir)
-			if err != nil {
-				return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
-					Code:    500,
-					Message: err.Error(),
-				})
+			var err error
+			if plan.TaskID == 0 {
+				r, err := tx.Exec("INSERT OR REPLACE INTO task (pvob, component, git_url,"+
+					"status, last_completed_date_time, creator, dir, worker_id)"+
+					" VALUES (?, ?, ?, 'init', '', ?, ?, 0)",
+					plan.Pvob, plan.Component, plan.TargetURL, username, plan.Dir)
+				if err == nil {
+					taskID, _ = r.LastInsertId()
+				} else {
+					return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
+						Code:    500,
+						Message: err.Error(),
+					})
+				}
+			} else {
+				tx.Exec("UPDATE task SET pvob = $1, component = $2, git_url = $3, status = 'init', " +
+					"last_completed_date_time = '', creator = $4, dir = $5, worker_id = 0 WHERE id = $6", plan.Pvob, plan.Component,
+					plan.OriginURL, username, plan.Dir, plan.TaskID)
 			}
-			taskID, errID = r.LastInsertId()
-			if errID != nil {
-				return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
-					Code:    500,
-					Message: err.Error(),
-				})
-			}
-			_, err = tx.Exec("UPDATE plan SET task_id=? where id=?", taskID, planId)
-			if err != nil {
-				return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
-					Code:    500,
-					Message: err.Error(),
-				})
+			if taskID != 0 {
+				_, err = tx.Exec("UPDATE plan SET task_id=? where id=?", taskID, planId)
+				if err != nil {
+					return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
+						Code:    500,
+						Message: err.Error(),
+					})
+				}
 			}
 		}
 		tx.Commit()
