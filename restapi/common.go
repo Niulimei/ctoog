@@ -5,12 +5,8 @@ import (
 	"net/http"
 )
 
-func CheckPermission(token string) bool {
-	username, valid := utils.Verify(token)
-	if !valid {
-		utils.RecordLog(utils.Info, utils.Auth, "", "user "+username+" Unauthorized", http.StatusUnauthorized)
-		return false
-	}
+func CheckPermission(r *http.Request) bool {
+	username := r.Header.Get("username")
 	userInfo := getUserInfo(username)
 	if userInfo.RoleID != int64(AdminRole) {
 		utils.RecordLog(utils.Info, utils.Auth, "", "user "+username+" Forbidden", http.StatusForbidden)

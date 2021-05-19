@@ -13,12 +13,6 @@ import (
 )
 
 func ListLogsHandler(param operations.ListLogsParams) middleware.Responder {
-	if !CheckPermission(param.Authorization) {
-		return operations.NewListLogsInternalServerError().WithPayload(&models.ErrorModel{
-			Code:    http.StatusUnauthorized,
-			Message: "",
-		})
-	}
 	var rows *sql.Rows
 	var err error
 	whereStr := buildWhereSqlStr(param)

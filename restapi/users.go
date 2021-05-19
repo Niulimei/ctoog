@@ -18,7 +18,7 @@ const (
 )
 
 func CreateUserHandler(params operations.CreateUserParams) middleware.Responder {
-	if !CheckPermission(params.Authorization) {
+	if !CheckPermission(params.HTTPRequest) {
 		return operations.NewCreateUserInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusUnauthorized,
 			Message: "",
@@ -61,19 +61,13 @@ func getUserInfo(username string) *models.UserInfoModel {
 }
 
 func GetUserHandler(param operations.GetUserParams) middleware.Responder {
-	username, valid := utils.Verify(param.Authorization)
-	if !valid {
-		return operations.NewGetUserInternalServerError().WithPayload(&models.ErrorModel{
-			Code:    http.StatusUnauthorized,
-			Message: "",
-		})
-	}
+	username := param.HTTPRequest.Header.Get("username")
 	userInfo := getUserInfo(username)
 	return operations.NewGetUserOK().WithPayload(&models.UserInfoModel{Username: username, RoleID: userInfo.RoleID})
 }
 
 func ListUsersHandler(param operations.ListUserParams) middleware.Responder {
-	if !CheckPermission(param.Authorization) {
+	if !CheckPermission(param.HTTPRequest) {
 		return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusUnauthorized,
 			Message: "",
