@@ -290,14 +290,14 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	usage := "Usage: ./translator-worker start | stop | status"
+	usage := "Usage: ./translator-worker start | stop | status | restart"
 	if len(os.Args) > 1 {
 		command := os.Args[1]
 		switch command {
 		case "start":
 			fmt.Println("translator-worker is starting.")
 			break
-		case "stop":
+		case "stop", "restart":
 			pid, _ := ioutil.ReadFile("./translator-worker.pid")
 			if string(pid) == "" {
 				fmt.Println("translator-worker is not running.")
@@ -307,7 +307,12 @@ func main() {
 				utils.Exec("kill " + string(pid))
 				fmt.Println("translator-worker has been stopped.")
 			}
-			return
+			if command == "stop" {
+				return
+			} else {
+				fmt.Println("translator-worker is starting.")
+				break
+			}
 		case "status":
 			pid, _ := ioutil.ReadFile("./translator-worker.pid")
 			if string(pid) == "" {
