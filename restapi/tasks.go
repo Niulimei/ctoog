@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -340,11 +341,11 @@ func UpdateTaskCommandOutHandler(params operations.UpdateTaskCommandOutParams) m
 }
 
 func DeleteTaskHandler(params operations.DeleteTaskParams) middleware.Responder {
-	code := DeleteCache(params.ID)
+	code, msg := DeleteCache(params.ID)
 	if code != http.StatusOK {
 		return operations.NewDeleteTaskInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
-			Message: "Delete Task Cache Fail.",
+			Message: msg,
 		})
 	}
 	utils.RecordLog(utils.Error, utils.DeleteTaskCache, "", fmt.Sprintf("TaskId: %d", params.ID), 0)
@@ -362,11 +363,11 @@ func DeleteTaskHandler(params operations.DeleteTaskParams) middleware.Responder 
 }
 
 func DeleteTaskCacheHandler(params operations.DeleteTaskCacheParams) middleware.Responder {
-	code := DeleteCache(params.ID)
+	code, msg := DeleteCache(params.ID)
 	if code != http.StatusOK {
 		return operations.NewDeleteTaskCacheInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
-			Message: "Delete Task Cache Fail.",
+			Message: msg,
 		})
 	}
 	utils.RecordLog(utils.Error, utils.DeleteTaskCache, "", fmt.Sprintf("TaskId: %d", params.ID), http.StatusUnauthorized)
@@ -411,10 +412,10 @@ func getTaskInfo(taskID int64) *TaskDelInfo {
 	}
 }
 
-func DeleteCache(taskID int64) int {
+func DeleteCache(taskID int64) (int, string) {
 	taskInfo := getTaskInfo(taskID)
 	if taskInfo == nil {
-		return http.StatusInternalServerError
+		return http.StatusInternalServerError, "get task info fail"
 	}
 	workerUrl := taskInfo.WorkerURL
 	taskInfo.WorkerURL = ""
@@ -422,8 +423,13 @@ func DeleteCache(taskID int64) int {
 	req, _ := http.NewRequest(http.MethodPost, "http://"+workerUrl+"/delete_task", bytes.NewBuffer(workerTaskModelByte))
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
-	if err != nil || resp.StatusCode != http.StatusOK {
-		return http.StatusInternalServerError
+	if err != nil || resp == nil {
+		return http.StatusInternalServerError, "request fail"
 	}
-	return http.StatusOK
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		return http.StatusInternalServerError, string(body)
+	}
+	return http.StatusOK, "ok"
 }

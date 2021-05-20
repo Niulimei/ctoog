@@ -269,11 +269,19 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 			workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.TaskId)
 		fmt.Println(cmdStr)
 		cmd := exec.Command("/bin/bash", "-c", cmdStr)
-		out, err := cmd.Output()
+		stdout, _ := cmd.StdoutPipe()
+		stderr, _ := cmd.StderrPipe()
+
+		cmd.Start()
+		s := bufio.NewScanner(io.MultiReader(stdout, stderr))
+		var tmp []string
+		for s.Scan() {
+			tmp = append(tmp, s.Text())
+		}
+		err := cmd.Wait()
 		if err != nil {
-			log.Error(err)
 			w.WriteHeader(500)
-			w.Write(out)
+			w.Write([]byte(strings.Join(tmp, "\n")))
 			return
 		}
 	} else {
