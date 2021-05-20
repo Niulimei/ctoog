@@ -33,7 +33,7 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       hideInSearch: true,
     },
     {
-      title: '物理子系统英文简称',
+      title: '物理子系统',
       dataIndex: 'subsystem',
       ellipsis: true,
       hideInSearch: true,
