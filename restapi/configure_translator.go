@@ -4,12 +4,10 @@ package restapi
 
 import (
 	"crypto/tls"
+	"ctgb/restapi/operations"
 	"ctgb/utils"
 	"fmt"
 	"net/http"
-	"strings"
-
-	"ctgb/restapi/operations"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
@@ -90,8 +88,9 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 		username, valid := utils.Verify(token)
-		if !valid && !strings.HasSuffix(r.RequestURI, "/login") && !strings.HasSuffix(r.RequestURI, "/workers"){
+		if !valid && !IsExceptionURL(r.Method, r.RequestURI) {
 			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Forbidden"))
 			return
 		}
 		r.Header.Set("username", username)
