@@ -20,7 +20,7 @@ initGitRepo(){
   username=$4
   email=$5
   masterBranchName="origin/init_master"
-  mkdir -p ${tmpGitDir}
+  mkdir -p ${tmpGitDir} -m 777
   cd ${tmpGitDir}
   git init
   git config --local core.longpaths true
@@ -122,8 +122,8 @@ pullCCAndPush(){
 }
 
 main(){
-  mkdir -p ${ccTmpRootPath}
-  mkdir -p ${gitTmpRootPath}
+  mkdir -p ${ccTmpRootPath} -m 777
+  mkdir -p ${gitTmpRootPath} -m 777
   pullCCAndPush $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10}
 }
 
