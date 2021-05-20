@@ -127,13 +127,6 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
                       </Button>
                     </Menu.Item>
                   )}
-                  {item.originType === 'ClearCase' && item.task_id && (
-                    <Menu.Item key="gotoTaskDetail">
-                      <Button size="small" type="link">
-                        跳转任务详情页
-                      </Button>
-                    </Menu.Item>
-                  )}
                 </Menu>
               }
             >
@@ -165,7 +158,8 @@ const PlanList: React.FC = () => {
       message.success('计划删除成功');
     },
     async execTask({ id }) {
-      const { message: taskId } = await planServices.updatePlan(id, { status: '迁移中' });
+      const { message: msg } = await planServices.updatePlan(id, { status: '迁移中' });
+      const taskId = id && msg;
       history.push(`/task/detail?id=${taskId}`);
     },
     toggleStatus(plan) {
@@ -183,6 +177,7 @@ const PlanList: React.FC = () => {
         actionRef={planStatusSwitcherRef}
       />
       <ProTable
+        headerTitle="迁移计划"
         rowKey="id"
         scroll={{ x: 1500 }}
         actionRef={tableRef}

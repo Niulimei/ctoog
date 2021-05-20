@@ -6,13 +6,13 @@
     access: 'isLogin',
     routes: [
       {
-        name: '计划列表',
+        name: '迁移计划',
         path: '/task/plan',
         component: './task/Plan',
         exact: true,
       },
       {
-        name: '任务列表',
+        name: '迁移任务',
         path: '/task/list',
         component: './task/List',
         exact: true,

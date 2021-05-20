@@ -13,7 +13,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 const breadcrumb = {
   routes: [
     {
-      breadcrumbName: '任务列表',
+      breadcrumbName: '迁移任务',
       path: '/task/list',
     },
     {
@@ -70,7 +70,15 @@ const TaskDetail = () => {
       }
     },
     /** 启动任务 */
-    async startTask() {},
+    async startTask() {
+      try {
+        await taskService.startTask(+taskId);
+        message.success('迁移任务启动成功');
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
+    },
   };
   React.useEffect(() => {
     taskService.getTaskDetail(taskId).then((data) => {

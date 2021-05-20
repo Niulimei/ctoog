@@ -14,7 +14,7 @@ import type { ProColumns } from '@ant-design/pro-table';
 
 type Actions = Record<
   'startTask' | 'gotoDetail' | 'updateTask' | 'createTask',
-  (id: string) => void
+  (id: number) => void
 >;
 const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
   return [
@@ -111,11 +111,11 @@ const TaskList: React.FC = () => {
 
   const actions: Actions = {
     /** 查看任务详情 */
-    async gotoDetail(id: string) {
+    async gotoDetail(id) {
       history.push(`/task/detail?id=${id}`);
     },
     /** 启动任务 */
-    async startTask(id: string) {
+    async startTask(id) {
       try {
         await taskService.startTask(id);
         message.success('迁移任务启动成功');
@@ -125,7 +125,7 @@ const TaskList: React.FC = () => {
       }
     },
     /** 更新任务 */
-    async updateTask(id: string) {
+    async updateTask(id) {
       creatorModalRef.current.openModal('update', id);
     },
     /** 创建任务 */
@@ -195,7 +195,7 @@ const TaskList: React.FC = () => {
             total: count,
           };
         }}
-        headerTitle="任务列表"
+        headerTitle="迁移任务"
         columns={getColumns(actions)}
         toolBarRender={() => [
           /** 批量上传 */

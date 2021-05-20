@@ -7,12 +7,12 @@ export const createPlan = (data: any) => {
   });
 };
 
-/** 获取创建计划列表 */
+/** 获取创建迁移计划 */
 export const getPlans = (params: API.PaginationRequestParams) => {
   return request.get('/plans', { params });
 };
 
-/** 获取创建计划列表 */
+/** 获取创建迁移计划 */
 export const getPlanDetail = (id: string) => {
   return request.get(`/plans/${id}`);
 };

@@ -14,7 +14,7 @@ export namespace User {
 
 export namespace Task {
   export type Base = {
-    id: string;
+    id: number;
     pvob: string;
     component: string;
     ccUser: string;

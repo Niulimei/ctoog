@@ -1,6 +1,6 @@
 import request from '@/utils/request';
 
-/** 获取任务列表 */
+/** 获取迁移任务 */
 export const getTasks = (params: API.PaginationRequestParams) => {
   return request.get('/tasks', {
     params,
@@ -27,7 +27,7 @@ export const updateTask = (id: string, data: any) => {
 };
 
 /** 启动迁移任务 */
-export const startTask = (id: string) => {
+export const startTask = (id: number) => {
   return request.post('/tasks/restart', {
     data: {
       id,
@@ -59,13 +59,10 @@ export const getLogOutput = (logId: string) => {
 
 /** 按钮删除任务 */
 export const deleteTask = (taskId: string) => {
-  return request.delete(`/tasks/${taskId}`)
-  
-}
+  return request.delete(`/tasks/${taskId}`);
+};
 
 /** 按钮删除缓存 */
 export const deleteCache = (taskId: string) => {
-  return request.delete(`/tasks/cache/${taskId}`)
-}
-
-
+  return request.delete(`/tasks/cache/${taskId}`);
+};
