@@ -33,7 +33,6 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       title: '迁移状态',
       dataIndex: 'status',
       ellipsis: true,
-      hideInSearch: true,
     },
     {
       title: '目标仓库地址',
@@ -92,6 +91,7 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
     {
       title: '操作',
       width: 140,
+      hideInSearch: true,
       fixed: 'right',
       // @ts-ignore
       render(item: Plan.Item) {

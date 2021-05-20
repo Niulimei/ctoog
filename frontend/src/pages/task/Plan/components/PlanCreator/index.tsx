@@ -188,6 +188,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                   placeholder="请选择 PVOB"
                   valueEnum={valueEnum.pvob}
                   rules={[{ required: true, message: '请选择 PVOB' }]}
+                  showSearch
                 />
                 <ProFormSelect
                   name="component"
@@ -195,6 +196,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                   placeholder="请选择组件"
                   valueEnum={valueEnum.component}
                   rules={[{ required: true, message: '请选择组件' }]}
+                  showSearch
                 />
                 <ProFormText
                   name="dir"
