@@ -55,7 +55,7 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       ellipsis: true,
       hideInSearch: true,
       // @ts-ignore
-      render(item: Plan.Item) {
+      render(_, item: Plan.Item) {
         return item.pvob ? `${item.pvob}/${item.component}` : item.originUrl;
       },
     },
@@ -121,7 +121,7 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
                     </Button>
                   </Menu.Item>
                   {item.originType === 'ClearCase' && (
-                    <Menu.Item key="execTask">
+                    <Menu.Item key={item.status === '未迁移' ? 'execTask' : 'gotoTaskDetail'}>
                       <Button size="small" type="link">
                         执行迁移任务
                       </Button>
