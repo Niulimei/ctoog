@@ -216,7 +216,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 		} else if planParams.Status == "已切换" {
 			tx.Exec("UPDATE plan SET status = $1, actual_switch_time = $2 WHERE id = $3",
 				planParams.Status, planParams.ActualSwitchTime, planId)
-		} else if planParams.Status == "迁移中" {
+		} else if planParams.Status == "迁移中" && plan.Status == "未迁移" {
 			username := params.HTTPRequest.Header.Get("username")
 			tx.Exec("UPDATE plan SET status = $1 WHERE id = $2",
 				planParams.Status, planId)
