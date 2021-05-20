@@ -159,7 +159,6 @@ func sender(server string, data *commandOut) {
 	req, err := http.NewRequest("POST",
 		fmt.Sprintf("http://%s/api/tasks/cmdout/%d", server, data.Logid), body)
 	if err != nil {
-		log.Error("send log err:", err)
 		return
 		// handle err
 	}
@@ -177,11 +176,12 @@ func doSend(req *http.Request) {
 		time.Sleep(time.Second * 3)
 		resp, err = http.DefaultClient.Do(req)
 		if err != nil || resp.Body == nil {
+			log.Error("send to server err:", err)
 			return
 		}
 	}
 	log.Info("info server success")
-	defer resp.Body.Close()
+	resp.Body.Close()
 }
 
 func pingServer(host string, port int) {
