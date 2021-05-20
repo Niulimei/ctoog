@@ -88,13 +88,10 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !IsExceptionURL(r.Method, r.RequestURI) {
 			token := r.Header.Get("Authorization")
-			username, valid := utils.Verify(token)
-			if !valid {
-				w.WriteHeader(http.StatusForbidden)
-				w.Write([]byte("Forbidden"))
-				return
+			username, _ := utils.Verify(token)
+			if username != "" {
+				r.Header.Set("username", username)
 			}
-			r.Header.Set("username", username)
 		}
 		handler.ServeHTTP(w, r)
 	})
