@@ -23,6 +23,11 @@ func CreateJWT(username string) string {
 }
 
 func Verify(tokenString string) (string, bool) {
+	defer func() {
+		if ret := recover(); ret != nil {
+			fmt.Printf("Recover From Panic. %v\n", ret)
+		}
+	}()
 	if tokenString == "" {
 		return "", false
 	}
