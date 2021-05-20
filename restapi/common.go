@@ -3,6 +3,7 @@ package restapi
 import (
 	"ctgb/utils"
 	"net/http"
+	"strings"
 )
 
 func CheckPermission(r *http.Request) bool {
@@ -13,4 +14,19 @@ func CheckPermission(r *http.Request) bool {
 		return false
 	}
 	return true
+}
+
+var exceptionURL = map[string]string{
+	"/login":   "POST",
+	"/workers": "POST",
+	"/cmdout/": "POST",
+}
+
+func IsExceptionURL(method, uri string) bool {
+	for uriChild, m := range exceptionURL {
+		if strings.Contains(uri, uriChild) && m == method {
+			return true
+		}
+	}
+	return false
 }
