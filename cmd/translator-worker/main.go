@@ -159,6 +159,7 @@ func sender(server string, data *commandOut) {
 	req, err := http.NewRequest("POST",
 		fmt.Sprintf("http://%s/api/tasks/cmdout/%d", server, data.Logid), body)
 	if err != nil {
+		log.Error("send log err:", err)
 		return
 		// handle err
 	}
