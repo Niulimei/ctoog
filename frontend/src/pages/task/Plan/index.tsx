@@ -15,6 +15,9 @@ type Actions = Record<
 >;
 
 const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
+  const handleMenuClick = (item: any, key: any) => {
+    actions[key]?.(item);
+  };
   return [
     {
       title: '编号',
@@ -30,7 +33,7 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       hideInSearch: true,
     },
     {
-      title: '物理子系统',
+      title: '物理子系统英文简称',
       dataIndex: 'subsystem',
       ellipsis: true,
       hideInSearch: true,
@@ -106,27 +109,27 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
             </Button>
             <Dropdown
               overlay={
-                <Menu>
-                  <Menu.Item>
-                    <Button size="small" type="link" onClick={() => actions.deletePlan(item)}>
+                <Menu onClick={(e) => handleMenuClick(item, e.key)}>
+                  <Menu.Item key="deletePlan">
+                    <Button size="small" type="link">
                       删除
                     </Button>
                   </Menu.Item>
-                  <Menu.Item>
-                    <Button size="small" type="link" onClick={() => actions.toggleStatus(item)}>
+                  <Menu.Item key="toggleStatus">
+                    <Button size="small" type="link">
                       变更状态
                     </Button>
                   </Menu.Item>
                   {item.originType === 'ClearCase' && (
-                    <Menu.Item>
-                      <Button size="small" type="link" onClick={() => actions.execTask(item)}>
+                    <Menu.Item key="execTask">
+                      <Button size="small" type="link">
                         执行迁移任务
                       </Button>
                     </Menu.Item>
                   )}
                   {item.originType === 'ClearCase' && item.task_id && (
-                    <Menu.Item>
-                      <Button size="small" type="link" onClick={() => actions.gotoTaskDetail(item)}>
+                    <Menu.Item key="gotoTaskDetail">
+                      <Button size="small" type="link">
                         跳转任务详情页
                       </Button>
                     </Menu.Item>

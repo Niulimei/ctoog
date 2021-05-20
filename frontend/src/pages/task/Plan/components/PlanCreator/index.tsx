@@ -256,9 +256,9 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
         left={
           <ProFormText
             name="subsystem"
-            label="物理子系统"
-            placeholder="请输入物理子系统"
-            rules={[{ required: true, message: '请输入物理子系统' }]}
+            label="物理子系统英文简称"
+            placeholder="请输入物理子系统英文简称"
+            rules={[{ required: true, message: '请输入物理子系统英文简称' }]}
           />
         }
         right={
