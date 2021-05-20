@@ -269,9 +269,14 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             {
               name: 'gitEmail',
               required: true,
-              rules: [{ type: 'email', message: '请正确输入邮箱地址' }],
+              rules: [
+                {
+                  pattern: /^[^@]+@ccbft.com$/,
+                  message: '请输入 Git Email，格式：云桌面账号@ccbft.com',
+                },
+              ],
               component: ProFormText,
-              placeholder: '请输入 Git Email，用于提交 Git 代码配置',
+              placeholder: '请输入 Git Email，格式：云桌面账号@ccbft.com',
             },
           ],
           [

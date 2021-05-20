@@ -74,6 +74,7 @@ const CustomChangeHandlers: Partial<
   },
   pvob(form, value, dispatch) {
     dispatch({ type: 'getComponentValueEnum', payload: value });
+    form.setFieldsValue({ configLib: value });
   },
 };
 
