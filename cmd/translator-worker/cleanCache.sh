@@ -13,7 +13,9 @@ clean() {
   done
   gitDirs=$(ls ${gitTmpRootPath} | grep -e ".*_${taskID}$")
   for gitDir in ${gitDirs}; do
+    set -e
     rm -rf ${gitTmpRootPath}/${gitDir}
+    set +e
   done
 }
 
