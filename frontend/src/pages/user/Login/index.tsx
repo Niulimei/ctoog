@@ -62,7 +62,7 @@ const Login: React.FC = () => {
         <div className={styles.top}>
           <div className={styles.header}>
             <Link to="/">
-              <span className={styles.title}>ClearCase To Git</span>
+              <span className={styles.title}>代码仓库迁移平台</span>
             </Link>
           </div>
           <div className={styles.desc} />

@@ -51,6 +51,7 @@ const TaskDetail = () => {
     /** 修改任务 */
     updateTask() {
       taskCreatorRef.current.openModal('update', taskId);
+      // taskCreatorRef.current.openModal('planUpdate', taskId);
     },
     /** 删除缓存 */
     async clearCache() {

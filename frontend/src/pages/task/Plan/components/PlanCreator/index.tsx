@@ -102,7 +102,10 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       if (mode === 'update' && id) {
         modalRef.current.planId = id;
         const fieldValues = await planServices.getPlanDetail(id);
-        clearCaseEnumDispatch('component', { pvob: fieldValues.pvob });
+        if (fieldValues.originType === 'ClearCase') {
+          clearCaseEnumDispatch('pvob', {});
+          clearCaseEnumDispatch('component', { pvob: fieldValues.pvob });
+        }
         form.setFieldsValue(fieldValues);
         toggleVisible(true);
       } else {
@@ -179,8 +182,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
               rules={[{ required: true, message: '请选择迁移任务类型' }]}
             />
 
-            {!form.isFieldTouched('originType') ||
-            form.getFieldValue('originType') === 'ClearCase' ? (
+            {form.getFieldValue('originType') === 'ClearCase' ? (
               <>
                 <ProFormSelect
                   name="pvob"
@@ -224,12 +226,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
               options={TranslateTypeOptions}
               rules={[{ required: true, message: '请选择迁移方式' }]}
             />
-            <ProFormText
-              name="targetUrl"
-              label="目标仓库地址"
-              placeholder="请填写目标仓库地址"
-              rules={[{ required: true, message: '请填写目标仓库地址' }]}
-            />
+            <ProFormText name="targetUrl" label="目标仓库地址" placeholder="请填写目标仓库地址" />
             <ProFormDatePicker
               name="plan_start_time"
               label="计划迁移日期"

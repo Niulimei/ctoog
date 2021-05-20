@@ -51,7 +51,7 @@ export async function getInitialState(): Promise<{
 export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
     logo: false,
-    title: 'ClearCase To Git',
+    title: '代码仓库迁移平台',
     rightContentRender: () => <RightContent />,
     disableContentMargin: false,
     waterMarkProps: {

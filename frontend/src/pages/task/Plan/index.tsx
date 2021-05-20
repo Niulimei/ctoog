@@ -201,7 +201,7 @@ const PlanList: React.FC = () => {
               planCreatorRef.current.openModal();
             }}
           >
-            新建迁移计划1
+            新建迁移计划
           </Button>,
         ]}
       ></ProTable>

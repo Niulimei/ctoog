@@ -12,7 +12,7 @@ const Settings: LayoutSettings & {
   fixedHeader: false,
   fixSiderbar: true,
   colorWeak: false,
-  title: 'ClearCase To Git',
+  title: '代码仓库迁移平台',
   pwa: false,
   iconfontUrl: '',
 };
