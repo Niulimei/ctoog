@@ -98,7 +98,7 @@ const TaskDetail = () => {
           breadcrumb,
         }}
         footer={[
-          (taskDetail?.taskModel as any).status !== Task.Status.RUNNING ? (
+          (taskDetail?.taskModel as any)?.status !== Task.Status.RUNNING ? (
             <Button key="startTask" onClick={actions.startTask} type="primary">
               启动任务
             </Button>

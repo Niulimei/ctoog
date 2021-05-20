@@ -202,15 +202,15 @@ const TaskList: React.FC = () => {
           // <Upload accept={excelTypeStr} beforeUpload={validateExcel} showUploadList={false} {...props}>
           //   <Button icon={<UploadOutlined />}>批量上传</Button>
           // </Upload>,
-          <Button
-            size="small"
-            type="primary"
-            onClick={() => {
-              creatorModalRef.current.openModal();
-            }}
-          >
-            新建迁移任务
-          </Button>,
+          // <Button
+          //   size="small"
+          //   type="primary"
+          //   onClick={() => {
+          //     creatorModalRef.current.openModal();
+          //   }}
+          // >
+          //   新建迁移任务
+          // </Button>,
         ]}
       />
       <TaskCreator
