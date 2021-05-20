@@ -1,6 +1,6 @@
 import React from 'react';
+import { Task } from '@/typings/model';
 import TaskCreator from '../TaskCreator';
-import type { Task } from '@/typings/model';
 import { useLocation, useHistory } from 'umi';
 import TaskField from './components/TaskField';
 import TaskLogger from './components/TaskLogger';
@@ -50,8 +50,11 @@ const TaskDetail = () => {
     },
     /** 修改任务 */
     updateTask() {
-      taskCreatorRef.current.openModal('update', taskId);
-      // taskCreatorRef.current.openModal('planUpdate', taskId);
+      if (taskDetail?.taskModel.ccUser) {
+        taskCreatorRef.current.openModal('update', taskId);
+      } else {
+        taskCreatorRef.current.openModal('planUpdate', taskId);
+      }
     },
     /** 删除缓存 */
     async clearCache() {
@@ -66,6 +69,8 @@ const TaskDetail = () => {
         setisLoading(false);
       }
     },
+    /** 启动任务 */
+    async startTask() {},
   };
   React.useEffect(() => {
     taskService.getTaskDetail(taskId).then((data) => {
@@ -93,15 +98,17 @@ const TaskDetail = () => {
           breadcrumb,
         }}
         footer={[
+          (taskDetail?.taskModel as any).status !== Task.Status.RUNNING ? (
+            <Button key="startTask" onClick={actions.startTask} type="primary">
+              启动任务
+            </Button>
+          ) : null,
+          <Button key="updateTask" onClick={actions.updateTask}>
+            修改任务
+          </Button>,
           <Button key="clearCache" loading={isLoading} onClick={actions.clearCache}>
             删除缓存
           </Button>,
-          <Button key="updateTask" onClick={actions.updateTask} type="primary">
-            修改任务
-          </Button>,
-          // <Button key="deleteTask" onClick={actions.deleteTask} danger type="primary">
-          //   删除任务
-          // </Button>,
         ]}
       >
         <div style={{ padding: 15, background: '#fff' }}>

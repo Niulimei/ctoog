@@ -30,17 +30,6 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       hideInSearch: true,
     },
     {
-      title: '迁移状态',
-      dataIndex: 'status',
-      ellipsis: true,
-    },
-    {
-      title: '目标仓库地址',
-      dataIndex: 'targetUrl',
-      ellipsis: true,
-      hideInSearch: true,
-    },
-    {
       title: '物理子系统',
       dataIndex: 'subsystem',
       ellipsis: true,
@@ -51,6 +40,21 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       dataIndex: 'configLib',
       ellipsis: true,
       hideInSearch: true,
+    },
+    {
+      title: '迁移状态',
+      dataIndex: 'status',
+      ellipsis: true,
+    },
+    {
+      title: '源仓库信息',
+      // dataIndex: 'targetUrl',
+      ellipsis: true,
+      hideInSearch: true,
+      // @ts-ignore
+      render(item: Plan.Item) {
+        return item.pvob ? `${item.pvob}/${item.component}` : item.originUrl;
+      },
     },
     {
       title: '事业群',
