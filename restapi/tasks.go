@@ -394,12 +394,17 @@ type TaskDelInfo struct {
 func getTaskInfo(taskID int64) (*TaskDelInfo, bool) {
 	row := database.DB.QueryRow("select cc_user,cc_password,worker_id from task where id=?", taskID)
 	if row == nil || row.Err() != nil {
+		log.Errorln("QueryRow err: ", row.Err())
 		return nil, true
 	}
-	var u, p string
+	var u, p sql.NullString
 	var wID int64
 	err := row.Scan(&u, &p, &wID)
 	if err != nil {
+		log.Errorln("Scan err: ", err)
+		if err == sql.ErrNoRows {
+			return nil, false
+		}
 		return nil, true
 	}
 
@@ -418,14 +423,16 @@ func getTaskInfo(taskID int64) (*TaskDelInfo, bool) {
 	}
 	return &TaskDelInfo{
 		TaskId:     taskID,
-		CcPassword: p,
-		CcUser:     u,
+		CcPassword: p.String,
+		CcUser:     u.String,
 		WorkerURL:  wUrl,
 	}, true
 }
 
 func DeleteCache(taskID int64) (int, string) {
 	taskInfo, cacheExist := getTaskInfo(taskID)
+	log.Infoln("taskInfo: ", taskInfo)
+	log.Infoln("cacheExist: ", cacheExist)
 	if !cacheExist {
 		return http.StatusOK, "ok"
 	}
