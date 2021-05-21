@@ -54,9 +54,14 @@ func startTask(taskId int64) {
 	err := database.DB.Get(task, "SELECT cc_password,"+
 		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty, dir, keep, worker_id"+
 		" FROM task WHERE id = $1", taskId)
+	startTime := time.Now().Format("2006-01-02 15:04:05")
 	if err != nil {
 		log.Error("start task but db err:", err)
 		database.DB.MustExec("UPDATE task SET status = 'failed' WHERE id = $1", taskId)
+		database.DB.MustExec(
+			"INSERT INTO task_log (task_id, status, start_time, end_time, duration)"+
+				" VALUES($1, 'failed', $2, $3, 0)", taskId, startTime, startTime,
+		)
 		return
 	}
 	worker := &database.WorkerModel{}
@@ -78,7 +83,6 @@ func startTask(taskId int64) {
 	var matchInfo []*models.TaskMatchInfo
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1 ORDER BY id",
 		taskId)
-	startTime := time.Now().Format("2006-01-02 15:04:05")
 	r := database.DB.MustExec(
 		"INSERT INTO task_log (task_id, status, start_time, end_time, duration)"+
 			" VALUES($1, 'running', $2, $3, 0)", taskId, startTime, "",
