@@ -58,10 +58,13 @@ func startTask(taskId int64) {
 	if err != nil {
 		log.Error("start task but db err:", err)
 		database.DB.MustExec("UPDATE task SET status = 'failed' WHERE id = $1", taskId)
-		database.DB.MustExec(
+		r := database.DB.MustExec(
 			"INSERT INTO task_log (task_id, status, start_time, end_time, duration)"+
 				" VALUES($1, 'failed', $2, $3, 0)", taskId, startTime, startTime,
 		)
+		logId, _ := r.LastInsertId()
+		database.DB.MustExec(
+			"INSERT OR REPLACE INTO task_command_out (log_id, content) VALUES (?,'请补全配置')", logId)
 		return
 	}
 	worker := &database.WorkerModel{}
