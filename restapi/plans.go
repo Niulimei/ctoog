@@ -49,7 +49,7 @@ func ListPlanHandler(params operations.ListPlanParams) middleware.Responder {
 
 	user := getUserInfo(username)
 	if user.RoleID != int64(AdminRole) {
-		whereSQL += fmt.Sprintf(" and creator=%s", username)
+		whereSQL += fmt.Sprintf(" and creator='%s'", username)
 	}
 	prepSQL := utils.PreparingQurySQL(planColumns, "plan", int(params.Offset), int(params.Limit), "id DESC", whereSQL)
 
