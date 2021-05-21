@@ -387,37 +387,45 @@ type TaskDelInfo struct {
 	WorkerURL  string `json:"worker_url,omitempty"`
 }
 
-func getTaskInfo(taskID int64) *TaskDelInfo {
+// 第二个返回值表示任务是否被执行过
+func getTaskInfo(taskID int64) (*TaskDelInfo, bool) {
 	row := database.DB.QueryRow("select cc_user,cc_password,worker_id from task where id=?", taskID)
 	if row == nil || row.Err() != nil {
-		return nil
+		return nil, true
 	}
 	var u, p string
 	var wID int64
 	err := row.Scan(&u, &p, &wID)
 	if err != nil {
-		return nil
+		return nil, true
+	}
+
+	if wID == 0 {
+		return nil, false
 	}
 
 	row1 := database.DB.QueryRow("select worker_url from worker where id=?", wID)
 	if row1 == nil || row1.Err() != nil {
-		return nil
+		return nil, true
 	}
 	var wUrl string
 	err1 := row1.Scan(&wUrl)
 	if err1 != nil {
-		return nil
+		return nil, true
 	}
 	return &TaskDelInfo{
 		TaskId:     taskID,
 		CcPassword: p,
 		CcUser:     u,
 		WorkerURL:  wUrl,
-	}
+	}, true
 }
 
 func DeleteCache(taskID int64) (int, string) {
-	taskInfo := getTaskInfo(taskID)
+	taskInfo, cacheExist := getTaskInfo(taskID)
+	if !cacheExist {
+		return http.StatusOK, "ok"
+	}
 	if taskInfo == nil {
 		return http.StatusInternalServerError, "get task info fail"
 	}
