@@ -77,7 +77,7 @@ const PlanStatusSwitcher: React.FC<PlanStatusSwitcherProps> = ({ actionRef, onSu
           name="date"
           fieldProps={{ width: '300px' }}
           placeholder="请选择日期"
-          label={`实际${isSwitchStatus() ? '切换' : '开始'}日期`}
+          label={`实际${isSwitchStatus() ? '切换' : '迁移'}日期`}
         />
       )}
     </ModalForm>
