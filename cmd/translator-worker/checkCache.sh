@@ -7,10 +7,10 @@ check() {
   taskID=$1
   local ccDirNotExist=false
   local gitDirNotExist=false
-  if [[ ! -d ${ccTmpRootPath} ]] || [[ $(ls ${ccTmpRootPath}*_${taskID}) == "" ]]; then
+  if [[ ! -d ${ccTmpRootPath} ]] || [[ $(ls ${ccTmpRootPath}/*_${taskID}) == "" ]]; then
     ccDirNotExist=true
   fi
-  if [[ ! -d ${gitTmpRootPath} ]] || [[ $(ls ${gitTmpRootPath}*_${taskID}) == "" ]]; then
+  if [[ ! -d ${gitTmpRootPath} ]] || [[ $(ls ${gitTmpRootPath}/*_${taskID}) == "" ]]; then
     gitDirNotExist=true
   fi
   if ${ccDirNotExist} && ${gitDirNotExist} ; then
