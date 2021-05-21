@@ -165,8 +165,8 @@ const PlanList: React.FC = () => {
     toggleStatus(plan) {
       planStatusSwitcherRef.current.openModal(plan);
     },
-    gotoTaskDetail({ id }) {
-      history.push(`/task/detail?id=${id}`);
+    gotoTaskDetail({ task_id }) {
+      history.push(`/task/detail?id=${task_id}`);
     },
   };
   return (

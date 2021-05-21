@@ -32,22 +32,6 @@
     padding: 12px 0;
     // border-top: 1px solid @border-color;
     position: relative;
-    &::before{
-      content: '*';
-      color: rgba(231, 11, 11, 0.808);
-      position: absolute;
-      top: 30px;
-      left: -15px;
-      font-size: @necessity-font-size;
-    }
-    &::after{
-      content: '*';
-      color: rgba(231, 11, 11, 0.808);
-      position: absolute;
-      top: 30px;
-      left: 348px;
-      font-size: @necessity-font-size;
-    }
   }
 
   .keep {
@@ -93,3 +77,14 @@
   margin-bottom: @field-margin-bottom;
 }
 
+.must{
+  position: relative;
+  &::after{
+    content: '*';
+    color: rgba(231, 11, 11, 0.808);
+    position: absolute;
+    top: 5px;
+    left: -20px;
+    font-size: @necessity-font-size;
+  }
+}
