@@ -252,6 +252,7 @@ type TaskDelInfo struct {
 	TaskId     int64  `json:"task_id"`
 	CcPassword string `json:"cc_password"`
 	CcUser     string `json:"cc_user"`
+	Exception  string `json:"exception"`
 }
 
 func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -266,10 +267,23 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	workerTaskModel := TaskDelInfo{}
 	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
 		cwd, _ := os.Getwd()
-		cmdStr := fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/cleanCache.sh %d"`,
-			workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.TaskId)
-		fmt.Println(cmdStr)
+
+		//目录不存在直接返回成功
+		cmdStr := fmt.Sprintf(`/usr/bin/bash %s/checkCache.sh`, cwd)
+		log.Infoln(cmdStr)
 		cmd := exec.Command("/bin/bash", "-c", cmdStr)
+		_, err := cmd.Output()
+		if err != nil {
+			log.Errorln(err.Error())
+			w.WriteHeader(200)
+			w.Write([]byte("success"))
+			return
+		}
+
+		cmdStr = fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/cleanCache.sh %d %s"`,
+			workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.TaskId, workerTaskModel.Exception)
+		log.Infoln(cmdStr)
+		cmd = exec.Command("/bin/bash", "-c", cmdStr)
 		stdout, _ := cmd.StdoutPipe()
 		stderr, _ := cmd.StderrPipe()
 
@@ -279,7 +293,7 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 		for s.Scan() {
 			tmp = append(tmp, s.Text())
 		}
-		err := cmd.Wait()
+		err = cmd.Wait()
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte(strings.Join(tmp, "\n")))

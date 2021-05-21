@@ -265,13 +265,37 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	return operations.NewListTaskOK().WithPayload(tasksPage)
 }
 
+func isCCInfoChange(params operations.UpdateTaskParams) bool {
+	oldTaskInfo := &models.TaskModel{}
+	database.DB.Get(oldTaskInfo, "SELECT cc_password,"+
+		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep"+
+		" FROM task WHERE id = $1", params.ID)
+	var matchInfo []*models.TaskMatchInfo
+	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", params.ID)
+	oldTaskInfo.MatchInfo = matchInfo
+	var oldStreams, paramStreams []string
+	for _, o := range oldTaskInfo.MatchInfo {
+		oldStreams = append(oldStreams, o.Stream.String)
+	}
+	for _, p := range params.TaskLog.MatchInfo {
+		paramStreams = append(paramStreams, p.Stream.String)
+	}
+	if oldTaskInfo.Pvob.String != params.TaskLog.Pvob ||
+		oldTaskInfo.Component.String != params.TaskLog.Component ||
+		oldTaskInfo.Dir.String != params.TaskLog.Dir ||
+		strings.Join(oldStreams, "_") != strings.Join(paramStreams, "_") {
+		return true
+	}
+	return false
+}
+
 func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder {
 	//username, verified := utils.Verify(params.Authorization)
 	taskId := params.ID
 	log.Debug(taskId)
-	tx := database.DB.MustBegin()
 	log.Debug("update task:", params.TaskLog)
 	if params.TaskLog.LogID != "" {
+		tx := database.DB.MustBegin()
 		task := &database.TaskModel{}
 		err := database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
 		taskLogInfo := params.TaskLog
@@ -285,7 +309,14 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 			taskLogInfo.Status, taskLogInfo.EndTime, taskId)
 		//tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
 		utils.RecordLog(utils.Info, utils.UpdateTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
+		log.Debug("task update commit:", tx.Commit())
 	} else {
+		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
+		if isCCInfoChange(params) {
+			log.Infoln("Is cleaning cache...")
+			DeleteCache(taskIdInt)
+		}
+		tx := database.DB.MustBegin()
 		log.Debug("update params:", params.TaskLog)
 		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, "+
 			"git_url = $6, git_user = $7, git_password = $8, git_email = $9, include_empty = $10, keep = $11 WHERE id = $12",
@@ -302,11 +333,11 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 			}
 		}
 		utils.RecordLog(utils.Info, utils.UpdateTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
-		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
 		go startTask(taskIdInt)
 		utils.RecordLog(utils.Info, utils.StartTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
+		log.Debug("task update commit:", tx.Commit())
 	}
-	log.Debug("task update commit:", tx.Commit())
+
 	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
 		Message: "ok",
 	})
@@ -387,6 +418,7 @@ type TaskDelInfo struct {
 	TaskId     int64  `json:"task_id"`
 	CcPassword string `json:"cc_password"`
 	CcUser     string `json:"cc_user"`
+	Exception  string `json:"exception,omitempty"`
 	WorkerURL  string `json:"worker_url,omitempty"`
 }
 
