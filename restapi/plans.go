@@ -273,7 +273,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 				"subsystem = :subsystem, config_lib = :config_lib, business_group = :business_group, team = :team, supporter = :supporter,"+
 				"supporter_tel = :supporter_tel, tip = :tip, project_type = :project_type, "+
 				"purpose = :purpose, plan_start_time = :plan_start_time, plan_switch_time = :plan_switch_time, "+
-				"effect = :effect WHERE id = :id", plan,
+				"effect = :effect, pvob = :pvob, component = :component WHERE id = :id", plan,
 		)
 		if err != nil {
 			log.Error("update plan failed:", err)
