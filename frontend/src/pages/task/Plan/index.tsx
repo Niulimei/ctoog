@@ -19,13 +19,7 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
     actions[key]?.(item);
   };
   return [
-    {
-      title: '编号',
-      dataIndex: 'id',
-      ellipsis: true,
-      hideInSearch: true,
-      width: 60,
-    },
+    
     {
       title: '源仓库类型',
       dataIndex: 'originType',
@@ -94,6 +88,13 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       dataIndex: 'actual_switch_time',
       ellipsis: true,
       hideInSearch: true,
+    },
+    {
+      title: '任务编号',
+      dataIndex: 'task_id',
+      ellipsis: true,
+      hideInSearch: true,
+      width: 80,
     },
     {
       title: '操作',

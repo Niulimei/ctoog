@@ -117,11 +117,9 @@ const formFieldsGenerator = (fields: any) => {
 
   /** 判断当前的节点是不是带有require属性 */
   const isRequired = (node: any): boolean => {
-    console.log(node?.props?.rules);
-    
     if(node?.props?.rules){
       if(Array.isArray(node.props.rules) && node.props.rules[0]){
-        return node.props.rules[0].hasOwnProperty('required') 
+        return node.props.rules[0].hasOwnProperty('required')  || node.props.rules[1].hasOwnProperty('required')
       }
     }
     return false
