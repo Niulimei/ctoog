@@ -269,7 +269,7 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 		cwd, _ := os.Getwd()
 
 		//目录不存在直接返回成功
-		cmdStr := fmt.Sprintf(`/usr/bin/bash %s/checkCache.sh`, cwd)
+		cmdStr := fmt.Sprintf(`/usr/bin/bash %s/checkCache.sh %d`, cwd, workerTaskModel.TaskId)
 		log.Infoln(cmdStr)
 		cmd := exec.Command("/bin/bash", "-c", cmdStr)
 		_, err := cmd.Output()

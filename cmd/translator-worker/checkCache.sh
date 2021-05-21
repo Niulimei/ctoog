@@ -4,12 +4,13 @@ workdir=$(cd $(dirname $0); pwd)
 source ${workdir}/common.sh
 
 check() {
+  taskID=$1
   local ccDirNotExist=false
   local gitDirNotExist=false
-  if [[ ! -d ${ccTmpRootPath} ]] || [[ $(ls ${ccTmpRootPath}) == "" ]]; then
+  if [[ ! -d ${ccTmpRootPath} ]] || [[ $(ls ${ccTmpRootPath}*_${taskID}) == "" ]]; then
     ccDirNotExist=true
   fi
-  if [[ ! -d ${gitTmpRootPath} ]] || [[ $(ls ${gitTmpRootPath}) == "" ]]; then
+  if [[ ! -d ${gitTmpRootPath} ]] || [[ $(ls ${gitTmpRootPath}*_${taskID}) == "" ]]; then
     gitDirNotExist=true
   fi
   if ${ccDirNotExist} && ${gitDirNotExist} ; then
@@ -18,4 +19,4 @@ check() {
   exit 0
 }
 
-check
+check $1
