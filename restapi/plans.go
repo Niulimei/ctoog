@@ -243,7 +243,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 			} else {
 				tx.Exec("UPDATE task SET pvob = $1, component = $2, git_url = $3, status = 'init', "+
 					"last_completed_date_time = '', creator = $4, dir = $5, worker_id = 0 WHERE id = $6", plan.Pvob, plan.Component,
-					plan.OriginURL, username, plan.Dir, plan.TaskID)
+					plan.TargetURL, username, plan.Dir, plan.TaskID)
 			}
 			if taskID != 0 {
 				_, err = tx.Exec("UPDATE plan SET task_id=? where id=?", taskID, planId)
