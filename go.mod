@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
+	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-openapi/analysis v0.20.1 // indirect
 	github.com/go-openapi/errors v0.20.0
