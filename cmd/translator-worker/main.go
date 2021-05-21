@@ -136,7 +136,7 @@ func sendCommandOut(server string, cmd *exec.Cmd, task *Task) error {
 		}
 	}(&tmp)
 	for s.Scan() {
-		tmp = append(tmp, s.Text())
+		tmp = append(tmp, utils.Iconv(s.Text(), "gbk", "utf8"))
 	}
 	time.Sleep(time.Second * 2)
 	stop <- struct{}{}
