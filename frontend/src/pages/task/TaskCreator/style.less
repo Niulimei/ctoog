@@ -1,5 +1,6 @@
 @field-margin-bottom: 18px;
 @border-color: #f0f0f0;
+@necessity-font-size: 18px;
 
 .gutter {
   padding-left: 24px;
@@ -30,6 +31,7 @@
   .divider {
     padding: 12px 0;
     // border-top: 1px solid @border-color;
+    position: relative;
   }
 
   .keep {
@@ -75,3 +77,14 @@
   margin-bottom: @field-margin-bottom;
 }
 
+.must{
+  position: relative;
+  &::after{
+    content: '*';
+    color: rgba(231, 11, 11, 0.808);
+    position: absolute;
+    top: 5px;
+    left: -20px;
+    font-size: @necessity-font-size;
+  }
+}

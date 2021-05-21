@@ -39,7 +39,7 @@ const FormSection: React.FC<FormSectionProps> = ({ left, title, right, wholeLine
   </div>
 );
 
-const OriginTypeOptions = ['ClearCase', 'IDCP(Gerrit)', '私服'];
+const OriginTypeOptions = ['ClearCase', 'ICDP(Gerrit)', '私服'];
 
 const TranslateTypeOptions = ['项目组自己迁移', '工作组帮迁移'];
 

@@ -108,11 +108,23 @@ const formFieldsGenerator = (fields: any) => {
 
     return React.createElement(component, {
       key: name,
+      required,
       rules,
       name,
       ...restProps,
     });
   };
+
+  /** 判断当前的节点是不是带有require属性 */
+  const isRequired = (node: any): boolean => {
+    if(node?.props?.rules){
+      if(Array.isArray(node.props.rules) && node.props.rules[0]){
+        return node.props.rules[0].hasOwnProperty('required')  || node.props.rules[1].hasOwnProperty('required')
+      }
+    }
+    return false
+  
+  }
 
   return fields.map((nodes: any) => {
     const key = guid();
@@ -120,11 +132,12 @@ const formFieldsGenerator = (fields: any) => {
     const [leftNode, rightNode, actionNode] = nodes.map((node: any) =>
       node.component ? renderFieldComponent(node) : node,
     );
-
+    // console.log(leftNode);
+    
     return (
       <div className={styles.col} key={key}>
-        <div className={classnames(styles.row, styles.left)}>{leftNode}</div>
-        <div className={classnames(styles.row, styles.right)}>{rightNode}</div>
+        <div className={classnames(styles.row, styles.left, isRequired(leftNode) ? styles.must : '')}>{leftNode}</div>
+        <div className={classnames(styles.row, styles.right, isRequired(rightNode) ? styles.must : '')}>{rightNode}</div>
         {actionNode ? <div className={styles.action}>{actionNode}</div> : null}
       </div>
     );
@@ -327,6 +340,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               placeholder: '请选择开发流',
               valueEnum: valueEnum.stream,
               showSearch: true,
+              required: true,
               rules: [
                 {
                   // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -341,6 +355,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               name: ['matchInfo', index, 'gitBranch'],
               component: ProFormText,
               placeholder: '请输入Git对应分支',
+              required: true,
               valueEnum: valueEnum.stream,
               rules: [
                 {
