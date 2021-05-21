@@ -51,8 +51,8 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
     },
     {
       title: '源仓库信息',
-      // dataIndex: 'targetUrl',
       ellipsis: true,
+      width: 250,
       hideInSearch: true,
       // @ts-ignore
       render(_, item: Plan.Item) {

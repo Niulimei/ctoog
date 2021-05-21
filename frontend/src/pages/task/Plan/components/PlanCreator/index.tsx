@@ -43,7 +43,7 @@ const OriginTypeOptions = ['ClearCase', 'IDCP(Gerrit)', '私服'];
 
 const TranslateTypeOptions = ['项目组自己迁移', '工作组帮迁移'];
 
-const groupOptions = [
+const GroupOptions = [
   '北京事业群',
   '厦门事业群',
   '成都事业群',
@@ -279,7 +279,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
               name="group"
               label="事业群"
               placeholder="请选择事业群"
-              options={groupOptions}
+              options={GroupOptions}
               rules={[{ required: true, message: '请选择 PVOB' }]}
             />
             <ProFormText
