@@ -23,6 +23,12 @@
         path: '/task/detail',
         component: './task/Detail',
       },
+      // {
+      //   name: '任务执行节点',
+      //   path: '/task/node',
+      //   component: './task/Node',
+      //   exact: true,
+      // },
     ],
   },
   {

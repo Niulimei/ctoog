@@ -66,3 +66,13 @@ export const deleteTask = (taskId: string) => {
 export const deleteCache = (taskId: string) => {
   return request.delete(`/tasks/cache/${taskId}`);
 };
+
+/** 获取任务节点列表 */
+export const getWorkList = (limit: number, offset: number) => {
+  return request.get(`/workers`, {
+    params: {
+      limit,
+      offset
+    }
+  });
+};

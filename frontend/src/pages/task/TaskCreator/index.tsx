@@ -238,6 +238,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
     return false;
   };
 
+
   return (
     <ModalForm
       form={form}
@@ -268,6 +269,16 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               required: true,
               component: ProFormText,
               placeholder: '请输入 Git Repo URL',
+              rules: [
+                {
+                  async validator(_: any, value: string) {
+                    if(value.indexOf(' ') !== -1){
+                      // value.replace(/\s+/g,"");
+                      throw new Error('路径中不能出现空格')
+                    }
+                  },
+                },
+              ],
             },
           ],
           [
