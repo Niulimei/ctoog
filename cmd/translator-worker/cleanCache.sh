@@ -13,9 +13,7 @@ clean() {
         continue
       fi
     fi
-    set -e
     cleartool rmview ${ccTmpRootPath}/${ccDir}
-    set +e
   done
   gitDirs=$(ls ${gitTmpRootPath} | grep -e ".*_${taskID}$")
   for gitDir in ${gitDirs}; do
@@ -24,9 +22,7 @@ clean() {
         continue
       fi
     fi
-    set -e
     rm -rf ${gitTmpRootPath}/${gitDir}
-    set +e
   done
 }
 
