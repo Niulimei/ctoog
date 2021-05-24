@@ -75,6 +75,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		GetUserHandler: GetUserHandlerFunc(func(params GetUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetUser has not yet been implemented")
 		}),
+		GetWorkerHandler: GetWorkerHandlerFunc(func(params GetWorkerParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetWorker has not yet been implemented")
+		}),
 		ListLogsHandler: ListLogsHandlerFunc(func(params ListLogsParams) middleware.Responder {
 			return middleware.NotImplemented("operation ListLogs has not yet been implemented")
 		}),
@@ -98,6 +101,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		}),
 		ListUserHandler: ListUserHandlerFunc(func(params ListUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation ListUser has not yet been implemented")
+		}),
+		ListWorkersHandler: ListWorkersHandlerFunc(func(params ListWorkersParams) middleware.Responder {
+			return middleware.NotImplemented("operation ListWorkers has not yet been implemented")
 		}),
 		LoginHandler: LoginHandlerFunc(func(params LoginParams) middleware.Responder {
 			return middleware.NotImplemented("operation Login has not yet been implemented")
@@ -178,6 +184,8 @@ type TranslatorAPI struct {
 	GetTaskCommandOutHandler GetTaskCommandOutHandler
 	// GetUserHandler sets the operation handler for the get user operation
 	GetUserHandler GetUserHandler
+	// GetWorkerHandler sets the operation handler for the get worker operation
+	GetWorkerHandler GetWorkerHandler
 	// ListLogsHandler sets the operation handler for the list logs operation
 	ListLogsHandler ListLogsHandler
 	// ListPlanHandler sets the operation handler for the list plan operation
@@ -194,6 +202,8 @@ type TranslatorAPI struct {
 	ListTaskHandler ListTaskHandler
 	// ListUserHandler sets the operation handler for the list user operation
 	ListUserHandler ListUserHandler
+	// ListWorkersHandler sets the operation handler for the list workers operation
+	ListWorkersHandler ListWorkersHandler
 	// LoginHandler sets the operation handler for the login operation
 	LoginHandler LoginHandler
 	// PingWorkerHandler sets the operation handler for the ping worker operation
@@ -318,6 +328,9 @@ func (o *TranslatorAPI) Validate() error {
 	if o.GetUserHandler == nil {
 		unregistered = append(unregistered, "GetUserHandler")
 	}
+	if o.GetWorkerHandler == nil {
+		unregistered = append(unregistered, "GetWorkerHandler")
+	}
 	if o.ListLogsHandler == nil {
 		unregistered = append(unregistered, "ListLogsHandler")
 	}
@@ -341,6 +354,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.ListUserHandler == nil {
 		unregistered = append(unregistered, "ListUserHandler")
+	}
+	if o.ListWorkersHandler == nil {
+		unregistered = append(unregistered, "ListWorkersHandler")
 	}
 	if o.LoginHandler == nil {
 		unregistered = append(unregistered, "LoginHandler")
@@ -495,6 +511,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/users/self"] = NewGetUser(o.context, o.GetUserHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/workers/{id}"] = NewGetWorker(o.context, o.GetWorkerHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
@@ -527,6 +547,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/users"] = NewListUser(o.context, o.ListUserHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/workers"] = NewListWorkers(o.context, o.ListWorkersHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}

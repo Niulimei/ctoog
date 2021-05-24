@@ -2,7 +2,6 @@ package restapi
 
 import (
 	"ctgb/utils"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 )
@@ -18,15 +17,12 @@ func CheckPermission(r *http.Request) bool {
 }
 
 var exceptionURL = map[string]string{
-	"/login":   "POST",
-	"/workers": "POST",
-	"/tasks/cmdout": "POST",
+	"/login": "POST",
 }
 
 func IsExceptionURL(method, uri string) bool {
 	for uriChild, m := range exceptionURL {
 		if strings.Contains(uri, uriChild) && m == method {
-			log.Debug("got auth exception url", uri)
 			return true
 		}
 	}

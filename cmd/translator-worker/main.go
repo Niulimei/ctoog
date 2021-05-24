@@ -26,6 +26,9 @@ var (
 	portFlag   int
 	serverFlag string
 )
+
+const adminJwtToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6ImFkbWluIn0.ZZX3Z0zbeCWGhjsdtCxrf3O4xTQ4QYc38AED6RLSUG0`
+
 var stop = make(chan struct{})
 
 func init() {
@@ -169,7 +172,7 @@ func sender(server string, data *commandOut) {
 func doSend(req *http.Request) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "1234567")
+	req.Header.Set("Authorization", adminJwtToken)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil || resp.Body == nil {
@@ -214,6 +217,7 @@ func pingServer(host string, port int) {
 		}
 		req.Header.Set("Accept", "application/json")
 		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", adminJwtToken)
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {

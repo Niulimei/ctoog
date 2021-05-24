@@ -53,3 +53,5 @@ release/
 release.tar.gz
 
 translator-*.*
+
+/backup

@@ -4,6 +4,7 @@ import (
 	"ctgb/database"
 	"ctgb/models"
 	"ctgb/restapi/operations"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -52,4 +53,42 @@ func PingWorkerHandler(params operations.PingWorkerParams) middleware.Responder 
 		database.DB.Exec("UPDATE worker SET status = 'running', register_time = $1 WHERE id = $2", now, worker.Id)
 	}
 	return operations.NewPingWorkerCreated().WithPayload(&models.OK{Message: "ok"})
+}
+
+func GetWorkerHandler(param operations.GetWorkerParams) middleware.Responder {
+	sqlStr := "select * from worker where id=?"
+	var workerInfo = &models.WorkerDetail{}
+	err := database.DB.Get(workerInfo, sqlStr, param.ID)
+	if err != nil {
+		return operations.NewGetWorkerInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Sql Error",
+		})
+	}
+	return operations.NewGetWorkerOK().WithPayload(workerInfo)
+}
+
+func ListWorkersHandler(param operations.ListWorkersParams) middleware.Responder {
+	if !CheckPermission(param.HTTPRequest) {
+		return operations.NewListWorkersInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusUnauthorized,
+			Message: "Unauthorized",
+		})
+	}
+	sqlStr := "select * from worker order by id limit ? offset ?"
+	sqlCountStr := "select count(id) from worker"
+	var workerInfo []*models.WorkerDetail
+	err := database.DB.Select(&workerInfo, sqlStr, param.Limit, param.Offset)
+	if err != nil {
+		return operations.NewListWorkersInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Sql Error",
+		})
+	}
+	var count int64
+	database.DB.Get(&count, sqlCountStr)
+	return operations.NewListWorkersOK().WithPayload(&models.WorkerPageInfoModel{
+		Count:      count,
+		WorkerInfo: workerInfo,
+	})
 }

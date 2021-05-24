@@ -1093,6 +1093,52 @@ func init() {
       }
     },
     "/workers": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "工作节点列表",
+        "operationId": "ListWorkers",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "offset",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "工作节点列表",
+            "schema": {
+              "$ref": "#/definitions/WorkerPageInfoModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
       "post": {
         "consumes": [
           "application/json"
@@ -1118,6 +1164,46 @@ func init() {
             "description": "成功",
             "schema": {
               "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/workers/{id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "工作节点详情",
+        "operationId": "GetWorker",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "工作节点信息",
+            "schema": {
+              "$ref": "#/definitions/WorkerDetail"
             }
           },
           "500": {
@@ -1655,6 +1741,26 @@ func init() {
         }
       }
     },
+    "WorkerDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "registerTime": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "taskCount": {
+          "type": "integer"
+        },
+        "workerUrl": {
+          "type": "string"
+        }
+      }
+    },
     "WorkerModel": {
       "type": "object",
       "properties": {
@@ -1665,6 +1771,20 @@ func init() {
         "port": {
           "type": "integer",
           "example": 80
+        }
+      }
+    },
+    "WorkerPageInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "workerInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WorkerDetail"
+          }
         }
       }
     }
@@ -2746,6 +2866,52 @@ func init() {
       }
     },
     "/workers": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "工作节点列表",
+        "operationId": "ListWorkers",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "offset",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "工作节点列表",
+            "schema": {
+              "$ref": "#/definitions/WorkerPageInfoModel"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
       "post": {
         "consumes": [
           "application/json"
@@ -2771,6 +2937,46 @@ func init() {
             "description": "成功",
             "schema": {
               "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/workers/{id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "工作节点详情",
+        "operationId": "GetWorker",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "工作节点信息",
+            "schema": {
+              "$ref": "#/definitions/WorkerDetail"
             }
           },
           "500": {
@@ -3308,6 +3514,26 @@ func init() {
         }
       }
     },
+    "WorkerDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "registerTime": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "taskCount": {
+          "type": "integer"
+        },
+        "workerUrl": {
+          "type": "string"
+        }
+      }
+    },
     "WorkerModel": {
       "type": "object",
       "properties": {
@@ -3318,6 +3544,20 @@ func init() {
         "port": {
           "type": "integer",
           "example": 80
+        }
+      }
+    },
+    "WorkerPageInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "workerInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WorkerDetail"
+          }
         }
       }
     }
