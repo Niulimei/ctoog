@@ -252,12 +252,10 @@ func init() {
 	if !isInitAlready {
 		DB.MustExec(schema)
 	}
-	cmd := exec.Command("chattr", "+a", "translator.db")
-	cmd.Run()
 	go func() {
 		for {
 			startTime := time.Now().Format("2006.01.02-15:04:05")
-			cmd = exec.Command("cp", "translator.db", "backup/translator-"+startTime+".back")
+			cmd := exec.Command("cp", "translator.db", "backup/translator-"+startTime+".back")
 			cmd.Run()
 			time.Sleep(time.Minute * 10)
 		}
@@ -272,7 +270,7 @@ func init() {
 					if err == nil {
 						duration := time.Now().Sub(d)
 						if duration > time.Hour * 24 * 15 {
-							cmd = exec.Command("rm", path)
+							cmd := exec.Command("rm", path)
 							err := cmd.Run()
 							if err != nil {
 								log.Error("delete backuo err:", err, " ", path)
