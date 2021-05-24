@@ -1,11 +1,13 @@
 package database
 
 import (
-	"log"
 	"os"
+	"os/exec"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
+	log "github.com/sirupsen/logrus"
 )
 
 var DB *sqlx.DB
@@ -249,4 +251,14 @@ func init() {
 	if !isInitAlready {
 		DB.MustExec(schema)
 	}
+	cmd := exec.Command("chattr", "+a", "translator.db")
+	cmd.Run()
+	go func() {
+		for {
+			startTime := time.Now().Format("2006.01.02-15:04:05")
+			cmd = exec.Command("cp", "translator.db", "translator-"+startTime+".back")
+			cmd.Run()
+			time.Sleep(time.Minute * 10)
+		}
+	}()
 }
