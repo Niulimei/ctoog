@@ -492,7 +492,66 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /workers/{id}:
+    get:
+      summary: 工作节点详情
+      description: ''
+      operationId: GetWorker
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 工作节点信息
+          schema:
+            $ref: '#/definitions/WorkerDetail'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /workers:
+    get:
+      summary: 工作节点列表
+      description: ''
+      operationId: ListWorkers
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: limit
+          in: query
+          required: true
+          default: 0
+          type: integer
+        - name: offset
+          in: query
+          required: true
+          default: 0
+          type: integer
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 工作节点列表
+          schema:
+            $ref: '#/definitions/WorkerPageInfoModel'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
     post:
       summary: worker注册和心跳
       description: ''
@@ -828,6 +887,28 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/TaskLogInfo'
+  WorkerPageInfoModel:
+    type: object
+    properties:
+      workerInfo:
+        type: array
+        items:
+          $ref: '#/definitions/WorkerDetail'
+      count:
+        type: integer
+  WorkerDetail:
+    type: object
+    properties:
+      id:
+        type: integer
+      workerUrl:
+        type: string
+      taskCount:
+        type: integer
+      status:
+        type: string
+      registerTime:
+        type: string
   TaskCommandOut:
     type: object
     properties:

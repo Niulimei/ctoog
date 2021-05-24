@@ -21,7 +21,7 @@ func CreateUserHandler(params operations.CreateUserParams) middleware.Responder 
 	if !CheckPermission(params.HTTPRequest) {
 		return operations.NewCreateUserInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusUnauthorized,
-			Message: "",
+			Message: "Unauthorized",
 		})
 	}
 	var id int
@@ -70,7 +70,7 @@ func ListUsersHandler(param operations.ListUserParams) middleware.Responder {
 	if !CheckPermission(param.HTTPRequest) {
 		return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusUnauthorized,
-			Message: "",
+			Message: "Unauthorized",
 		})
 	}
 	rows, err := database.DB.Query("SELECT count(1) over() AS total_rows,username,role_id FROM user ORDER BY id LIMIT ? OFFSET ?", param.Limit, param.Offset)
