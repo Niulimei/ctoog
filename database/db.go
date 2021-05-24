@@ -3,6 +3,7 @@ package database
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -259,6 +260,31 @@ func init() {
 			cmd = exec.Command("cp", "translator.db", "translator-"+startTime+".back")
 			cmd.Run()
 			time.Sleep(time.Minute * 10)
+		}
+	}()
+	go func() {
+		pattern := "translator-*.back"
+		for {
+			paths, err := filepath.Glob(pattern)
+			if err == nil {
+				for _, path := range paths {
+					d, err := time.ParseInLocation("translator-2006.01.02-15:04:05.back", path, time.Local)
+					if err == nil {
+						duration := time.Now().Sub(d)
+						log.Error("dura", duration)
+						if duration > time.Hour * 24 * 15 {
+							cmd = exec.Command("rm", path)
+							err := cmd.Run()
+							if err != nil {
+								log.Error("delete backuo err:", err, " ", path)
+							} else {
+								log.Info("delete backup:", path)
+							}
+						}
+					}
+				}
+			}
+			time.Sleep(time.Hour)
 		}
 	}()
 }
