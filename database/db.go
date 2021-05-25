@@ -1,93 +1,19 @@
 package database
 
 import (
-	"log"
+	"encoding/json"
+	"io/ioutil"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
+	log "github.com/sirupsen/logrus"
 )
 
 var DB *sqlx.DB
-
-var schema = `
-CREATE TABLE user (
-    id integer PRIMARY KEY autoincrement,
-    username varchar (128),
-    password varchar (32),
-    role_id integer
-);
-
-CREATE TABLE log (
-    id integer PRIMARY KEY autoincrement,
-    time integer,
-	level varchar (256),
-	user varchar (256),
-	action varchar (256),
-	position varchar (256),
-	message varchar (256),
-	errcode integer
-);
-
-CREATE TABLE task (
-    id integer PRIMARY KEY autoincrement,
-    pvob varchar (256),
-    component varchar (256),
-    dir varchar (256),
-    keep varchar (256),
-    cc_user varchar (256),
-    cc_password varchar (256),
-    git_url varchar (256),
-    git_user varchar (256),
-    git_password varchar (256),
-    git_email varchar (256),
-    status varchar (16),
-    last_completed_date_time varchar (64),
-    creator varchar(128),
-    worker_id integer,
-    include_empty boolean
-);
-
-CREATE TABLE match_info (
-    id integer PRIMARY KEY autoincrement,
-    task_id integer,
-    stream varchar (256),
-    git_branch varchar (256)
-);
-
-CREATE TABLE task_log (
-    log_id integer PRIMARY KEY autoincrement,
-    task_id integer,
-    status varchar (16),
-    start_time varchar (64),
-    end_time varchar (64),
-    duration integer
-);
-
-CREATE TABLE task_command_out (
-    log_id integer PRIMARY KEY,
-    content text
-);
-
-CREATE TABLE worker (
-    id integer PRIMARY KEY autoincrement,
-    worker_url varchar (256),
-    status varchar (16),
-    task_count integer,
-    register_time varchar (64)
-);
-
-CREATE TABLE schedule (
-    id integer PRIMARY KEY autoincrement,
-    status varchar (16),
-    schedule varchar (16),
-    task_id integer,
-    creator varchar (128)
-);
-
-
-INSERT INTO user (username,password,role_id) VALUES("admin", "b17eccdc6c06bd8e15928d583503adf9", 1);
-`
 
 type TaskModel struct {
 	// id
@@ -169,6 +95,43 @@ type ScheduleModel struct {
 }
 
 func init() {
+	initDB()
+	upgradeDB()
+	go func() {
+		for {
+			startTime := time.Now().Format("2006.01.02-15:04:05")
+			cmd := exec.Command("cp", "translator.db", "backup/translator-"+startTime+".back")
+			cmd.Run()
+			time.Sleep(time.Minute * 10)
+		}
+	}()
+	go func() {
+		pattern := "backup/translator-*.back"
+		for {
+			paths, err := filepath.Glob(pattern)
+			if err == nil {
+				for _, path := range paths {
+					d, err := time.ParseInLocation("backup/translator-2006.01.02-15:04:05.back", path, time.Local)
+					if err == nil {
+						duration := time.Now().Sub(d)
+						if duration > time.Hour*24*15 {
+							cmd := exec.Command("rm", path)
+							err := cmd.Run()
+							if err != nil {
+								log.Error("delete backuo err:", err, " ", path)
+							} else {
+								log.Info("delete backup:", path)
+							}
+						}
+					}
+				}
+			}
+			time.Sleep(time.Hour)
+		}
+	}()
+}
+
+func initDB() {
 	var err error
 	var isInitAlready = true
 	_, err = os.Stat("translator.db") //os.Stat获取文件信息
@@ -186,6 +149,42 @@ func init() {
 		log.Fatalln(err)
 	}
 	if !isInitAlready {
-		DB.MustExec(schema)
+		_, err = sqlx.LoadFile(DB, "sql/base.sql")
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+}
+
+type sqlFiles struct {
+	Files []string `json:"files"`
+}
+
+func upgradeDB() {
+	var sf = &sqlFiles{}
+	c, err := ioutil.ReadFile("sql/sql_files.json")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = json.Unmarshal(c, sf)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sqlStr := "select count(1) from db_upgrade_log where name=?"
+	var count int
+	for _, filename := range sf.Files {
+		err = DB.Get(&count, sqlStr, filename)
+		if count == 0 {
+			_, err = sqlx.LoadFile(DB, filepath.Join("sql", filename))
+			if err != nil {
+				log.Fatalln(err)
+			} else {
+				_, err = DB.Exec("INSERT INTO db_upgrade_log (name,exectime) VALUES(?,?)", filename, time.Now().Format("2006.01.02-15:04:05"))
+				if err != nil {
+					log.Fatalln(err)
+				}
+				log.Infoln("Upgrade sql file: ", filename)
+			}
+		}
 	}
 }
