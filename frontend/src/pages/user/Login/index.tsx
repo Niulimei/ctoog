@@ -1,7 +1,7 @@
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { message, Tabs } from 'antd';
+import { LockOutlined, UserOutlined, EditTwoTone, ProfileTwoTone } from '@ant-design/icons';
+import { message, Tabs, Form } from 'antd';
 import React, { useState } from 'react';
-import ProForm, { ProFormText } from '@ant-design/pro-form';
+import ProForm, { ProFormText, ProFormSelect } from '@ant-design/pro-form';
 import { Link, history, useModel } from 'umi';
 import md5 from 'md5';
 
@@ -35,26 +35,72 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleSubmit = async ({ password, username }: User.Base) => {
-    setSubmitting(true);
-    // 登录
-    try {
-      const msg = await UserService.login({
-        username,
-        password: md5(password),
-      });
-      if (msg.token) {
-        message.success('登录成功！');
-        await fetchUserInfo();
-        goto();
+  // const handleSubmit = async ({ password, username }: User.Base) => {
+
+
+  //   setSubmitting(true);
+  //   // 登录
+  //   try {
+  //     const msg = await UserService.login({
+  //       username,
+  //       password: md5(password),
+  //     });
+  //     if (msg.token) {
+  //       message.success('登录成功！');
+  //       await fetchUserInfo();
+  //       goto();
+  //     }
+  //   } catch (err) {
+  //     // eslint-disable-next-line no-console
+  //     console.log(err);
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+  const handleSubmit = async (value: any) => {
+
+    const { username, password, team, group, nickname, bussinessgroup } = value
+
+    if (type === 'account') {
+      setSubmitting(true);
+      // 登录
+      try {
+        const msg = await UserService.login({
+          username,
+          password: md5(password),
+        });
+        if (msg.token) {
+          message.success('登录成功！');
+          await fetchUserInfo();
+          goto();
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log(err);
+      } finally {
+        setSubmitting(false);
       }
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(err);
-    } finally {
-      setSubmitting(false);
+    } else if (type === 'registery') {
+      try {
+        await UserService.registerUser({
+          username, password: md5(password), team, group, nickname, bussinessgroup
+        })
+        message.success('注册成功！');
+        history.replace('/')
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error);
+      } finally {
+        setSubmitting(false);
+      }
+
+
     }
+
   };
+
+  const [form] = Form.useForm();
+
 
   return (
     <div className={styles.container}>
@@ -75,7 +121,7 @@ const Login: React.FC = () => {
             }}
             submitter={{
               searchConfig: {
-                submitText: '登录',
+                submitText: type === 'account' ? '登录' : '注册',
               },
               render: (_, dom) => dom.pop(),
               submitButtonProps: {
@@ -89,9 +135,11 @@ const Login: React.FC = () => {
             onFinish={async (values) => {
               handleSubmit(values as User.Base);
             }}
+            form={form}
           >
             <Tabs activeKey={type} onChange={setType}>
               <Tabs.TabPane key="account" tab="账户密码登录" />
+              <Tabs.TabPane key="registery" tab="注册新用户" />
             </Tabs>
             {type === 'account' && (
               <>
@@ -125,6 +173,155 @@ const Login: React.FC = () => {
                 />
               </>
             )}
+            {
+              type === 'registery' && (
+                <>
+                  {/* 手机号 */}
+                  <ProFormText
+                    name="username"
+                    fieldProps={{
+                      size: 'large',
+                      prefix: <UserOutlined className={styles.prefixIcon} />,
+                    }}
+                    placeholder="请输入手机号码"
+                    rules={[
+                      {
+                        required: true,
+                        message: '请输入手机号码!',
+                      },
+                      {
+                        pattern: /^1\d{10}$/,
+                        message: '不合法的手机号格式!',
+                      },
+                    ]}
+                  />
+                  {/* 名字 */}
+                  <ProFormText
+                    name="nickname"
+                    fieldProps={{
+                      size: 'large',
+                      prefix: <EditTwoTone className={styles.prefixIcon} />,
+                    }}
+                    placeholder="请输入姓名"
+                    rules={[
+                      {
+                        required: true,
+                        message: '请输入姓名!',
+                      },
+                      {
+                        pattern: /[\u4e00-\u9fa5a-z0-9]+$/i,
+                        message: '名字不能含有特殊字符!',
+                      },
+
+                    ]}
+                  />
+                  {/* 项目组 */}
+                  <ProFormText
+                    name="team"
+                    fieldProps={{
+                      size: 'large',
+                      prefix: <ProfileTwoTone className={styles.prefixIcon} />,
+                    }}
+                    placeholder="请输入项目组"
+                    rules={[
+                      {
+                        required: true,
+                        message: '请输入项目组!',
+                      },
+
+                    ]}
+                  />
+                  {/* 事业群 */}
+                  <ProFormSelect
+                    options={[
+                      {
+                        value: '北京事业群',
+                        label: '北京事业群',
+                      },
+                      {
+                        value: '厦门事业群',
+                        label: '厦门事业群',
+                      },
+                      {
+                        value: '成都事业群',
+                        label: '成都事业群',
+                      },
+                      {
+                        value: '深圳事业群',
+                        label: '深圳事业群',
+                      },
+                      {
+                        value: '上海事业群',
+                        label: '上海事业群',
+                      },
+                      {
+                        value: '广州事业群',
+                        label: '广州事业群',
+                      },
+                      {
+                        value: '广研事业群',
+                        label: '广研事业群',
+                      },
+                      {
+                        value: '武汉事业群',
+                        label: '武汉事业群',
+                      },
+                    ]}
+                    fieldProps={{
+                      size: 'large',
+
+                    }}
+                    name="bussinessgroup"
+                    placeholder="请选择事业群"
+                    rules={[
+                      {
+                        required: true,
+                        message: '请选择事业群!',
+                      },
+                      
+                    ]}
+                    showSearch
+
+                  />
+                  {/* 密码 */}
+                  <ProFormText.Password
+                    name="password"
+                    fieldProps={{
+                      size: 'large',
+                      prefix: <LockOutlined className={styles.prefixIcon} />,
+                    }}
+                    placeholder="请输入密码"
+                    rules={[
+                      {
+                        required: true,
+                        message: '请输入密码！',
+                      },
+                      {
+                        pattern: /^[a-zA-Z]\w{5,17}$/,
+                        message: '密码以字母开头，长度在6~18之间，只能包含字母、数字和下划线',
+                      },
+                    ]}
+                  />
+                  <ProFormText.Password
+                    placeholder="请再次输入用户密码"
+                    fieldProps={{
+                      size: 'large',
+                      prefix: <LockOutlined className={styles.prefixIcon} />,
+                    }}
+                    rules={[
+                      {
+                        async validator(_, value) {
+                          if (value !== form.getFieldValue('password')) {
+                            throw new Error('两次密码输入不一致');
+                          }
+                        },
+                      },
+                    ]}
+                    name="retypePassword"
+                  />
+                </>
+              )
+            }
           </ProForm>
         </div>
       </div>

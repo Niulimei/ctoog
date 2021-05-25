@@ -11,30 +11,30 @@ type missionNode = {
     key: string
 }[]
 
-type nodeData = {
-    key: string,
-    nodeIp: string,
-    nodeOrder: number,
-    currentState: string,
-    amount: number
-}[]
+// type nodeData = {
+//     key: string,
+//     workerUrl: string,
+//     id: number,
+//     status: string,
+//     amount: number
+// }[]
 
 const columns: missionNode = [
 
     {
         title: '节点编号',
-        dataIndex: 'nodeOrder',
-        key: 'nodeOrder',
+        dataIndex: 'id',
+        key: 'id',
     },
     {
         title: '节点IP',
-        dataIndex: 'nodeIp',
-        key: 'nodeIp',
+        dataIndex: 'workerUrl',
+        key: 'workerUrl',
     },
     {
         title: '当前状态',
-        dataIndex: 'currentState',
-        key: 'currentState',
+        dataIndex: 'status',
+        key: 'status',
     },
     {
         title: '当前任务数',
@@ -44,30 +44,30 @@ const columns: missionNode = [
 
 
 ];
-const data: nodeData = [
-    {
-        key: '1',
-        nodeIp: 'John Brown',
-        nodeOrder: 32,
-        currentState: 'New York No. 1 Lake Park',
-        amount: 1,
-    },
-    {
-        key: '2',
-        nodeIp: 'Jim Green',
-        nodeOrder: 42,
-        currentState: 'London No. 1 Lake Park',
-        amount: 2,
-    },
-    {
-        key: '3',
-        nodeIp: 'Joe Black',
-        nodeOrder: 32,
-        currentState: 'Sidney No. 1 Lake Park',
-        amount: 1,
-    },
+// const data: nodeData = [
+//     {
+//         key: '1',
+//         workerUrl: 'John Brown',
+//         id: 32,
+//         status: 'New York No. 1 Lake Park',
+//         amount: 1,
+//     },
+//     {
+//         key: '2',
+//         workerUrl: 'Jim Green',
+//         id: 42,
+//         status: 'London No. 1 Lake Park',
+//         amount: 2,
+//     },
+//     {
+//         key: '3',
+//         workerUrl: 'Joe Black',
+//         id: 32,
+//         status: 'Sidney No. 1 Lake Park',
+//         amount: 1,
+//     },
 
-];
+// ];
 
 
 /** 组件 */
@@ -75,14 +75,19 @@ const Node: React.FC = () => {
     /** 分页 */
     const [pageSize, setPagesize] = useState(5)
     const [pageNum, setPagenum] = useState(1)
-    const [total] = useState(8)
+    const [total, setTotal] = useState(8)
+    const [mydata, setMyData] = useState([])
     useEffect(()=>{
-        async function getWorkListData(){
-            await taskService.getWorkList(total, pageSize)
-        }
-        getWorkListData()
+        (async function getWorkListData(){
+            const response = await taskService.getWorkList(total, 0)
+            console.log(response);
+            
+            setMyData(response.workerInfo)
+            setTotal(response.count)
+        })()
         
-    })
+        
+    }, [])
     const changePage = (n: any, s: any) => {
         setPagenum(n)
         setPagesize(s)
@@ -100,7 +105,7 @@ const Node: React.FC = () => {
     return (
         <div>
             <p className='nodeTitle'>任务执行节点列表</p>
-            <Table columns={columns} dataSource={data} pagination={paginationProps} />
+            <Table columns={columns} dataSource={mydata} pagination={paginationProps} />
         </div>
     )
 }

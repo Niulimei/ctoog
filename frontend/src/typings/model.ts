@@ -6,6 +6,14 @@ export namespace User {
     role_id?: Role;
   };
 
+  export type Regisrity = {
+    username: string;
+    password: string;
+    nickname: string;
+    team: string;
+    bussinessgroup: string
+  }
+
   export enum Role {
     ADMIN = 1,
     NORMAL = 2,
