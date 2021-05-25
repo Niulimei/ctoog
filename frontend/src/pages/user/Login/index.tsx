@@ -35,6 +35,17 @@ const Login: React.FC = () => {
     }
   };
 
+  const GroupOptions = [
+    '北京事业群',
+    '厦门事业群',
+    '成都事业群',
+    '深圳事业群',
+    '上海事业群',
+    '广州事业群',
+    '广研事业群',
+    '武汉事业群',
+  ];
+
   // const handleSubmit = async ({ password, username }: User.Base) => {
 
 
@@ -149,11 +160,11 @@ const Login: React.FC = () => {
                     size: 'large',
                     prefix: <UserOutlined className={styles.prefixIcon} />,
                   }}
-                  placeholder="请输入用户名"
+                  placeholder="请输入用户名或手机号"
                   rules={[
                     {
                       required: true,
-                      message: '请输入用户名!',
+                      message: '请输入用户名或手机号!',
                     },
                   ]}
                 />
@@ -215,6 +226,13 @@ const Login: React.FC = () => {
 
                     ]}
                   />
+                  
+                  {/* 事业群 */}
+                  <ProFormSelect
+                    options={GroupOptions}
+                    showSearch
+
+                  />
                   {/* 项目组 */}
                   <ProFormText
                     name="team"
@@ -230,58 +248,6 @@ const Login: React.FC = () => {
                       },
 
                     ]}
-                  />
-                  {/* 事业群 */}
-                  <ProFormSelect
-                    options={[
-                      {
-                        value: '北京事业群',
-                        label: '北京事业群',
-                      },
-                      {
-                        value: '厦门事业群',
-                        label: '厦门事业群',
-                      },
-                      {
-                        value: '成都事业群',
-                        label: '成都事业群',
-                      },
-                      {
-                        value: '深圳事业群',
-                        label: '深圳事业群',
-                      },
-                      {
-                        value: '上海事业群',
-                        label: '上海事业群',
-                      },
-                      {
-                        value: '广州事业群',
-                        label: '广州事业群',
-                      },
-                      {
-                        value: '广研事业群',
-                        label: '广研事业群',
-                      },
-                      {
-                        value: '武汉事业群',
-                        label: '武汉事业群',
-                      },
-                    ]}
-                    fieldProps={{
-                      size: 'large',
-
-                    }}
-                    name="bussinessgroup"
-                    placeholder="请选择事业群"
-                    rules={[
-                      {
-                        required: true,
-                        message: '请选择事业群!',
-                      },
-                      
-                    ]}
-                    showSearch
-
                   />
                   {/* 密码 */}
                   <ProFormText.Password
