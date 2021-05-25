@@ -55,6 +55,8 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	api.UpdateTaskCommandOutHandler = operations.UpdateTaskCommandOutHandlerFunc(UpdateTaskCommandOutHandler)
 	api.DeleteTaskHandler = operations.DeleteTaskHandlerFunc(DeleteTaskHandler)
 	api.DeleteTaskCacheHandler = operations.DeleteTaskCacheHandlerFunc(DeleteTaskCacheHandler)
+	api.GetWorkerHandler = operations.GetWorkerHandlerFunc(GetWorkerHandler)
+	api.ListWorkersHandler = operations.ListWorkersHandlerFunc(ListWorkersHandler)
 
 	api.PreServerShutdown = func() {}
 

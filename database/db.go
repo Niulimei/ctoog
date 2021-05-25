@@ -1,11 +1,16 @@
 package database
 
 import (
-	"log"
+	"encoding/json"
+	"io/ioutil"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
+	log "github.com/sirupsen/logrus"
 )
 
 var DB *sqlx.DB
@@ -209,6 +214,43 @@ type ScheduleModel struct {
 }
 
 func init() {
+	initDB()
+	upgradeDB()
+	go func() {
+		for {
+			startTime := time.Now().Format("2006.01.02-15:04:05")
+			cmd := exec.Command("cp", "translator.db", "backup/translator-"+startTime+".back")
+			cmd.Run()
+			time.Sleep(time.Minute * 10)
+		}
+	}()
+	go func() {
+		pattern := "backup/translator-*.back"
+		for {
+			paths, err := filepath.Glob(pattern)
+			if err == nil {
+				for _, path := range paths {
+					d, err := time.ParseInLocation("backup/translator-2006.01.02-15:04:05.back", path, time.Local)
+					if err == nil {
+						duration := time.Now().Sub(d)
+						if duration > time.Hour*24*15 {
+							cmd := exec.Command("rm", path)
+							err := cmd.Run()
+							if err != nil {
+								log.Error("delete backuo err:", err, " ", path)
+							} else {
+								log.Info("delete backup:", path)
+							}
+						}
+					}
+				}
+			}
+			time.Sleep(time.Hour)
+		}
+	}()
+}
+
+func initDB() {
 	var err error
 	var isInitAlready = true
 	_, err = os.Stat("translator.db") //os.Stat获取文件信息
@@ -226,6 +268,42 @@ func init() {
 		log.Fatalln(err)
 	}
 	if !isInitAlready {
-		DB.MustExec(schema)
+		_, err = sqlx.LoadFile(DB, "sql/base.sql")
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+}
+
+type sqlFiles struct {
+	Files []string `json:"files"`
+}
+
+func upgradeDB() {
+	var sf = &sqlFiles{}
+	c, err := ioutil.ReadFile("sql/sql_files.json")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = json.Unmarshal(c, sf)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sqlStr := "select count(1) from db_upgrade_log where name=?"
+	var count int
+	for _, filename := range sf.Files {
+		err = DB.Get(&count, sqlStr, filename)
+		if count == 0 {
+			_, err = sqlx.LoadFile(DB, filepath.Join("sql", filename))
+			if err != nil {
+				log.Fatalln(err)
+			} else {
+				_, err = DB.Exec("INSERT INTO db_upgrade_log (name,exectime) VALUES(?,?)", filename, time.Now().Format("2006.01.02-15:04:05"))
+				if err != nil {
+					log.Fatalln(err)
+				}
+				log.Infoln("Upgrade sql file: ", filename)
+			}
+		}
 	}
 }

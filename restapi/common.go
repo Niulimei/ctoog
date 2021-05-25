@@ -17,9 +17,7 @@ func CheckPermission(r *http.Request) bool {
 }
 
 var exceptionURL = map[string]string{
-	"/login":   "POST",
-	"/workers": "POST",
-	"/cmdout/": "POST",
+	"/login": "POST",
 }
 
 func IsExceptionURL(method, uri string) bool {
