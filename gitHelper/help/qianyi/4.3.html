@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CC-云桌面迁移(参考)</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="../../3/layui-v2.6.7/css/layui.css">
+  <link rel="stylesheet" href="help.css">
+  <script src="../../3/layui-v2.6.7/layui.js" charset="utf-8"></script>
+  <script src="help.js" charset="utf-8"></script>
+</head>
+<body >
+
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+  <legend>CC-云桌面迁移(参考)</legend>
+</fieldset> 
+
+1.新建代码托管模块仓库<br>
+点击右上角的【+】，点击【新建仓库】菜单。<br>
+操作界面如下：<br>
+
+<br>
+<!--图片-->
+<img  src="imgs/4.3.1.png" class="w-6" onclick="zoomImg(this)"><br>
+填写仓库名称，选择关联配置库,选择归属(当前企业/团队/物理子系统),选择仓库模型，然后点击【新建】按钮创建仓库。<br>
+操作界面如下：<br>
+
+<img  src="imgs/4.3.2.png" class="w-6" onclick="zoomImg(this)"><br>
+
+如下两项信息关系到后续的投产流水线流程：<br>
+1）关联配置库，后续可修改此配置库；<br>
+2）归属（当前企业/团队/物理子系统）选定后不可修改。<br>
+
+2.配置仓库成员<br>
+仓库负责人为仓库配置仓库成员信息，需选择所需要配置的仓库，然后进行成员管理操作。<br>
+点击左侧【代码工程】图标，点击仓库名，进入仓库管理界面，点击【成员管理】菜单。<br>
+若需要新增成员时，点击【添加成员】按钮。<br>
+若需要删除成员时，点击需要删除人员右侧的【移除】图标。<br>
+具体操作如下：<br>
+<img  src="imgs/4.3.3.png" class="w-6" onclick="zoomImg(this)"><br>
+<img  src="imgs/4.3.4.png" class="w-6" onclick="zoomImg(this)"><br>
+
+
+3.拉取CC流的静态视图<br>
+使用本地已有的CC流视图进行拉取，CC指令参考如下：<br>
+	cleartool checkout<br>
+	
+4.初始化本地git仓库<br>
+git bash 打开此目录：<br>
+<img  src="imgs/4.3.5.png" class="w-6" onclick="zoomImg(this)"><br>
+
+<pre class="layui-code" lay-title="命令" lay-skin="notepad">
+# git init 初始化git仓库 
+git init
+</pre>
+<img  src="imgs/4.3.6.png" class="w-6" onclick="zoomImg(this)"><br>
+<pre class="layui-code" lay-title="命令" lay-skin="notepad">
+# gitcc init 开发流静态试图所在目录
+gitcc init c:\\Users\\Administrator\\cc-migrate-demo
+</pre>
+<img  src="imgs/4.3.7.png" class="w-6" onclick="zoomImg(this)"><br>
+<img  src="imgs/4.3.8.png" class="w-6" onclick="zoomImg(this)"><br>
+
+5.修改gitcc 文件<br>
+<pre class="layui-code" lay-title="命令" lay-skin="notepad">
+#配置
+#[core]
+# UCM
+vim .git/gitcc
+
+# clearcase = 静态试图所在目录路径
+# 注意windows 下路径格式
+[core]
+type = UCM
+[master]
+clearcase = C:\\Users\\Administrator\\cc-migrate-demo
+</pre>
+<img  src="imgs/4.3.9.png" class="w-6" onclick="zoomImg(this)"><br>
+<pre class="layui-code" lay-title="命令" lay-skin="notepad">
+# gitcc update "自定义commit信息"
+gitcc update "first commit"
+</pre>
+<img  src="imgs/4.3.10.png" class="w-6" onclick="zoomImg(this)"><br>
+
+6.配置ssh公钥<br>
+<pre class="layui-code" lay-title="命令" lay-skin="notepad">
+# git bash
+# 回车即可
+ssh-keygen
+
+#获取本地ssh公钥
+</pre>
+<img  src="imgs/4.3.11.png" class="w-6" onclick="zoomImg(this)"><br>
+<img  src="imgs/4.3.12.png" class="w-6" onclick="zoomImg(this)"><br>
+
+复制公钥并粘贴至Gitee：<br>
+<img  src="imgs/4.3.13.png" class="w-6" onclick="zoomImg(this)"><br>
+
+
+
+7.提交代码到代码托管模块<br>
+获取代码托管模块仓库地址:<br>
+点击左侧菜单【代码】，然后点击【克隆/下载】按钮，选择【http】协议标签，点击【复制】获取到代码托管模块仓库地址并将仓库地址复制到剪切板。<br>
+<img  src="imgs/4.3.14.png" class="w-6" onclick="zoomImg(this)"><br>
+
+添加远端仓库地址并推送：<br>
+git remote add origin git@gitee.com:*/*****.git<br>
+<img  src="imgs/4.3.15.png" class="w-6" onclick="zoomImg(this)"><br>
+
+git push -u origin master<br>
+<img  src="imgs/4.3.16.png" class="w-6" onclick="zoomImg(this)"><br>
+
+
+
+
+8.仓库的关联配置库变更
+点击左侧菜单【代码工程】,选择需要变更的仓库，点击【管理】下菜单【基础设置】。选择关联配置库。点击【保存】按钮进行保存。<br>
+操作界面如图：<br>
+<img  src="imgs/4.3.17.png" class="w-6" onclick="zoomImg(this)"><br>
+
+至此CC仓库迁移Git完成。
+
+
+</body>
+</html>

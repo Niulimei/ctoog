@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CC-服务器脚本迁移(参考)</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="../../3/layui-v2.6.7/css/layui.css">
+  <link rel="stylesheet" href="help.css">
+  <script src="../../3/layui-v2.6.7/layui.js" charset="utf-8"></script>
+  <script src="help.js" charset="utf-8"></script>
+</head>
+<body >
+
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+  <legend>CC-服务器脚本迁移(参考)</legend>
+</fieldset> 
+
+<p >
+  推荐通过登录迁移服务器进行迁移，该服务器已经准备好了迁移脚本，登录后可直接使用。具体服务器地址以及申请[ <a href="" target="_blank">参考</a>]
+</p>
+<img  src="imgs/4.2.1.png" class="w-6" onclick="zoomImg(this)">
+
+
+<p >
+  切换到有权限的用户（配置库体系虚拟管理员账号或使用root）
+</p>
+<img  src="imgs/4.2.2.png" class="w-6" onclick="zoomImg(this)"><br>
+
+
+1)服务器创建静态视图<br>
+<br>
+ssh 登录迁移服务器<br>
+在 /root 目录下执行命令<br>
+sh ccView.sh $1 $2 $3 $4 $5 <br>
+$1：视图存储路径<br>
+$2：pvob名称 <br>
+$3：流名称<br>
+$3：组件名称<br>
+$5：视图名称<br>
+<img  src="imgs/4.2.3.png" class="w-6" onclick="zoomImg(this)"><br>
+回车后执行<br>
+<img  src="imgs/4.2.4.png" class="w-6" onclick="zoomImg(this)"><br>
+
+2)初始化git 仓库<br>
+cd $1/$5 确认文件路径。<br>
+/root 目录下执行<br>
+sh togtiee.sh $1 $2<br>
+$1：确认后的项目路径<br>
+$2: gitee仓库克隆地址<br>
+<br>
+确认项目路径<br>
+
+<img  src="imgs/4.2.5.png" class="w-6" onclick="zoomImg(this)"><br>
+保留空目录（视项目组需求而定）<br>
+空目录在git中默认无法保存，如想保存空目录，需要在该目录下创建文件(空文件即可)，我们提供了批量处理导出仓库空文件的程序，如下图例。<br>
+<img  src="imgs/4.2.6.png" class="w-6" onclick="zoomImg(this)"><br>
+
+命令行运行gitee_keep.sh,在1号参数位输入想要创建用来保留空目录的空文件文件名，如sample中的gitee(厦门事业群默认的空文件名)，如担心未来出现误删除或影响编译等情况发生，可创建为隐藏文件如.gitkeep（文件名前添加’.’）。<br>
+使用案例：<br>
+<img  src="imgs/4.2.7.png" class="w-6" onclick="zoomImg(this)"><br>
+如上图，通过gitee_keep.sh完成创建文件处理，屏幕上输出的内容为已创建文件的空目录名。<br>
+<br>
+执行迁移到gitee脚本<br>
+<img  src="imgs/4.2.8.png" class="w-6" onclick="zoomImg(this)"><br>
+
+推送成功<br>
+<img  src="imgs/4.2.9.png" class="w-6" onclick="zoomImg(this)"><br>
+平台页面查看<br>
+<img  src="imgs/4.2.10.png" class="w-6" onclick="zoomImg(this)"><br>
+
+
+</body>
+</html>

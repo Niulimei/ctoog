@@ -161,7 +161,7 @@ func (f *FileServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.HandlerFunc(fileapi.PlansExportHandler).ServeHTTP(w, r)
 		return
 	} else if !strings.HasPrefix(r.URL.Path, "/api") {
-		if !strings.HasPrefix(r.URL.Path, "/frontend/dist") {
+		if !strings.HasPrefix(r.URL.Path, "/frontend/dist") && !strings.HasPrefix(r.URL.Path, "/gitHelper") {
 			r.URL.Path = "/frontend/dist" + r.URL.Path
 		}
 		http.FileServer(http.Dir("./")).ServeHTTP(w, r)
