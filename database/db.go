@@ -31,10 +31,6 @@ CREATE TABLE log (
 
 CREATE TABLE task (
     id integer PRIMARY KEY autoincrement,
-    pvob varchar (256),
-    component varchar (256),
-    dir varchar (256),
-    keep varchar (256),
     cc_user varchar (256),
     cc_password varchar (256),
     git_url varchar (256),
@@ -45,7 +41,23 @@ CREATE TABLE task (
     last_completed_date_time varchar (64),
     creator varchar(128),
     worker_id integer,
+    model_type varchar(16) default 'clearcase'
+);
+
+
+CREATE TABLE cc_meta (
+    id integer PRIMARY KEY autoincrement,
+    pvob varchar (256),
+    component varchar (256),
+    dir varchar (256),
+    keep varchar (256),
+    task_id integer,
     include_empty boolean
+);
+
+CREATE TABLE svn_meta (
+    id integer PRIMARY KEY autoincrement,
+    svn_url varchar(512)
 );
 
 CREATE TABLE match_info (
@@ -53,6 +65,14 @@ CREATE TABLE match_info (
     task_id integer,
     stream varchar (256),
     git_branch varchar (256)
+);
+
+CREATE TABLE svn_name_pair (
+    id integer PRIMARY KEY autoincrement,
+    task_id integer,
+    svn_username varchar (256),
+    git_username varchar (256),
+    git_email varchar (256)
 );
 
 CREATE TABLE task_log (
@@ -99,15 +119,6 @@ type TaskModel struct {
 	// cc user
 	CcUser string `db:"cc_user"`
 
-	// component
-	Component string
-
-	// dir
-	Dir string
-
-	// keep
-	Keep string
-
 	// git password
 	GitPassword string `db:"git_password"`
 
@@ -126,14 +137,43 @@ type TaskModel struct {
 	//worker id
 	WorkerId int64 `db:"worker_id"`
 
+	// git email
+	GitEmail string `db:"git_email"`
+
+	// model type
+	ModelType string `db:"model_type"`
+}
+
+type CcMetaModel struct {
+	// id
+	Id int64
+
+	// component
+	Component string
+
+	// dir
+	Dir string
+
+	// keep
+	Keep string
+
 	// pvob
 	Pvob string
 
 	// include empty dir
 	IncludeEmpty bool `db:"include_empty"`
+}
 
-	// git email
-	GitEmail string `db:"git_email"`
+type SvnMetaModel struct {
+	Id int64
+	SvnURL string `db:"svn_url"`
+}
+
+type SvnNamePair struct {
+	TaskId int64 `db:"task_id"`
+	SvnUserName string `db:"svn_username"`
+	GitUserName string `db:"git_username"`
+	GitEmail    string `db:"git_email"`
 }
 
 type WorkerModel struct {

@@ -209,6 +209,11 @@ paths:
           in: query
           required: false
           type: string
+        - name: modelType
+          in: query
+          required: false
+          type: string
+          default: clearcase
         - name: Authorization
           in: header
           required: true
@@ -492,6 +497,61 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /svn_username_pairs/{id}:
+    get:
+      summary: svn用户名列表列表
+      description: ''
+      operationId: ListSvnUsername
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+      responses:
+        '200':
+          description: 用户名列表
+          schema:
+            type: array
+            items:
+              type: string
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      summary: 更新用户名对应信息
+      description: ''
+      operationId: UpdateSvnNamePair
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: string
+        - name: usernamePairInfo
+          in: body
+          description: 对应信息
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/NamePairInfo'
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /workers:
     post:
       summary: worker注册和心跳
@@ -726,6 +786,8 @@ definitions:
         type: integer
       includeEmpty:
         type: boolean
+      svnUrl:
+        type: string
   TaskInfoUpdateModel:
     type: object
     properties:
@@ -761,16 +823,33 @@ definitions:
         type: string
       includeEmpty:
         type: boolean
+      svnUrl:
+        type: string
+      modelType:
+        type: string
       matchInfo:
         type: array
         items:
           $ref: '#/definitions/TaskMatchInfo'
+      namePair:
+        type: array
+        items:
+          $ref: '#/definitions/NamePairInfo'
   TaskMatchInfo:
     type: object
     properties:
       stream:
         type: string
       gitBranch:
+        type: string
+  NamePairInfo:
+    type: object
+    properties:
+      snvUserName:
+        type: string
+      gitUserName:
+        type: string
+      gitEmail:
         type: string
   TaskModel:
     type: object
@@ -801,6 +880,14 @@ definitions:
           $ref: '#/definitions/TaskMatchInfo'
       includeEmpty:
         type: boolean
+      svnUrl:
+        type: string
+      modelType:
+        type: string
+      namePair:
+        type: array
+        items:
+          $ref: '#/definitions/NamePairInfo'
   TaskRestart:
     type: object
     properties:

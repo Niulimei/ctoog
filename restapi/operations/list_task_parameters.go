@@ -23,12 +23,15 @@ func NewListTaskParams() ListTaskParams {
 	var (
 		// initialize parameters with default values
 
-		limitDefault  = int64(0)
-		offsetDefault = int64(0)
+		limitDefault     = int64(0)
+		modelTypeDefault = string("clearcase")
+		offsetDefault    = int64(0)
 	)
 
 	return ListTaskParams{
 		Limit: limitDefault,
+
+		ModelType: &modelTypeDefault,
 
 		Offset: offsetDefault,
 	}
@@ -58,6 +61,11 @@ type ListTaskParams struct {
 	  Default: 0
 	*/
 	Limit int64
+	/*
+	  In: query
+	  Default: "clearcase"
+	*/
+	ModelType *string
 	/*
 	  Required: true
 	  In: query
@@ -96,6 +104,11 @@ func (o *ListTaskParams) BindRequest(r *http.Request, route *middleware.MatchedR
 
 	qLimit, qhkLimit, _ := qs.GetOK("limit")
 	if err := o.bindLimit(qLimit, qhkLimit, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qModelType, qhkModelType, _ := qs.GetOK("modelType")
+	if err := o.bindModelType(qModelType, qhkModelType, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -179,6 +192,25 @@ func (o *ListTaskParams) bindLimit(rawData []string, hasKey bool, formats strfmt
 		return errors.InvalidType("limit", "query", "int64", raw)
 	}
 	o.Limit = value
+
+	return nil
+}
+
+// bindModelType binds and validates parameter ModelType from query.
+func (o *ListTaskParams) bindModelType(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewListTaskParams()
+		return nil
+	}
+	o.ModelType = &raw
 
 	return nil
 }

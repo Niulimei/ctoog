@@ -61,6 +61,12 @@ type TaskInfoUpdateModel struct {
 	// match info
 	MatchInfo []*TaskMatchInfo `json:"matchInfo"`
 
+	// model type
+	ModelType string `json:"modelType,omitempty"`
+
+	// name pair
+	NamePair []*NamePairInfo `json:"namePair"`
+
 	// pvob
 	Pvob string `json:"pvob,omitempty"`
 
@@ -69,6 +75,9 @@ type TaskInfoUpdateModel struct {
 
 	// status
 	Status string `json:"status,omitempty"`
+
+	// svn Url
+	SvnURL string `json:"svnUrl,omitempty"`
 }
 
 // Validate validates this task info update model
@@ -76,6 +85,10 @@ func (m *TaskInfoUpdateModel) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateMatchInfo(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateNamePair(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -109,11 +122,39 @@ func (m *TaskInfoUpdateModel) validateMatchInfo(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *TaskInfoUpdateModel) validateNamePair(formats strfmt.Registry) error {
+	if swag.IsZero(m.NamePair) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.NamePair); i++ {
+		if swag.IsZero(m.NamePair[i]) { // not required
+			continue
+		}
+
+		if m.NamePair[i] != nil {
+			if err := m.NamePair[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("namePair" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 // ContextValidate validate this task info update model based on the context it is used
 func (m *TaskInfoUpdateModel) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.contextValidateMatchInfo(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateNamePair(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -131,6 +172,24 @@ func (m *TaskInfoUpdateModel) contextValidateMatchInfo(ctx context.Context, form
 			if err := m.MatchInfo[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("matchInfo" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *TaskInfoUpdateModel) contextValidateNamePair(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.NamePair); i++ {
+
+		if m.NamePair[i] != nil {
+			if err := m.NamePair[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("namePair" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

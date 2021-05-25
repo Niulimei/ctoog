@@ -51,3 +51,7 @@ translator.db
 
 release/
 release.tar.gz
+
+backup/
+
+translator-*

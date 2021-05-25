@@ -362,6 +362,87 @@ func init() {
         }
       }
     },
+    "/svn_username_pairs/{id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "svn用户名列表列表",
+        "operationId": "ListSvnUsername",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "用户名列表",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "更新用户名对应信息",
+        "operationId": "UpdateSvnNamePair",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "对应信息",
+            "name": "usernamePairInfo",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/NamePairInfo"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/tasks": {
       "get": {
         "consumes": [
@@ -400,6 +481,12 @@ func init() {
           {
             "type": "string",
             "name": "status",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "default": "clearcase",
+            "name": "modelType",
             "in": "query"
           },
           {
@@ -1007,6 +1094,20 @@ func init() {
         }
       }
     },
+    "NamePairInfo": {
+      "type": "object",
+      "properties": {
+        "gitEmail": {
+          "type": "string"
+        },
+        "gitUserName": {
+          "type": "string"
+        },
+        "snvUserName": {
+          "type": "string"
+        }
+      }
+    },
     "OK": {
       "type": "object",
       "properties": {
@@ -1109,6 +1210,9 @@ func init() {
         },
         "status": {
           "type": "string"
+        },
+        "svnUrl": {
+          "type": "string"
         }
       }
     },
@@ -1160,6 +1264,15 @@ func init() {
             "$ref": "#/definitions/TaskMatchInfo"
           }
         },
+        "modelType": {
+          "type": "string"
+        },
+        "namePair": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NamePairInfo"
+          }
+        },
         "pvob": {
           "type": "string"
         },
@@ -1167,6 +1280,9 @@ func init() {
           "type": "string"
         },
         "status": {
+          "type": "string"
+        },
+        "svnUrl": {
           "type": "string"
         }
       }
@@ -1241,7 +1357,19 @@ func init() {
             "$ref": "#/definitions/TaskMatchInfo"
           }
         },
+        "modelType": {
+          "type": "string"
+        },
+        "namePair": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NamePairInfo"
+          }
+        },
         "pvob": {
+          "type": "string"
+        },
+        "svnUrl": {
           "type": "string"
         }
       }
@@ -1685,6 +1813,87 @@ func init() {
         }
       }
     },
+    "/svn_username_pairs/{id}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "svn用户名列表列表",
+        "operationId": "ListSvnUsername",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "用户名列表",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "更新用户名对应信息",
+        "operationId": "UpdateSvnNamePair",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "对应信息",
+            "name": "usernamePairInfo",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/NamePairInfo"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/tasks": {
       "get": {
         "consumes": [
@@ -1723,6 +1932,12 @@ func init() {
           {
             "type": "string",
             "name": "status",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "default": "clearcase",
+            "name": "modelType",
             "in": "query"
           },
           {
@@ -2330,6 +2545,20 @@ func init() {
         }
       }
     },
+    "NamePairInfo": {
+      "type": "object",
+      "properties": {
+        "gitEmail": {
+          "type": "string"
+        },
+        "gitUserName": {
+          "type": "string"
+        },
+        "snvUserName": {
+          "type": "string"
+        }
+      }
+    },
     "OK": {
       "type": "object",
       "properties": {
@@ -2432,6 +2661,9 @@ func init() {
         },
         "status": {
           "type": "string"
+        },
+        "svnUrl": {
+          "type": "string"
         }
       }
     },
@@ -2483,6 +2715,15 @@ func init() {
             "$ref": "#/definitions/TaskMatchInfo"
           }
         },
+        "modelType": {
+          "type": "string"
+        },
+        "namePair": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NamePairInfo"
+          }
+        },
         "pvob": {
           "type": "string"
         },
@@ -2490,6 +2731,9 @@ func init() {
           "type": "string"
         },
         "status": {
+          "type": "string"
+        },
+        "svnUrl": {
           "type": "string"
         }
       }
@@ -2564,7 +2808,19 @@ func init() {
             "$ref": "#/definitions/TaskMatchInfo"
           }
         },
+        "modelType": {
+          "type": "string"
+        },
+        "namePair": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NamePairInfo"
+          }
+        },
         "pvob": {
+          "type": "string"
+        },
+        "svnUrl": {
           "type": "string"
         }
       }

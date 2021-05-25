@@ -46,6 +46,9 @@ type TaskInfoModel struct {
 
 	// status
 	Status string `json:"status,omitempty"`
+
+	// svn Url
+	SvnURL string `json:"svnUrl,omitempty"`
 }
 
 // Validate validates this task info model

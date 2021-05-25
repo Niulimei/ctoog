@@ -81,6 +81,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		ListScheduleHandler: ListScheduleHandlerFunc(func(params ListScheduleParams) middleware.Responder {
 			return middleware.NotImplemented("operation ListSchedule has not yet been implemented")
 		}),
+		ListSvnUsernameHandler: ListSvnUsernameHandlerFunc(func(params ListSvnUsernameParams) middleware.Responder {
+			return middleware.NotImplemented("operation ListSvnUsername has not yet been implemented")
+		}),
 		ListTaskHandler: ListTaskHandlerFunc(func(params ListTaskParams) middleware.Responder {
 			return middleware.NotImplemented("operation ListTask has not yet been implemented")
 		}),
@@ -98,6 +101,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		}),
 		UpdateScheduleHandler: UpdateScheduleHandlerFunc(func(params UpdateScheduleParams) middleware.Responder {
 			return middleware.NotImplemented("operation UpdateSchedule has not yet been implemented")
+		}),
+		UpdateSvnNamePairHandler: UpdateSvnNamePairHandlerFunc(func(params UpdateSvnNamePairParams) middleware.Responder {
+			return middleware.NotImplemented("operation UpdateSvnNamePair has not yet been implemented")
 		}),
 		UpdateTaskHandler: UpdateTaskHandlerFunc(func(params UpdateTaskParams) middleware.Responder {
 			return middleware.NotImplemented("operation UpdateTask has not yet been implemented")
@@ -167,6 +173,8 @@ type TranslatorAPI struct {
 	ListPvobComponentStreamHandler ListPvobComponentStreamHandler
 	// ListScheduleHandler sets the operation handler for the list schedule operation
 	ListScheduleHandler ListScheduleHandler
+	// ListSvnUsernameHandler sets the operation handler for the list svn username operation
+	ListSvnUsernameHandler ListSvnUsernameHandler
 	// ListTaskHandler sets the operation handler for the list task operation
 	ListTaskHandler ListTaskHandler
 	// ListUserHandler sets the operation handler for the list user operation
@@ -179,6 +187,8 @@ type TranslatorAPI struct {
 	RestartTaskHandler RestartTaskHandler
 	// UpdateScheduleHandler sets the operation handler for the update schedule operation
 	UpdateScheduleHandler UpdateScheduleHandler
+	// UpdateSvnNamePairHandler sets the operation handler for the update svn name pair operation
+	UpdateSvnNamePairHandler UpdateSvnNamePairHandler
 	// UpdateTaskHandler sets the operation handler for the update task operation
 	UpdateTaskHandler UpdateTaskHandler
 	// UpdateTaskCommandOutHandler sets the operation handler for the update task command out operation
@@ -299,6 +309,9 @@ func (o *TranslatorAPI) Validate() error {
 	if o.ListScheduleHandler == nil {
 		unregistered = append(unregistered, "ListScheduleHandler")
 	}
+	if o.ListSvnUsernameHandler == nil {
+		unregistered = append(unregistered, "ListSvnUsernameHandler")
+	}
 	if o.ListTaskHandler == nil {
 		unregistered = append(unregistered, "ListTaskHandler")
 	}
@@ -316,6 +329,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.UpdateScheduleHandler == nil {
 		unregistered = append(unregistered, "UpdateScheduleHandler")
+	}
+	if o.UpdateSvnNamePairHandler == nil {
+		unregistered = append(unregistered, "UpdateSvnNamePairHandler")
 	}
 	if o.UpdateTaskHandler == nil {
 		unregistered = append(unregistered, "UpdateTaskHandler")
@@ -466,6 +482,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/svn_username_pairs/{id}"] = NewListSvnUsername(o.context, o.ListSvnUsernameHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/tasks"] = NewListTask(o.context, o.ListTaskHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -487,6 +507,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
 	o.handlers["PUT"]["/schedules/{id}"] = NewUpdateSchedule(o.context, o.UpdateScheduleHandler)
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/svn_username_pairs/{id}"] = NewUpdateSvnNamePair(o.context, o.UpdateSvnNamePairHandler)
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}

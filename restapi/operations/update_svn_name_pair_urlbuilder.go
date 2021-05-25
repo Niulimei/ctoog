@@ -9,18 +9,12 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-
-	"github.com/go-openapi/swag"
+	"strings"
 )
 
-// ListTaskURL generates an URL for the list task operation
-type ListTaskURL struct {
-	Component *string
-	Limit     int64
-	ModelType *string
-	Offset    int64
-	Pvob      *string
-	Status    *string
+// UpdateSvnNamePairURL generates an URL for the update svn name pair operation
+type UpdateSvnNamePairURL struct {
+	ID string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -30,7 +24,7 @@ type ListTaskURL struct {
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ListTaskURL) WithBasePath(bp string) *ListTaskURL {
+func (o *UpdateSvnNamePairURL) WithBasePath(bp string) *UpdateSvnNamePairURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -38,15 +32,22 @@ func (o *ListTaskURL) WithBasePath(bp string) *ListTaskURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ListTaskURL) SetBasePath(bp string) {
+func (o *UpdateSvnNamePairURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *ListTaskURL) Build() (*url.URL, error) {
+func (o *UpdateSvnNamePairURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/tasks"
+	var _path = "/svn_username_pairs/{id}"
+
+	id := o.ID
+	if id != "" {
+		_path = strings.Replace(_path, "{id}", id, -1)
+	} else {
+		return nil, errors.New("id is required on UpdateSvnNamePairURL")
+	}
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -54,57 +55,11 @@ func (o *ListTaskURL) Build() (*url.URL, error) {
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
-	qs := make(url.Values)
-
-	var componentQ string
-	if o.Component != nil {
-		componentQ = *o.Component
-	}
-	if componentQ != "" {
-		qs.Set("component", componentQ)
-	}
-
-	limitQ := swag.FormatInt64(o.Limit)
-	if limitQ != "" {
-		qs.Set("limit", limitQ)
-	}
-
-	var modelTypeQ string
-	if o.ModelType != nil {
-		modelTypeQ = *o.ModelType
-	}
-	if modelTypeQ != "" {
-		qs.Set("modelType", modelTypeQ)
-	}
-
-	offsetQ := swag.FormatInt64(o.Offset)
-	if offsetQ != "" {
-		qs.Set("offset", offsetQ)
-	}
-
-	var pvobQ string
-	if o.Pvob != nil {
-		pvobQ = *o.Pvob
-	}
-	if pvobQ != "" {
-		qs.Set("pvob", pvobQ)
-	}
-
-	var statusQ string
-	if o.Status != nil {
-		statusQ = *o.Status
-	}
-	if statusQ != "" {
-		qs.Set("status", statusQ)
-	}
-
-	_result.RawQuery = qs.Encode()
-
 	return &_result, nil
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *ListTaskURL) Must(u *url.URL, err error) *url.URL {
+func (o *UpdateSvnNamePairURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -115,17 +70,17 @@ func (o *ListTaskURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *ListTaskURL) String() string {
+func (o *UpdateSvnNamePairURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *ListTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *UpdateSvnNamePairURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on ListTaskURL")
+		return nil, errors.New("scheme is required for a full url on UpdateSvnNamePairURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on ListTaskURL")
+		return nil, errors.New("host is required for a full url on UpdateSvnNamePairURL")
 	}
 
 	base, err := o.Build()
@@ -139,6 +94,6 @@ func (o *ListTaskURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *ListTaskURL) StringFull(scheme, host string) string {
+func (o *UpdateSvnNamePairURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

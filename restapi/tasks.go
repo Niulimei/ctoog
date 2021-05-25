@@ -24,17 +24,17 @@ func init() {
 		for {
 			select {
 			case <-t.C:
-				log.Info("ticker begin")
+				log.Debug("ticker begin")
 				var taskLogs []*database.TaskLog
 				now := time.Now()
 				start := now.Add(time.Hour * -1).Format("2006-01-02 15:04:05")
-				log.Info("start", start)
-				log.Info(database.DB.Select(&taskLogs,
+				log.Debug("start", start)
+				log.Debug(database.DB.Select(&taskLogs,
 					"SELECT * FROM task_log WHERE start_time < $1 AND status = 'running'", start))
 				tx, err := database.DB.Begin()
 				if err == nil {
 					for _, taskLog := range taskLogs {
-						log.Info("auto close task log ", taskLog.LogId)
+						log.Debug("auto close task log ", taskLog.LogId)
 						tx.Exec("UPDATE task_log SET status = 'failed', end_time = $1 WHERE log_id = $2",
 							now.Format("2006-01-02 15:04:05"), taskLog.LogId)
 						tx.Exec("UPDATE task SET status = 'failed' WHERE id = $1", taskLog.TaskId)
