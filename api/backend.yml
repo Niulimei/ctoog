@@ -65,6 +65,31 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /users/register:
+    post:
+      summary: 注册账户
+      description: ''
+      operationId: RegisterUser
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: userRegisterInfo
+          in: body
+          description: 用户信息
+          required: true
+          schema:
+            $ref: '#/definitions/UserRegisterModel'
+      responses:
+        '201':
+          description: 成功
+          schema:
+            $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /users:
     post:
       summary: 开通账户
@@ -886,6 +911,13 @@ definitions:
         type: integer
       limit:
         type: integer
+  UserRegisterModel:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
   UserModel:
     type: object
     properties:

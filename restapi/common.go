@@ -17,12 +17,13 @@ func CheckPermission(r *http.Request) bool {
 }
 
 var exceptionURL = map[string]string{
-	"/login": "POST",
+	"/api/login":      "POST",
+	"/users/register": "POST",
 }
 
 func IsExceptionURL(method, uri string) bool {
 	for uriChild, m := range exceptionURL {
-		if strings.Contains(uri, uriChild) && m == method {
+		if strings.HasSuffix(uri, uriChild) && m == method {
 			return true
 		}
 	}

@@ -45,8 +45,32 @@ func CreateUserHandler(params operations.CreateUserParams) middleware.Responder 
 			Message: "Sql Error",
 		})
 	} else {
-		utils.RecordLog(utils.Info, utils.AddUser, "", "", 0)
-		return operations.NewCreateUserCreated().WithPayload(&models.OK{Message: "User Create Success"})
+		utils.RecordLog(utils.Info, utils.AddUser, "", "User "+params.UserInfo.Username+" create success", 0)
+		return operations.NewCreateUserCreated().WithPayload(&models.OK{Message: "User " + params.UserInfo.Username + " create success"})
+	}
+}
+
+func RegisterUserHandler(params operations.RegisterUserParams) middleware.Responder {
+	var id int
+	row := database.DB.QueryRow("SELECT id FROM user WHERE username=?", params.UserRegisterInfo.Username)
+	err := row.Scan(&id)
+	if err == nil || id != 0 {
+		return operations.NewRegisterUserInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Username Already Exist",
+		})
+	}
+	sqlStr := "INSERT INTO user (username,password,role_id) VALUES (?,?,?)"
+	ret := database.DB.MustExec(sqlStr, params.UserRegisterInfo.Username, params.UserRegisterInfo.Password, NormalRole)
+	_, err = ret.RowsAffected()
+	if err != nil {
+		return operations.NewRegisterUserInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Sql Error",
+		})
+	} else {
+		utils.RecordLog(utils.Info, utils.AddUser, "", "User "+params.UserRegisterInfo.Username+" register success", 0)
+		return operations.NewRegisterUserCreated().WithPayload(&models.OK{Message: "User " + params.UserRegisterInfo.Username + " register success"})
 	}
 }
 

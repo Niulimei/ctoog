@@ -1058,6 +1058,43 @@ func init() {
         }
       }
     },
+    "/users/register": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "注册账户",
+        "operationId": "RegisterUser",
+        "parameters": [
+          {
+            "description": "用户信息",
+            "name": "userRegisterInfo",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserRegisterModel"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/users/self": {
       "get": {
         "consumes": [
@@ -1738,6 +1775,17 @@ func init() {
           "items": {
             "$ref": "#/definitions/UserInfoModel"
           }
+        }
+      }
+    },
+    "UserRegisterModel": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
         }
       }
     },
@@ -2831,6 +2879,43 @@ func init() {
         }
       }
     },
+    "/users/register": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "注册账户",
+        "operationId": "RegisterUser",
+        "parameters": [
+          {
+            "description": "用户信息",
+            "name": "userRegisterInfo",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserRegisterModel"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/users/self": {
       "get": {
         "consumes": [
@@ -3511,6 +3596,17 @@ func init() {
           "items": {
             "$ref": "#/definitions/UserInfoModel"
           }
+        }
+      }
+    },
+    "UserRegisterModel": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
         }
       }
     },
