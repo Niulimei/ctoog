@@ -209,8 +209,8 @@ const Login: React.FC = () => {
                         message: '请输入姓名!',
                       },
                       {
-                        pattern: /^((?!\\|\/|:|\*|\?|<|>|\||'|%).){1,8}$/,
-                        message: '名字长度为1-8，且不能含有特殊字符!',
+                        pattern: /[\u4e00-\u9fa5a-z0-9]+$/i,
+                        message: '名字不能含有特殊字符!',
                       },
 
                     ]}
@@ -235,35 +235,35 @@ const Login: React.FC = () => {
                   <ProFormSelect
                     options={[
                       {
-                        value: 'bj',
+                        value: '北京事业群',
                         label: '北京事业群',
                       },
                       {
-                        value: 'xm',
+                        value: '厦门事业群',
                         label: '厦门事业群',
                       },
                       {
-                        value: 'cd',
+                        value: '成都事业群',
                         label: '成都事业群',
                       },
                       {
-                        value: 'sz',
+                        value: '深圳事业群',
                         label: '深圳事业群',
                       },
                       {
-                        value: 'sh',
+                        value: '上海事业群',
                         label: '上海事业群',
                       },
                       {
-                        value: 'gz',
+                        value: '广州事业群',
                         label: '广州事业群',
                       },
                       {
-                        value: 'gy',
+                        value: '广研事业群',
                         label: '广研事业群',
                       },
                       {
-                        value: 'wh',
+                        value: '武汉事业群',
                         label: '武汉事业群',
                       },
                     ]}
@@ -280,6 +280,7 @@ const Login: React.FC = () => {
                       },
                       
                     ]}
+                    showSearch
 
                   />
                   {/* 密码 */}
@@ -296,8 +297,8 @@ const Login: React.FC = () => {
                         message: '请输入密码！',
                       },
                       {
-                        pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/,
-                        message: '密码至少包含数字和英文，长度6-20',
+                        pattern: /^[a-zA-Z]\w{5,17}$/,
+                        message: '密码以字母开头，长度在6~18之间，只能包含字母、数字和下划线',
                       },
                     ]}
                   />
