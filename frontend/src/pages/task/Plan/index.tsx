@@ -2,10 +2,10 @@ import React from 'react';
 import { useHistory } from 'umi';
 import type { Plan } from '@/typings/model';
 import ProTable from '@ant-design/pro-table';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, SmileOutlined } from '@ant-design/icons';
 import { plan as planServices } from '@/services';
 import PlanCreator from './components/PlanCreator';
-import { Button, Menu, Dropdown, message } from 'antd';
+import { Button, Menu, Dropdown, message, notification } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
 import PlanStatusSwitcher from './components/PlanStatusSwitcher';
 
@@ -19,7 +19,7 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
     actions[key]?.(item);
   };
   return [
-    
+
     {
       title: '源仓库类型',
       dataIndex: 'originType',
@@ -170,6 +170,15 @@ const PlanList: React.FC = () => {
       history.push(`/task/detail?id=${task_id}`);
     },
   };
+  /** 提示信息 */
+  const description = `目前有事业群反映，物理子系统过多，逐个填报过于繁琐,如果想批量录入，工作组提供了临时的批量导入方案。
+  现提供仓库迁移范围模板，事业群同事可以编辑迁移范围模板excel，由工作组每日进行导入
+  1）模板存放地址：云上，\\128.194.1.13\\全生命周期it管理\\工作目录\\仓库迁移信息\\仓库迁移范围信息-模板.xlsx
+  事业群可以复制模板，修改名称为【仓库迁移范围信息-事业群.xlsx】进行填写
+  填写前请先阅读同级文件【readme.txt】
+  2）如果无法访问共享的，请使用sftp填报
+  地址：128.194.225.15 用户名密码：repinf/inf0525
+  存放位置：/home/ap/repinf`
   return (
     <>
       <PlanCreator onSuccess={() => tableRef.current.reload()} actionRef={planCreatorRef} />
@@ -197,6 +206,17 @@ const PlanList: React.FC = () => {
         columns={getColumns(actions)}
         search={false}
         toolBarRender={() => [
+          <Button size="small"
+            type="primary"
+            onClick={() => {
+              notification.open({
+                message: `友情提示`,
+                description,
+                icon: <SmileOutlined style={{ color: '#108ee9' }} />,
+              });
+            }}
+          >批量计划导入
+          </Button>,
           <Button
             size="small"
             type="primary"

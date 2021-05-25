@@ -231,7 +231,8 @@ const Login: React.FC = () => {
                   <ProFormSelect
                     options={GroupOptions}
                     showSearch
-
+                    placeholder="请选择事业群"
+                    name="bussinessgroup"
                   />
                   {/* 项目组 */}
                   <ProFormText
