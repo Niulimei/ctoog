@@ -76,6 +76,13 @@ const CustomChangeHandlers: Partial<
     dispatch({ type: 'getComponentValueEnum', payload: value });
     form.setFieldsValue({ configLib: value });
   },
+  plan_start_time(form, value) {
+    const switchTime = form.getFieldValue('plan_switch_time');
+    if (dayjs(switchTime).isAfter(dayjs(value)))
+      form.setFields([{ name: ['plan_switch_time'], errors: [] }])
+    else
+      form.setFields([{ name: ['plan_switch_time'], errors: ['计划切换日期应在计划迁移日期之后'] }])
+  }
 };
 
 interface IPlanCreatorProps {

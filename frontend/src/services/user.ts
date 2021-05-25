@@ -29,3 +29,10 @@ export const getUsers = (params: API.PaginationRequestParams) => {
 export const getCurrentUser = () => {
   return request.get(`/users/self`);
 };
+
+/** 注册操作 */
+export const registerUser = (userRegisterInfo: any)=>{
+  return request.post('/users/register', {
+    data: userRegisterInfo
+  })
+}
