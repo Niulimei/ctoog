@@ -1,6 +1,8 @@
 package database
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,118 +14,6 @@ import (
 )
 
 var DB *sqlx.DB
-
-var schema = `
-CREATE TABLE user (
-    id integer PRIMARY KEY autoincrement,
-    username varchar (128),
-    password varchar (32),
-    role_id integer
-);
-
-CREATE TABLE log (
-    id integer PRIMARY KEY autoincrement,
-    time integer,
-	level varchar (256),
-	user varchar (256),
-	action varchar (256),
-	position varchar (256),
-	message varchar (256),
-	errcode integer
-);
-
-CREATE TABLE task (
-    id integer PRIMARY KEY autoincrement,
-    pvob varchar (256),
-    component varchar (256),
-    dir varchar (256),
-    keep varchar (256),
-    cc_user varchar (256),
-    cc_password varchar (256),
-    git_url varchar (256),
-    git_user varchar (256),
-    git_password varchar (256),
-    git_email varchar (256),
-    status varchar (16),
-    last_completed_date_time varchar (64),
-    creator varchar(128),
-    worker_id integer,
-    include_empty boolean
-);
-
-CREATE TABLE match_info (
-    id integer PRIMARY KEY autoincrement,
-    task_id integer,
-    stream varchar (256),
-    git_branch varchar (256)
-);
-
-CREATE TABLE task_log (
-    log_id integer PRIMARY KEY autoincrement,
-    task_id integer,
-    status varchar (16),
-    start_time varchar (64),
-    end_time varchar (64),
-    duration integer
-);
-
-CREATE TABLE task_command_out (
-    log_id integer PRIMARY KEY,
-    content text
-);
-
-CREATE TABLE worker (
-    id integer PRIMARY KEY autoincrement,
-    worker_url varchar (256),
-    status varchar (16),
-    task_count integer,
-    register_time varchar (64)
-);
-
-CREATE TABLE schedule (
-    id integer PRIMARY KEY autoincrement,
-    status varchar (16),
-    schedule varchar (16),
-    task_id integer,
-    creator varchar (128)
-);
-
-CREATE TABLE plan (
-    id integer PRIMARY KEY autoincrement,
-    status varchar (16), 
-    origin_type varchar(8),
-    pvob varchar(256),
-    component varchar (256),
-    dir varchar (256),
-    origin_url varchar(256),
-    translate_type varchar(8),
-    target_url varchar(256),
-    subsystem varchar(256),
-    config_lib varchar(256),
-    business_group varchar(256),
-    team varchar(256),
-    supporter varchar(256),
-    supporter_tel varchar(16),
-    creator varchar(256),
-    tip text,
-    project_type vartchar(8),
-    purpose text,
-    plan_start_time varchar(64),
-    plan_switch_time varchar(64),
-    actual_start_time varchar(64),
-    actual_switch_time varchar(64),
-    effect text,
-    task_id integer,
-    extra1 text,
-    extra2 text,
-    extra3 text
-);
-
-INSERT INTO user (username,password,role_id) VALUES("admin", "b17eccdc6c06bd8e15928d583503adf9", 1);
-alter table user add column bussinessgroup varchar(256) default "";
-alter table user add column team varchar(256) default "";
-alter table user add column nickname varchar(256) default "";
-`
 
 type TaskModel struct {
 	// id
@@ -236,25 +126,8 @@ type PlanModel struct {
 }
 
 func init() {
-	var err error
-	var isInitAlready = true
-	_, err = os.Stat("translator.db") //os.Stat获取文件信息
-	if err != nil {
-		if os.IsNotExist(err) {
-			isInitAlready = false
-		}
-	}
-	DB, err = sqlx.Connect("sqlite3", "file:translator.db?cache=private&mode=rwc")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	err = DB.Ping()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	if !isInitAlready {
-		DB.MustExec(schema)
-	}
+	initDB()
+	upgradeDB()
 	go func() {
 		for {
 			startTime := time.Now().Format("2006.01.02-15:04:05")
@@ -287,4 +160,62 @@ func init() {
 			time.Sleep(time.Hour)
 		}
 	}()
+}
+
+func initDB() {
+	var err error
+	var isInitAlready = true
+	_, err = os.Stat("translator.db") //os.Stat获取文件信息
+	if err != nil {
+		if os.IsNotExist(err) {
+			isInitAlready = false
+		}
+	}
+	DB, err = sqlx.Connect("sqlite3", "file:translator.db?cache=private&mode=rwc")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = DB.Ping()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if !isInitAlready {
+		_, err = sqlx.LoadFile(DB, "sql/base.sql")
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+}
+
+type sqlFiles struct {
+	Files []string `json:"files"`
+}
+
+func upgradeDB() {
+	var sf = &sqlFiles{}
+	c, err := ioutil.ReadFile("sql/sql_files.json")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = json.Unmarshal(c, sf)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	sqlStr := "select count(1) from db_upgrade_log where name=?"
+	var count int
+	for _, filename := range sf.Files {
+		err = DB.Get(&count, sqlStr, filename)
+		if count == 0 {
+			_, err = sqlx.LoadFile(DB, filepath.Join("sql", filename))
+			if err != nil {
+				log.Fatalln(err)
+			} else {
+				_, err = DB.Exec("INSERT INTO db_upgrade_log (name,exectime) VALUES(?,?)", filename, time.Now().Format("2006.01.02-15:04:05"))
+				if err != nil {
+					log.Fatalln(err)
+				}
+				log.Infoln("Upgrade sql file: ", filename)
+			}
+		}
+	}
 }
