@@ -17,14 +17,23 @@ import (
 // swagger:model UserInfoModel
 type UserInfoModel struct {
 
+	// bussinessgroup
+	Bussinessgroup string `json:"bussinessgroup,omitempty"`
+
 	// id
 	ID int64 `json:"id,omitempty"`
+
+	// nickname
+	Nickname string `json:"nickname,omitempty"`
 
 	// password
 	Password string `json:"password,omitempty"`
 
 	// role id
-	RoleID int64 `json:"role_id,omitempty"`
+	RoleID int64 `json:"role_id,omitempty" db:"role_id"`
+
+	// team
+	Team string `json:"team,omitempty"`
 
 	// username
 	Username string `json:"username,omitempty"`

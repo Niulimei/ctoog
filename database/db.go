@@ -120,6 +120,9 @@ CREATE TABLE plan (
 );
 
 INSERT INTO user (username,password,role_id) VALUES("admin", "b17eccdc6c06bd8e15928d583503adf9", 1);
+alter table user add column bussinessgroup varchar(256) default "";
+alter table user add column team varchar(256) default "";
+alter table user add column nickname varchar(256) default "";
 `
 
 type TaskModel struct {
@@ -269,7 +272,7 @@ func init() {
 					d, err := time.ParseInLocation("backup/translator-2006.01.02-15:04:05.back", path, time.Local)
 					if err == nil {
 						duration := time.Now().Sub(d)
-						if duration > time.Hour * 24 * 15 {
+						if duration > time.Hour*24*15 {
 							cmd := exec.Command("rm", path)
 							err := cmd.Run()
 							if err != nil {

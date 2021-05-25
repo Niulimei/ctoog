@@ -17,10 +17,19 @@ import (
 // swagger:model UserRegisterModel
 type UserRegisterModel struct {
 
+	// 事业群
+	Bussinessgroup string `json:"bussinessgroup,omitempty"`
+
+	// 姓名
+	Nickname string `json:"nickname,omitempty"`
+
 	// password
 	Password string `json:"password,omitempty"`
 
-	// username
+	// 项目组
+	Team string `json:"team,omitempty"`
+
+	// 电话号码或用户名
 	Username string `json:"username,omitempty"`
 }
 

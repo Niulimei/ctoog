@@ -866,6 +866,12 @@ definitions:
         type: integer
       role_id:
         type: integer
+      bussinessgroup:
+        type: string
+      team:
+        type: string
+      nickname:
+        type: string
   LogPageInfoModel:
     type: object
     properties:
@@ -914,7 +920,17 @@ definitions:
   UserRegisterModel:
     type: object
     properties:
+      bussinessgroup:
+        description: "事业群"
+        type: string
+      team:
+        description: "项目组"
+        type: string
+      nickname:
+        description: "姓名"
+        type: string
       username:
+        description: "电话号码或用户名"
         type: string
       password:
         type: string

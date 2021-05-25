@@ -1730,14 +1730,23 @@ func init() {
     "UserInfoModel": {
       "type": "object",
       "properties": {
+        "bussinessgroup": {
+          "type": "string"
+        },
         "id": {
           "type": "integer"
+        },
+        "nickname": {
+          "type": "string"
         },
         "password": {
           "type": "string"
         },
         "role_id": {
           "type": "integer"
+        },
+        "team": {
+          "type": "string"
         },
         "username": {
           "type": "string"
@@ -1781,10 +1790,23 @@ func init() {
     "UserRegisterModel": {
       "type": "object",
       "properties": {
+        "bussinessgroup": {
+          "description": "事业群",
+          "type": "string"
+        },
+        "nickname": {
+          "description": "姓名",
+          "type": "string"
+        },
         "password": {
           "type": "string"
         },
+        "team": {
+          "description": "项目组",
+          "type": "string"
+        },
         "username": {
+          "description": "电话号码或用户名",
           "type": "string"
         }
       }
@@ -3551,14 +3573,23 @@ func init() {
     "UserInfoModel": {
       "type": "object",
       "properties": {
+        "bussinessgroup": {
+          "type": "string"
+        },
         "id": {
           "type": "integer"
+        },
+        "nickname": {
+          "type": "string"
         },
         "password": {
           "type": "string"
         },
         "role_id": {
           "type": "integer"
+        },
+        "team": {
+          "type": "string"
         },
         "username": {
           "type": "string"
@@ -3602,10 +3633,23 @@ func init() {
     "UserRegisterModel": {
       "type": "object",
       "properties": {
+        "bussinessgroup": {
+          "description": "事业群",
+          "type": "string"
+        },
+        "nickname": {
+          "description": "姓名",
+          "type": "string"
+        },
         "password": {
           "type": "string"
         },
+        "team": {
+          "description": "项目组",
+          "type": "string"
+        },
         "username": {
+          "description": "电话号码或用户名",
           "type": "string"
         }
       }

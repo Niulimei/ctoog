@@ -60,8 +60,9 @@ func RegisterUserHandler(params operations.RegisterUserParams) middleware.Respon
 			Message: "Username Already Exist",
 		})
 	}
-	sqlStr := "INSERT INTO user (username,password,role_id) VALUES (?,?,?)"
-	ret := database.DB.MustExec(sqlStr, params.UserRegisterInfo.Username, params.UserRegisterInfo.Password, NormalRole)
+	sqlStr := "INSERT INTO user (bussinessgroup,team,nickname,username,password,role_id) VALUES (?,?,?,?,?,?)"
+	ret := database.DB.MustExec(sqlStr, params.UserRegisterInfo.Bussinessgroup, params.UserRegisterInfo.Team,
+		params.UserRegisterInfo.Nickname, params.UserRegisterInfo.Username, params.UserRegisterInfo.Password, NormalRole)
 	_, err = ret.RowsAffected()
 	if err != nil {
 		return operations.NewRegisterUserInternalServerError().WithPayload(&models.ErrorModel{
@@ -76,8 +77,7 @@ func RegisterUserHandler(params operations.RegisterUserParams) middleware.Respon
 
 func getUserInfo(username string) *models.UserInfoModel {
 	user := &models.UserInfoModel{}
-	row := database.DB.QueryRow("SELECT username,role_id FROM user WHERE username=?", username)
-	err := row.Scan(&user.Username, &user.RoleID)
+	err := database.DB.Get(user, "SELECT * FROM user WHERE username=?", username)
 	if err != nil {
 		return user
 	}
@@ -97,26 +97,20 @@ func ListUsersHandler(param operations.ListUserParams) middleware.Responder {
 			Message: "Unauthorized",
 		})
 	}
-	rows, err := database.DB.Query("SELECT count(1) over() AS total_rows,username,role_id FROM user ORDER BY id LIMIT ? OFFSET ?", param.Limit, param.Offset)
+	var users []*models.UserInfoModel
+	err := database.DB.Select(&users, "SELECT * FROM user ORDER BY id LIMIT ? OFFSET ?", param.Limit, param.Offset)
 	if err != nil {
 		return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
 			Message: "Sql Error",
 		})
 	}
-	defer rows.Close()
-	var users []*models.UserInfoModel
-	var count int64
-	for rows.Next() {
-		tmp := &models.UserInfoModel{}
-		if err := rows.Scan(&count, &tmp.Username, &tmp.RoleID); err != nil {
-			return operations.NewListUserInternalServerError().WithPayload(&models.ErrorModel{
-				Code:    http.StatusInternalServerError,
-				Message: "Sql Error",
-			})
-		}
-		users = append(users, tmp)
+	for i := range users {
+		users[i].Password = ""
 	}
+	var count int64
+	database.DB.Get(&count, "select count(id) from user")
+
 	return operations.NewListUserOK().WithPayload(&models.UserPageInfoModel{
 		Count:    count,
 		Limit:    param.Limit,
