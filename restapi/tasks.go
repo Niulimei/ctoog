@@ -52,8 +52,8 @@ func init() {
 func startTask(taskId int64) {
 	task := &database.TaskModel{}
 	err := database.DB.Get(task, "SELECT cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty, dir, keep, worker_id"+
-		" FROM task WHERE id = $1", taskId)
+		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty, dir, keep, worker_id, "+
+		" svnUrl, modelType FROM task WHERE id = $1", taskId)
 	startTime := time.Now().Format("2006-01-02 15:04:05")
 	if err != nil {
 		log.Error("start task but db err:", err)
@@ -86,6 +86,9 @@ func startTask(taskId int64) {
 	var matchInfo []*models.TaskMatchInfo
 	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1 ORDER BY id",
 		taskId)
+	var namePair []*models.NamePairInfo
+	database.DB.Select(&namePair, "SELECT git_email, svn_username, git_username FROM svn_name_pair WHERE task_id = $1 ORDER BY id",
+		taskId)
 	r := database.DB.MustExec(
 		"INSERT INTO task_log (task_id, status, start_time, end_time, duration)"+
 			" VALUES($1, 'running', $2, $3, 0)", taskId, startTime, "",
@@ -112,6 +115,9 @@ func startTask(taskId int64) {
 			IncludeEmpty bool
 			Matches      []InnerMatchInfo
 			Keep         string
+			SvnUrl       string
+			ModelType    string
+			NamePair     []*models.NamePairInfo
 		}
 		workerTaskModel := InnerTask{
 			TaskId:       taskId,
@@ -126,11 +132,14 @@ func startTask(taskId int64) {
 			Pvob:         task.Pvob,
 			IncludeEmpty: task.IncludeEmpty,
 			Keep:         task.Keep,
+			SvnUrl:       task.SvnURL,
+			ModelType:    task.ModelType,
 		}
 		for _, match := range matchInfo {
 			workerTaskModel.Matches =
 				append(workerTaskModel.Matches, InnerMatchInfo{Stream: match.Stream.String, Branch: match.GitBranch.String})
 		}
+		workerTaskModel.NamePair = namePair
 		workerTaskModelByte, _ := json.Marshal(workerTaskModel)
 		req, _ := http.NewRequest(http.MethodPost, "http://"+workerUrl+"/new_task", bytes.NewBuffer(workerTaskModelByte))
 		req.Header.Set("Content-Type", "application/json")
