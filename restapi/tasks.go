@@ -387,12 +387,17 @@ func DeleteTaskHandler(params operations.DeleteTaskParams) middleware.Responder 
 		})
 	}
 	utils.RecordLog(utils.Error, utils.DeleteTaskCache, "", fmt.Sprintf("TaskId: %d", params.ID), 0)
+	var workerID int
+	database.DB.Get(&workerID, "select worker_id from task where id=?", params.ID)
 	_, err := database.DB.Exec("delete from task where id=?", params.ID)
 	if err != nil {
 		return operations.NewDeleteTaskInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
 			Message: "Delete Task Fail.",
 		})
+	}
+	if workerID != 0 {
+		database.DB.Exec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", workerID)
 	}
 	utils.RecordLog(utils.Error, utils.DeleteTask, "", fmt.Sprintf("TaskId: %d", params.ID), 0)
 	return operations.NewDeleteTaskOK().WithPayload(&models.OK{

@@ -169,12 +169,17 @@ func DeletePlanHandler(params operations.DeletePlanParams) middleware.Responder 
 			Message: msg,
 		})
 	}
+	var workerID int
+	database.DB.Get(&workerID, "select worker_id from task where id=?", params.ID)
 	_, err = database.DB.Exec("delete from task where id=?", taskID)
 	if err != nil {
 		return operations.NewDeletePlanInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
 			Message: "Sql Error",
 		})
+	}
+	if workerID != 0 {
+		database.DB.Exec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", workerID)
 	}
 	_, err = database.DB.Exec("delete from plan where id=?", params.ID)
 	if err != nil {
