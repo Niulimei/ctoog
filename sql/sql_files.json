@@ -1,6 +1,7 @@
 {
   "files": [
     "dbupgrade_1.0.0.sql",
-    "user_1.0.0.sql"
+    "user_1.0.0.sql",
+    "task_1.0.0.sql"
   ]
 }

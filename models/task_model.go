@@ -135,8 +135,17 @@ type TaskModel struct {
 	// match info
 	MatchInfo []*TaskMatchInfo `json:"matchInfo"`
 
+	// model type
+	ModelType string `json:"modelType,omitempty"`
+
+	// name pair
+	NamePair []*NamePairInfo `json:"namePair"`
+
 	// pvob
 	Pvob JsonNullString `json:"pvob,omitempty"`
+
+	// svn Url
+	SvnURL string `json:"svnUrl,omitempty"`
 }
 
 // Validate validates this task model
@@ -144,6 +153,10 @@ func (m *TaskModel) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateMatchInfo(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateNamePair(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -177,11 +190,39 @@ func (m *TaskModel) validateMatchInfo(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *TaskModel) validateNamePair(formats strfmt.Registry) error {
+	if swag.IsZero(m.NamePair) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.NamePair); i++ {
+		if swag.IsZero(m.NamePair[i]) { // not required
+			continue
+		}
+
+		if m.NamePair[i] != nil {
+			if err := m.NamePair[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("namePair" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 // ContextValidate validate this task model based on the context it is used
 func (m *TaskModel) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.contextValidateMatchInfo(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateNamePair(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -199,6 +240,24 @@ func (m *TaskModel) contextValidateMatchInfo(ctx context.Context, formats strfmt
 			if err := m.MatchInfo[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("matchInfo" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *TaskModel) contextValidateNamePair(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.NamePair); i++ {
+
+		if m.NamePair[i] != nil {
+			if err := m.NamePair[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("namePair" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
