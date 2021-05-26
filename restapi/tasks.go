@@ -283,7 +283,9 @@ func isCCInfoChange(params operations.UpdateTaskParams) bool {
 	if oldTaskInfo.Pvob.String != params.TaskLog.Pvob ||
 		oldTaskInfo.Component.String != params.TaskLog.Component ||
 		oldTaskInfo.Dir.String != params.TaskLog.Dir ||
-		strings.Join(oldStreams, "_") != strings.Join(paramStreams, "_") {
+		strings.Join(oldStreams, "_") != strings.Join(paramStreams, "_") ||
+		oldTaskInfo.CcUser.String != params.TaskLog.CcUser ||
+		oldTaskInfo.CcPassword.String != params.TaskLog.CcPassword {
 		return true
 	}
 	return false
