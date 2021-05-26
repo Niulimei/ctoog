@@ -47,6 +47,7 @@ pullCCAndPush(){
     tmpGitDirExist=true
   fi
   git svn clone "${svnRepoUrl}" --authors-file="${userFile}" --no-metadata --prefix "" "${tmpGitDir}"
+  rm -rf "${userFile}"
   configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
   if [[ ${containEmptyDir} == "true" ]]; then
     find "${tmpGitDir}" -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;

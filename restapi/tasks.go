@@ -427,18 +427,20 @@ type TaskDelInfo struct {
 	CcUser     string `json:"cc_user"`
 	Exception  string `json:"exception,omitempty"`
 	WorkerURL  string `json:"worker_url,omitempty"`
+	ModelType  string `json:"modelType,omitempty"`
 }
 
 // 第二个返回值表示任务是否被执行过
 func getTaskInfo(taskID int64) (*TaskDelInfo, bool) {
-	row := database.DB.QueryRow("select cc_user,cc_password,worker_id from task where id=?", taskID)
+	row := database.DB.QueryRow("select cc_user,cc_password,worker_id,modelType from task where id=?", taskID)
 	if row == nil || row.Err() != nil {
 		log.Errorln("QueryRow err: ", row.Err())
 		return nil, true
 	}
 	var u, p sql.NullString
 	var wID int64
-	err := row.Scan(&u, &p, &wID)
+	var mt string
+	err := row.Scan(&u, &p, &wID, &mt)
 	if err != nil {
 		log.Errorln("Scan err: ", err)
 		if err == sql.ErrNoRows {
@@ -465,6 +467,7 @@ func getTaskInfo(taskID int64) (*TaskDelInfo, bool) {
 		CcPassword: p.String,
 		CcUser:     u.String,
 		WorkerURL:  wUrl,
+		ModelType:  mt,
 	}, true
 }
 

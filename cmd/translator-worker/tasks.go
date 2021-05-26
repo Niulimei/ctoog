@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -190,44 +191,59 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 	}
 	workerTaskModel := TaskDelInfo{}
-	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
-		cwd, _ := os.Getwd()
-
-		//目录不存在直接返回成功
-		cmdStr := fmt.Sprintf(`/usr/bin/bash %s/checkCache.sh %d`, cwd, workerTaskModel.TaskId)
-		log.Infoln(cmdStr)
-		cmd := exec.Command("/bin/bash", "-c", cmdStr)
-		_, err := cmd.Output()
-		if err != nil {
-			log.Errorln(err.Error())
-			w.WriteHeader(200)
-			w.Write([]byte("success"))
-			return
-		}
-
-		cmdStr = fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/cleanCache.sh %d %s"`,
-			workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.TaskId, workerTaskModel.Exception)
-		log.Infoln(cmdStr)
-		cmd = exec.Command("/bin/bash", "-c", cmdStr)
-		stdout, _ := cmd.StdoutPipe()
-		stderr, _ := cmd.StderrPipe()
-
-		cmd.Start()
-		s := bufio.NewScanner(io.MultiReader(stdout, stderr))
-		var tmp []string
-		for s.Scan() {
-			tmp = append(tmp, s.Text())
-		}
-		err = cmd.Wait()
-		if err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte(strings.Join(tmp, "\n")))
-			return
-		}
-	} else {
+	err = json.Unmarshal(body, &workerTaskModel)
+	if err != nil {
 		log.Error(err)
 		w.WriteHeader(500)
-		w.Write([]byte("fail"))
+		w.Write([]byte("Json marshal fail"))
+		return
+	}
+	delCache(w, workerTaskModel)
+}
+
+func delCache(w http.ResponseWriter, workerTaskModel TaskDelInfo) {
+	cwd, _ := os.Getwd()
+	var checkCacheCmdStr, cleanCacheCmdStr string
+	switch workerTaskModel.ModelType {
+	case "clearcase":
+		checkCacheCmdStr = fmt.Sprintf(`/usr/bin/bash %s/script/cc2git/checkCache.sh %d`, cwd, workerTaskModel.TaskId)
+		cleanCacheCmdStr = fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/script/cc2git/cleanCache.sh %d %s"`,
+			workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.TaskId, workerTaskModel.Exception)
+	case "svn":
+		checkCacheCmdStr = fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/checkCache.sh %d`, cwd, workerTaskModel.TaskId)
+		cleanCacheCmdStr = fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/cleanCache.sh %d`, cwd, workerTaskModel.TaskId)
+	default:
+		w.WriteHeader(500)
+		w.Write([]byte("Not Support"))
+		return
+	}
+
+	//目录不存在直接返回成功
+	log.Infoln(checkCacheCmdStr)
+	cmd := exec.Command("/bin/bash", "-c", checkCacheCmdStr)
+	_, err := cmd.Output()
+	if err != nil {
+		log.Errorln(err.Error())
+		w.WriteHeader(200)
+		w.Write([]byte("success"))
+		return
+	}
+
+	log.Infoln(cleanCacheCmdStr)
+	cmd = exec.Command("/bin/bash", "-c", cleanCacheCmdStr)
+	stdout, _ := cmd.StdoutPipe()
+	stderr, _ := cmd.StderrPipe()
+
+	cmd.Start()
+	s := bufio.NewScanner(io.MultiReader(stdout, stderr))
+	var tmp []string
+	for s.Scan() {
+		tmp = append(tmp, s.Text())
+	}
+	err = cmd.Wait()
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(strings.Join(tmp, "\n")))
 		return
 	}
 	w.WriteHeader(200)
@@ -244,55 +260,64 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 	}
 	workerTaskModel := Task{}
-	code := cc2Git(body, workerTaskModel)
-	if code != http.StatusOK {
-		w.WriteHeader(code)
-		w.Write([]byte("fail"))
+	err = json.Unmarshal(body, &workerTaskModel)
+	if err != nil {
+		log.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Json marshal fail"))
+		return
 	}
+	gitUrl := parseGitURL(workerTaskModel.GitUser, workerTaskModel.GitPassword, workerTaskModel.GitURL)
+	switch workerTaskModel.ModelType {
+	case "clearcase":
+		cc2Git(workerTaskModel, gitUrl)
+	case "svn":
+		svn2Git(workerTaskModel, gitUrl)
+	default:
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Not Support"))
+	}
+
 	w.WriteHeader(201)
 	w.Write([]byte("bye"))
 }
 
-func cc2Git(body []byte, workerTaskModel Task) int {
-	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
-		gitUrl := parseGitURL(workerTaskModel.GitUser, workerTaskModel.GitPassword, workerTaskModel.GitURL)
-		cwd, _ := os.Getwd()
-		var cmds []*exec.Cmd
-		for _, match := range workerTaskModel.Matches {
-			cmd := exec.Command("/bin/bash", "-c",
-				fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/script/cc2git/cc2git.sh %s %s %s %s %s %d %t %s %s %s"`,
-					workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
-					match.Stream, gitUrl, match.Branch, workerTaskModel.TaskId,
-					workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail, workerTaskModel.Keep))
-			cmds = append(cmds, cmd)
-		}
-		go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmds)
-		return http.StatusOK
-	} else {
-		log.Error(err)
-		return http.StatusInternalServerError
+func cc2Git(workerTaskModel Task, gitUrl string) {
+	cwd, _ := os.Getwd()
+	var cmds []*exec.Cmd
+	for _, match := range workerTaskModel.Matches {
+		cmd := exec.Command("/bin/bash", "-c",
+			fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/script/cc2git/cc2git.sh %s %s %s %s %s %d %t %s %s %s"`,
+				workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
+				match.Stream, gitUrl, match.Branch, workerTaskModel.TaskId,
+				workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail, workerTaskModel.Keep))
+		cmds = append(cmds, cmd)
 	}
+	go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmds)
 }
 
-func svn2Git(body []byte, workerTaskModel Task) int {
-	if err := json.Unmarshal(body, &workerTaskModel); err == nil {
-		gitUrl := parseGitURL(workerTaskModel.GitUser, workerTaskModel.GitPassword, workerTaskModel.GitURL)
-		cwd, _ := os.Getwd()
-		var cmds []*exec.Cmd
-		for _, match := range workerTaskModel.Matches {
-			cmd := exec.Command("/bin/bash", "-c",
-				fmt.Sprintf(`echo %s | su - %s -c "/usr/bin/bash %s/script/svn2git/svn2git.sh %s %s %s %s %s %d %t %s %s %s"`,
-					workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
-					match.Stream, gitUrl, match.Branch, workerTaskModel.TaskId,
-					workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail, workerTaskModel.Keep))
-			cmds = append(cmds, cmd)
-		}
-		go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmds)
-		return http.StatusOK
-	} else {
-		log.Error(err)
-		return http.StatusInternalServerError
+func geneUsersFile(workerTaskModel Task) string {
+	cwd, _ := os.Getwd()
+	var buffer bytes.Buffer
+	for _, pi := range workerTaskModel.NamePair {
+		buffer.WriteString(fmt.Sprintf("%s = %s <%s>\n", pi.SnvUserName, pi.GitUserName, pi.GitEmail))
 	}
+	fp := filepath.Join(cwd, filepath.Base(workerTaskModel.SvnURL)+"_"+strconv.Itoa(int(workerTaskModel.TaskId))+".txt")
+	ioutil.WriteFile(fp, []byte(buffer.String()), 0644)
+	return fp
+}
+
+func svn2Git(workerTaskModel Task, gitUrl string) int {
+	cwd, _ := os.Getwd()
+	var cmds []*exec.Cmd
+	userFile := geneUsersFile(workerTaskModel)
+	cmd := exec.Command("/bin/bash", "-c",
+		fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/svn2git.sh %s %s %d %t %s %s %s %s`,
+			cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
+			workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail, workerTaskModel.Keep, userFile))
+	cmds = append(cmds, cmd)
+	go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmds)
+	return http.StatusOK
 }
 
 func parseGitURL(user, passwd, gitUrl string) string {
