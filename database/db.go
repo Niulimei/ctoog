@@ -60,6 +60,12 @@ type TaskModel struct {
 
 	// git email
 	GitEmail string `db:"git_email"`
+
+	// svn url
+	SvnURL string `db:"svn_url"`
+
+	// model type
+	ModelType string `db:"model_type"`
 }
 
 type WorkerModel struct {
