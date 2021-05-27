@@ -1,4 +1,4 @@
-package main
+package restapi
 
 import (
 	"bufio"
@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
+func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd, tmpCmdOutFile string) {
 	data := payload{
 		Logid:  strconv.FormatInt(task.TaskLogId, 10),
 		Status: "completed",
@@ -28,7 +28,7 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 	for _, cmd := range cmds {
 		data.Starttime = start.Format("2006-01-02 15:04:05")
 		log.Debug("start cmd:", cmd.String())
-		err := sendCommandOut(server, cmd, task)
+		err := sendCommandOut(server, cmd, task, tmpCmdOutFile)
 		if err != nil {
 			log.Error("cmd err:", err)
 			data.Status = "failed"
@@ -58,27 +58,28 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd) {
 	doSend(req)
 }
 
-func sendCommandOut(server string, cmd *exec.Cmd, task *Task) error {
+func sendCommandOut(server string, cmd *exec.Cmd, task *Task, tmpCmdOutFile string) error {
+	var stop = make(chan struct{})
 	data := &commandOut{
 		Logid: task.TaskLogId,
 	}
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		log.Println(err)
-		return err
-	}
+	//stdout, err := cmd.StdoutPipe()
+	//if err != nil {
+	//	log.Println(err)
+	//	return err
+	//}
+	//stderr, err := cmd.StderrPipe()
+	//if err != nil {
+	//	log.Println(err)
+	//	return err
+	//}
 
 	if err := cmd.Start(); err != nil {
 		log.Println(err)
 		return err
 	}
 
-	s := bufio.NewScanner(io.MultiReader(stdout, stderr))
+	//s := bufio.NewScanner(io.MultiReader(stdout, stderr))
 	tk := time.NewTicker(time.Second * 1)
 	var tmp []string
 	go func(in *[]string) {
@@ -92,18 +93,19 @@ func sendCommandOut(server string, cmd *exec.Cmd, task *Task) error {
 			}
 		}
 	}(&tmp)
-	for s.Scan() {
-		tmp = append(tmp, s.Text())
-		//tmp = append(tmp, utils.Iconv(s.Text(), "gbk", "utf8"))
-	}
+	go readCommandOut(tmpCmdOutFile, &tmp)
+	//for s.Scan() {
+	//	tmp = append(tmp, s.Text())
+	//	//tmp = append(tmp, utils.Iconv(s.Text(), "gbk", "utf8"))
+	//}
+
+	err := cmd.Wait()
+	log.Errorln(err)
+
 	time.Sleep(time.Second * 2)
 	stop <- struct{}{}
-
-	if err := cmd.Wait(); err != nil {
-		log.Println(err)
-		return err
-	}
-	return nil
+	os.RemoveAll(tmpCmdOutFile)
+	return err
 }
 
 func sender(server string, data *commandOut) {
@@ -142,7 +144,7 @@ func doSend(req *http.Request) {
 	resp.Body.Close()
 }
 
-func pingServer(host string, port int) {
+func PingServer(host string, port int) {
 	defer func() {
 		if ret := recover(); ret != nil {
 			fmt.Printf("Recover From Panic. %v\n", ret)
@@ -160,7 +162,7 @@ func pingServer(host string, port int) {
 	}
 	for {
 		body := bytes.NewReader(payloadBytes)
-		req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/api/workers", serverFlag), body)
+		req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/api/workers", ServerFlag), body)
 		if err != nil {
 			return
 			// handle err
@@ -181,7 +183,7 @@ func pingServer(host string, port int) {
 	}
 }
 
-func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+func DeleteWorkerTaskCacheHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Error("read task error:", err)
@@ -190,7 +192,7 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Body != nil {
 		defer r.Body.Close()
 	}
-	workerTaskModel := TaskDelInfo{}
+	workerTaskModel := WorkerTaskDelInfo{}
 	err = json.Unmarshal(body, &workerTaskModel)
 	if err != nil {
 		log.Error(err)
@@ -201,7 +203,7 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	delCache(w, workerTaskModel)
 }
 
-func delCache(w http.ResponseWriter, workerTaskModel TaskDelInfo) {
+func delCache(w http.ResponseWriter, workerTaskModel WorkerTaskDelInfo) {
 	cwd, _ := os.Getwd()
 	var checkCacheCmdStr, cleanCacheCmdStr string
 	switch workerTaskModel.ModelType {
@@ -250,7 +252,7 @@ func delCache(w http.ResponseWriter, workerTaskModel TaskDelInfo) {
 	w.Write([]byte("success"))
 }
 
-func taskHandler(w http.ResponseWriter, r *http.Request) {
+func WorkerTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Error("read task error:", err)
@@ -282,20 +284,60 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("bye"))
 }
 
+func readCommandOut(fileName string, container *[]string) {
+	var stopRead = make(chan struct{})
+	file, err := os.Open(fileName)
+	if err != nil {
+		log.Errorf("Open file fail:%v", err)
+		return
+	}
+	defer file.Close()
+	go func() {
+		for {
+			_, err := os.Lstat(fileName)
+			if os.IsNotExist(err) {
+				stopRead <- struct{}{}
+				return
+			}
+			time.Sleep(time.Second)
+		}
+	}()
+	reader := bufio.NewReader(file)
+	var tick = time.NewTicker(100 * time.Millisecond)
+	func() {
+		for {
+			select {
+			case <-tick.C:
+				line, err := reader.ReadString('\n')
+				if err != nil {
+					if err != io.EOF {
+						return
+					}
+				}
+				*container = append(*container, line)
+			case <-stopRead:
+				return
+			}
+		}
+	}()
+}
+
 func cc2Git(workerTaskModel Task, gitUrl string) {
 	cwd, _ := os.Getwd()
 	var cmds []*exec.Cmd
+	tmpCmdOutFile := fmt.Sprintf("%s/tmpCmdOut/%d_%d.log", cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)
+	exec.Command("/bin/bash", "-c", fmt.Sprintf("mkdir -p %s/tmpCmdOut;touch %s/tmpCmdOut/%d_%d.log", cwd, cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)).Output()
 	for _, match := range workerTaskModel.Matches {
-		cmdStr := fmt.Sprintf(`echo %s | su - %s -c '/usr/bin/bash %s/script/cc2git/cc2git.sh "%s" "%s" "%s" "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s"'`,
+		cmdStr := fmt.Sprintf(`echo %s | su - %s -c '/usr/bin/bash %s/script/cc2git/cc2git.sh "%s" "%s" "%s" "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s"' &>>%s`,
 			workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
 			match.Stream, gitUrl, match.Branch, workerTaskModel.TaskId,
 			workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail, workerTaskModel.Keep,
-			strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""))
+			strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""), tmpCmdOutFile)
 		log.Infoln(cmdStr)
 		cmd := exec.Command("/bin/bash", "-c", cmdStr)
 		cmds = append(cmds, cmd)
 	}
-	go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmds)
+	go infoServerTaskCompleted(&workerTaskModel, ServerFlag, cmds, tmpCmdOutFile)
 }
 
 func geneUsersFile(workerTaskModel Task) string {
@@ -313,14 +355,17 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	cwd, _ := os.Getwd()
 	var cmds []*exec.Cmd
 	userFile := geneUsersFile(workerTaskModel)
-	cmdStr := fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s"`,
+	tmpCmdOutFile := fmt.Sprintf("%s/tmpCmdOut/%d_%d.log", cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)
+	exec.Command("/bin/bash", "-c", fmt.Sprintf("mkdir -p %s/tmpCmdOut;touch %s/tmpCmdOut/%d_%d.log", cwd, cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)).Output()
+	cmdStr := fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" &> %s`,
 		cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
 		workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail,
-		workerTaskModel.Keep, userFile, strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""))
+		workerTaskModel.Keep, userFile, strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""),
+		tmpCmdOutFile)
 	log.Infoln(cmdStr)
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	cmds = append(cmds, cmd)
-	go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmds)
+	go infoServerTaskCompleted(&workerTaskModel, ServerFlag, cmds, tmpCmdOutFile)
 	return http.StatusOK
 }
 
