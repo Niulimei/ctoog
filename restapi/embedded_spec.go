@@ -142,6 +142,24 @@ func init() {
           },
           {
             "type": "string",
+            "description": "事业群",
+            "name": "group",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "项目组",
+            "name": "team",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "联系人",
+            "name": "supporter",
+            "in": "query"
+          },
+          {
+            "type": "string",
             "name": "Authorization",
             "in": "header",
             "required": true
@@ -1655,6 +1673,9 @@ func init() {
         "gitRepo": {
           "type": "string"
         },
+        "gitignore": {
+          "type": "string"
+        },
         "id": {
           "type": "integer"
         },
@@ -1665,6 +1686,9 @@ func init() {
           "type": "string"
         },
         "lastCompleteDateTime": {
+          "type": "string"
+        },
+        "modelType": {
           "type": "string"
         },
         "pvob": {
@@ -1709,6 +1733,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {
@@ -1808,6 +1835,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {
@@ -2125,6 +2155,24 @@ func init() {
           },
           {
             "type": "string",
+            "description": "事业群",
+            "name": "group",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "项目组",
+            "name": "team",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "联系人",
+            "name": "supporter",
+            "in": "query"
+          },
+          {
+            "type": "string",
             "name": "Authorization",
             "in": "header",
             "required": true
@@ -3638,6 +3686,9 @@ func init() {
         "gitRepo": {
           "type": "string"
         },
+        "gitignore": {
+          "type": "string"
+        },
         "id": {
           "type": "integer"
         },
@@ -3648,6 +3699,9 @@ func init() {
           "type": "string"
         },
         "lastCompleteDateTime": {
+          "type": "string"
+        },
+        "modelType": {
           "type": "string"
         },
         "pvob": {
@@ -3692,6 +3746,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {
@@ -3791,6 +3848,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {

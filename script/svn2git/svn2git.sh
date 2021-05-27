@@ -9,7 +9,7 @@
 
 export LANG="zh_CN.UTF-8"
 set -e
-workdir=$(cd $(dirname $0); pwd)
+workdir=$(cd "$(dirname "$0")"; pwd)
 source "${workdir}"/common.sh
 
 configGitRepo(){
@@ -38,6 +38,7 @@ pullCCAndPush(){
   email=$6
   emptyFileName=$7
   userFile=$8
+  gitignoreContent=$9
   combineNameAdapt=$(basename "${svnRepoUrl}")
   local tmpGitDir="${gitTmpRootPath}/${combineNameAdapt}_${taskID}"
   local tmpGitDirExist=false
@@ -47,11 +48,13 @@ pullCCAndPush(){
     tmpGitDirExist=true
   fi
   git svn clone "${svnRepoUrl}" --authors-file="${userFile}" --no-metadata --prefix "" "${tmpGitDir}"
+  rm -rf "${userFile}"
   configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
   if [[ ${containEmptyDir} == "true" ]]; then
     find "${tmpGitDir}" -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
   fi
   bash "${workdir}"/changeCharSet.sh "${tmpGitDir}"
+  echo -e "${gitignoreContent}" >./.gitignore
   git add -A .
   echo "Pushing code..."
   if $tmpGitDirExist; then
@@ -77,7 +80,7 @@ pullCCAndPush(){
 
 main(){
   mkdir -p "${gitTmpRootPath}" -m 777
-  pullCCAndPush $1 $2 $3 $4 $5 $6 $7 $8
+  pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
 }
 
-main $1 $2 $3 $4 $5 $6 $7 $8
+main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"

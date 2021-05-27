@@ -18,13 +18,13 @@ import (
 type NamePairInfo struct {
 
 	// git email
-	GitEmail string `json:"gitEmail,omitempty"`
+	GitEmail string `json:"gitEmail,omitempty" db:"git_email"`
 
 	// git user name
-	GitUserName string `json:"gitUserName,omitempty"`
+	GitUserName string `json:"gitUserName,omitempty" db:"git_username"`
 
 	// svn user name
-	SvnUserName string `json:"svnUserName,omitempty"`
+	SvnUserName string `json:"svnUserName,omitempty" db:"svn_username"`
 }
 
 // Validate validates this name pair info

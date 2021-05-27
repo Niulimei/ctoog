@@ -35,6 +35,7 @@ const Login: React.FC = () => {
     }
   };
 
+
   const GroupOptions = [
     '北京事业群',
     '厦门事业群',
@@ -44,6 +45,12 @@ const Login: React.FC = () => {
     '广州事业群',
     '广研事业群',
     '武汉事业群',
+    '基础技术中心',
+    '实施管理中心',
+    '大数据中心',
+    '产品经营中心',
+    '智能云事业部',
+    '交付事业部',
   ];
 
   // const handleSubmit = async ({ password, username }: User.Base) => {

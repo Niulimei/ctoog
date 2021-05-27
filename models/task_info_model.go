@@ -29,6 +29,9 @@ type TaskInfoModel struct {
 	// git repo
 	GitRepo JsonNullString `json:"gitRepo,omitempty" db:"git_url"`
 
+	// gitignore
+	Gitignore string `json:"gitignore,omitempty"`
+
 	// id
 	ID JsonNullInt64 `json:"id,omitempty"`
 
@@ -40,6 +43,9 @@ type TaskInfoModel struct {
 
 	// last complete date time
 	LastCompleteDateTime JsonNullString `json:"lastCompleteDateTime,omitempty" db:"last_completed_date_time"`
+
+	// model type
+	ModelType string `json:"modelType,omitempty"`
 
 	// pvob
 	Pvob JsonNullString `json:"pvob,omitempty"`

@@ -811,6 +811,21 @@ paths:
           required: true
           default: 0
           type: integer
+        - name: group
+          in: query
+          required: false
+          type: string
+          description: "事业群"
+        - name: team
+          in: query
+          required: false
+          type: string
+          description: "项目组"
+        - name: supporter
+          in: query
+          required: false
+          type: string
+          description: "联系人"
         - name: Authorization
           in: header
           required: true
@@ -1049,6 +1064,10 @@ definitions:
         type: boolean
       svnUrl:
         type: string
+      modelType:
+        type: string
+      gitignore:
+        type: string
   TaskInfoUpdateModel:
     type: object
     properties:
@@ -1087,6 +1106,8 @@ definitions:
       svnUrl:
         type: string
       modelType:
+        type: string
+      gitignore:
         type: string
       keep:
         type: string
@@ -1146,6 +1167,8 @@ definitions:
       svnUrl:
         type: string
       modelType:
+        type: string
+      gitignore:
         type: string
       namePair:
         type: array

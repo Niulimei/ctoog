@@ -23,6 +23,15 @@ type MatchInfo struct {
 	Stream string
 }
 
+type NamePairInfo struct {
+	// git email
+	GitEmail string `json:"gitEmail,omitempty"`
+	// git user name
+	GitUserName string `json:"gitUserName,omitempty"`
+	// snv user name
+	SnvUserName string `json:"snvUserName,omitempty"`
+}
+
 type Task struct {
 	TaskId       int64
 	TaskLogId    int64
@@ -37,6 +46,10 @@ type Task struct {
 	IncludeEmpty bool
 	Matches      []MatchInfo
 	Keep         string
+	ModelType    string          `json:"modelType,omitempty"`
+	NamePair     []*NamePairInfo `json:"namePair"`
+	SvnURL       string          `json:"svnUrl,omitempty"`
+	Gitignore    string          `json:"gitignore"`
 }
 
 type TaskDelInfo struct {
@@ -44,6 +57,7 @@ type TaskDelInfo struct {
 	CcPassword string `json:"cc_password"`
 	CcUser     string `json:"cc_user"`
 	Exception  string `json:"exception"`
+	ModelType  string `json:"modelType,omitempty"`
 }
 
 type conf struct {
