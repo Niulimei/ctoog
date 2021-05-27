@@ -148,7 +148,7 @@ type TaskModel struct {
 	Pvob JsonNullString `json:"pvob,omitempty"`
 
 	// svn Url
-	SvnURL JsonNullString `json:"svnUrl,omitempty" db:"svn_url"`
+	SvnURL JsonNullString `json:"svn_url,omitempty" db:"svn_url"`
 }
 
 // Validate validates this task model

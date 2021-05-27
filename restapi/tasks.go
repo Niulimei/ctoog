@@ -53,7 +53,7 @@ func startTask(taskId int64) {
 	task := &database.TaskModel{}
 	err := database.DB.Get(task, "SELECT cc_password,"+
 		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty, dir, keep, worker_id, "+
-		" svnUrl, modelType, gitignore FROM task WHERE id = $1", taskId)
+		" svn_url, model_type, gitignore FROM task WHERE id = $1", taskId)
 	startTime := time.Now().Format("2006-01-02 15:04:05")
 	if err != nil {
 		log.Error("start task but db err:", err)
