@@ -1,5 +1,5 @@
 ALTER TABLE task ADD COLUMN svnUrl varchar(256) DEFAULT '';
-ALTER TABLE task ADD COLUMN modelType varchar(256) DEFAULT '';
+ALTER TABLE task ADD COLUMN modelType varchar(256) DEFAULT 'clearcase';
 
 CREATE TABLE svn_name_pair (
     id integer PRIMARY KEY autoincrement,

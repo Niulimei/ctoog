@@ -9,12 +9,13 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-	"strings"
 )
 
 // ListSvnUsernameURL generates an URL for the list svn username operation
 type ListSvnUsernameURL struct {
-	ID string
+	SvnPassword string
+	SvnURL      string
+	SvnUser     string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -40,20 +41,32 @@ func (o *ListSvnUsernameURL) SetBasePath(bp string) {
 func (o *ListSvnUsernameURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/svn_username_pairs/{id}"
-
-	id := o.ID
-	if id != "" {
-		_path = strings.Replace(_path, "{id}", id, -1)
-	} else {
-		return nil, errors.New("id is required on ListSvnUsernameURL")
-	}
+	var _path = "/svn_username_pairs"
 
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/api"
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	svnPasswordQ := o.SvnPassword
+	if svnPasswordQ != "" {
+		qs.Set("svn_password", svnPasswordQ)
+	}
+
+	svnURLQ := o.SvnURL
+	if svnURLQ != "" {
+		qs.Set("svn_url", svnURLQ)
+	}
+
+	svnUserQ := o.SvnUser
+	if svnUserQ != "" {
+		qs.Set("svn_user", svnUserQ)
+	}
+
+	_result.RawQuery = qs.Encode()
 
 	return &_result, nil
 }

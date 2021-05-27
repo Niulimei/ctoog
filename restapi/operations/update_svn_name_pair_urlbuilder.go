@@ -9,12 +9,11 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-	"strings"
 )
 
 // UpdateSvnNamePairURL generates an URL for the update svn name pair operation
 type UpdateSvnNamePairURL struct {
-	ID string
+	TaskID string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -40,20 +39,22 @@ func (o *UpdateSvnNamePairURL) SetBasePath(bp string) {
 func (o *UpdateSvnNamePairURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/svn_username_pairs/{id}"
-
-	id := o.ID
-	if id != "" {
-		_path = strings.Replace(_path, "{id}", id, -1)
-	} else {
-		return nil, errors.New("id is required on UpdateSvnNamePairURL")
-	}
+	var _path = "/svn_username_pairs"
 
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/api"
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	taskIDQ := o.TaskID
+	if taskIDQ != "" {
+		qs.Set("task_id", taskIDQ)
+	}
+
+	_result.RawQuery = qs.Encode()
 
 	return &_result, nil
 }

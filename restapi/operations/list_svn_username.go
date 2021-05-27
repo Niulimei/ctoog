@@ -29,7 +29,7 @@ func NewListSvnUsername(ctx *middleware.Context, handler ListSvnUsernameHandler)
 	return &ListSvnUsername{Context: ctx, Handler: handler}
 }
 
-/* ListSvnUsername swagger:route GET /svn_username_pairs/{id} listSvnUsername
+/* ListSvnUsername swagger:route GET /svn_username_pairs listSvnUsername
 
 svn用户名列表列表
 

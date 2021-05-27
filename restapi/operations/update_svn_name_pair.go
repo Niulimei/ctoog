@@ -29,7 +29,7 @@ func NewUpdateSvnNamePair(ctx *middleware.Context, handler UpdateSvnNamePairHand
 	return &UpdateSvnNamePair{Context: ctx, Handler: handler}
 }
 
-/* UpdateSvnNamePair swagger:route PUT /svn_username_pairs/{id} updateSvnNamePair
+/* UpdateSvnNamePair swagger:route PUT /svn_username_pairs updateSvnNamePair
 
 更新用户名对应信息
 

@@ -576,7 +576,7 @@ func init() {
         }
       }
     },
-    "/svn_username_pairs/{id}": {
+    "/svn_username_pairs": {
       "get": {
         "consumes": [
           "application/json"
@@ -589,8 +589,20 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "id",
-            "in": "path",
+            "name": "svn_url",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "svn_user",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "svn_password",
+            "in": "query",
             "required": true
           }
         ],
@@ -624,8 +636,8 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "id",
-            "in": "path",
+            "name": "task_id",
+            "in": "query",
             "required": true
           },
           {
@@ -1440,7 +1452,7 @@ func init() {
         "gitUserName": {
           "type": "string"
         },
-        "snvUserName": {
+        "svnUserName": {
           "type": "string"
         }
       }
@@ -2547,7 +2559,7 @@ func init() {
         }
       }
     },
-    "/svn_username_pairs/{id}": {
+    "/svn_username_pairs": {
       "get": {
         "consumes": [
           "application/json"
@@ -2560,8 +2572,20 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "id",
-            "in": "path",
+            "name": "svn_url",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "svn_user",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "svn_password",
+            "in": "query",
             "required": true
           }
         ],
@@ -2595,8 +2619,8 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "id",
-            "in": "path",
+            "name": "task_id",
+            "in": "query",
             "required": true
           },
           {
@@ -3411,7 +3435,7 @@ func init() {
         "gitUserName": {
           "type": "string"
         },
-        "snvUserName": {
+        "svnUserName": {
           "type": "string"
         }
       }

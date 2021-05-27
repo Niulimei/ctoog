@@ -170,28 +170,52 @@ func startTask(taskId int64) {
 func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder {
 	username := params.HTTPRequest.Header.Get("username")
 	taskInfo := params.TaskInfo
-	if len(taskInfo.Dir.String) > 0 && !strings.HasPrefix(taskInfo.Dir.String, "/") {
-		taskInfo.Dir.String = "/" + taskInfo.Dir.String
-	}
-	r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
-		"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id)"+
-		" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0)",
-		taskInfo.Pvob, taskInfo.Component, taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL,
-		taskInfo.GitUser, taskInfo.GitPassword, "init", username,
-		taskInfo.IncludeEmpty, taskInfo.GitEmail, taskInfo.Dir, taskInfo.Keep)
-	taskId, err := r.LastInsertId()
-	if err != nil {
+	var taskId int64
+	var err error
+	if taskInfo.ModelType.String == "clearcase" || taskInfo.ModelType.String == "" {
+		if len(taskInfo.Dir.String) > 0 && !strings.HasPrefix(taskInfo.Dir.String, "/") {
+			taskInfo.Dir.String = "/" + taskInfo.Dir.String
+		}
+		r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
+			"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id, model_type)"+
+			" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase)",
+			taskInfo.Pvob, taskInfo.Component, taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL,
+			taskInfo.GitUser, taskInfo.GitPassword, "init", username,
+			taskInfo.IncludeEmpty, taskInfo.GitEmail, taskInfo.Dir, taskInfo.Keep)
+		taskId, err = r.LastInsertId()
+		if err != nil {
+			return operations.NewCreateTaskInternalServerError().WithPayload(
+				&models.ErrorModel{Message: fmt.Sprintf("Insert into db error: %+v", err), Code: 500})
+		}
+		tx, _ := database.DB.Begin()
+		for _, match := range taskInfo.MatchInfo {
+			tx.Exec("INSERT INTO "+
+				"match_info (task_id, stream, git_branch) "+
+				"VALUES($1, $2, $3)",
+				taskId, match.Stream, match.GitBranch)
+		}
+		tx.Commit()
+	} else if taskInfo.ModelType.String == "svn" {
+		r := database.DB.MustExec("INSERT INTO task (cc_user, cc_password, git_url,"+
+			"git_user, git_password, status, last_completed_date_time, creator, worker_id, model_type, include_empty, keep)"+
+			" VALUES ($1, $2, $3, $4, $5, 'init', '', $6, 0, 'svn', false, '')",
+			taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL, taskInfo.GitUser, taskInfo.GitPassword, username)
+		taskId, err = r.LastInsertId()
+		if err != nil {
+			return operations.NewCreateTaskInternalServerError().WithPayload(
+				&models.ErrorModel{Message: fmt.Sprintf("Insert into db error: %+v", err), Code: 500})
+		}
+		tx, _ := database.DB.Begin()
+		for _, namePair := range taskInfo.NamePair {
+			tx.Exec("INSERT INTO name_pair (task_id, git_username, git_email, svn_username) VALUES (?,?,?)",
+				taskId, namePair.GitUserName, namePair.GitEmail, namePair.SvnUserName)
+		}
+		tx.Commit()
+	} else {
+		log.Error("not supporrt type:", taskInfo.ModelType.String)
 		return operations.NewCreateTaskInternalServerError().WithPayload(
-			&models.ErrorModel{Message: fmt.Sprintf("Insert into db error: %+v", err), Code: 500})
+			&models.ErrorModel{Message: fmt.Sprintf("Not support type error: %+v", taskInfo.ModelType.String), Code: 500})
 	}
-	tx, _ := database.DB.Begin()
-	for _, match := range taskInfo.MatchInfo {
-		tx.Exec("INSERT INTO "+
-			"match_info (task_id, stream, git_branch) "+
-			"VALUES($1, $2, $3)",
-			taskId, match.Stream, match.GitBranch)
-	}
-	tx.Commit()
 	go startTask(taskId)
 	utils.RecordLog(utils.Info, utils.AddTask, "", fmt.Sprintf("TaskId: %d", taskId), 0)
 	return operations.NewCreateTaskCreated().WithPayload(&models.OK{Message: "ok"})
@@ -200,12 +224,22 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	taskID := params.ID
 	task := &models.TaskModel{}
-	log.Info(database.DB.Get(task, "SELECT cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep"+
+	log.Debug(database.DB.Get(task, "SELECT cc_password,"+
+		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep, model_type, svn_url"+
 		" FROM task WHERE id = $1", taskID))
-	var matchInfo []*models.TaskMatchInfo
-	database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", taskID)
-	task.MatchInfo = matchInfo
+	if task.ModelType.String == "clearcase" || task.ModelType.String == "" {
+		var matchInfo []*models.TaskMatchInfo
+		database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", taskID)
+		task.MatchInfo = matchInfo
+	} else if task.ModelType.String == "svn" {
+		var namePairInfo []*models.NamePairInfo
+		database.DB.Select(&namePairInfo, "SELECT git_username, git_email, svn_username FROM name_pair WHERE task_id = ?", taskID)
+		task.NamePair = namePairInfo
+	} else {
+		log.Error("not supporrt type:", task.ModelType.String)
+		return operations.NewCreateTaskInternalServerError().WithPayload(
+			&models.ErrorModel{Message: fmt.Sprintf("Not support type error: %+v", task.ModelType.String), Code: 500})
+	}
 	var logList []*models.TaskLogInfo
 	database.DB.Select(&logList, "SELECT duration, end_time, log_id, start_time, status FROM task_log WHERE task_id = $1 ORDER BY log_id DESC", taskID)
 	taskDetail := &models.TaskDetail{TaskModel: task, LogList: logList}
@@ -238,12 +272,12 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	user := getUserInfo(username)
 	if user.RoleID == int64(AdminRole) {
 		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-			" status, include_empty, git_email, dir, keep" +
+			" status, include_empty, git_email, dir, keep, svn_url" +
 			" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
 		queryCount = "SELECT count(id) FROM task;"
 	} else {
 		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-			" status, include_empty, git_email, dir, keep" +
+			" status, include_empty, git_email, dir, keep, svn_url" +
 			" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
 		queryCount = "SELECT count(id) FROM task WHERE creator = $1;"
 	}
@@ -314,17 +348,19 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		log.Debug("task update commit:", tx.Commit())
 	} else {
 		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
-		if isCCInfoChange(params) {
-			log.Infoln("Is cleaning cache...")
-			DeleteCache(taskIdInt)
+		if params.TaskLog.ModelType == "clearcase" || params.TaskLog.ModelType == "" {
+			if isCCInfoChange(params) {
+				log.Infoln("Is cleaning cache...")
+				DeleteCache(taskIdInt)
+			}
 		}
 		tx := database.DB.MustBegin()
 		log.Debug("update params:", params.TaskLog)
 		tx.MustExec("UPDATE task SET pvob = $1, component = $2, dir = $3, cc_user = $4, cc_password = $5, "+
-			"git_url = $6, git_user = $7, git_password = $8, git_email = $9, include_empty = $10, keep = $11 WHERE id = $12",
+			"git_url = $6, git_user = $7, git_password = $8, git_email = $9, include_empty = $10, keep = $11, svn_url = $12 WHERE id = $13",
 			params.TaskLog.Pvob, params.TaskLog.Component, params.TaskLog.Dir, params.TaskLog.CcUser,
 			params.TaskLog.CcPassword, params.TaskLog.GitURL, params.TaskLog.GitUser, params.TaskLog.GitPassword,
-			params.TaskLog.GitEmail, params.TaskLog.IncludeEmpty, params.TaskLog.Keep, params.ID)
+			params.TaskLog.GitEmail, params.TaskLog.IncludeEmpty, params.TaskLog.Keep, params.TaskLog.SvnURL, params.ID)
 		if len(params.TaskLog.MatchInfo) > 0 {
 			tx.MustExec("DELETE FROM match_info WHERE task_id = $1", taskId)
 			for _, match := range params.TaskLog.MatchInfo {
@@ -332,6 +368,13 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 					"match_info (task_id, stream, git_branch) "+
 					"VALUES($1, $2, $3)",
 					taskId, match.Stream, match.GitBranch)
+			}
+		}
+		if len(params.TaskLog.NamePair) > 0 {
+			tx.MustExec("DELETE FROM svn_name_pair WHERE task_id = ?", taskId)
+			for _, namePair  := range params.TaskLog.NamePair {
+				tx.MustExec("INSERT INTO svn_name_pair (task_id, svn_username, git_username, git_email) VALUES(?, ?, ?)",
+					taskId, namePair.SvnUserName, namePair.GitUserName, namePair.GitEmail)
 			}
 		}
 		utils.RecordLog(utils.Info, utils.UpdateTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)

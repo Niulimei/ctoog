@@ -549,7 +549,7 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
-  /svn_username_pairs/{id}:
+  /svn_username_pairs:
     get:
       summary: svn用户名列表列表
       description: ''
@@ -559,8 +559,16 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: "id"
-          in: "path"
+        - name: "svn_url"
+          in: "query"
+          required: true
+          type: "string"
+        - name: "svn_user"
+          in: "query"
+          required: true
+          type: "string"
+        - name: "svn_password"
+          in: "query"
           required: true
           type: "string"
       responses:
@@ -583,8 +591,8 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: "id"
-          in: "path"
+        - name: "task_id"
+          in: "query"
           required: true
           type: string
         - name: usernamePairInfo
@@ -1100,7 +1108,7 @@ definitions:
   NamePairInfo:
     type: object
     properties:
-      snvUserName:
+      svnUserName:
         type: string
       gitUserName:
         type: string

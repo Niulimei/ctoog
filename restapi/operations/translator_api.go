@@ -566,7 +566,7 @@ func (o *TranslatorAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/svn_username_pairs/{id}"] = NewListSvnUsername(o.context, o.ListSvnUsernameHandler)
+	o.handlers["GET"]["/svn_username_pairs"] = NewListSvnUsername(o.context, o.ListSvnUsernameHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -606,7 +606,7 @@ func (o *TranslatorAPI) initHandlerCache() {
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/svn_username_pairs/{id}"] = NewUpdateSvnNamePair(o.context, o.UpdateSvnNamePairHandler)
+	o.handlers["PUT"]["/svn_username_pairs"] = NewUpdateSvnNamePair(o.context, o.UpdateSvnNamePairHandler)
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
