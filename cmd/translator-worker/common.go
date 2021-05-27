@@ -46,12 +46,10 @@ type Task struct {
 	IncludeEmpty bool
 	Matches      []MatchInfo
 	Keep         string
-	// model type
-	ModelType string `json:"modelType,omitempty"`
-	// name pair
-	NamePair []*NamePairInfo `json:"namePair"`
-	// svn Url
-	SvnURL string `json:"svnUrl,omitempty"`
+	ModelType    string          `json:"modelType,omitempty"`
+	NamePair     []*NamePairInfo `json:"namePair"`
+	SvnURL       string          `json:"svnUrl,omitempty"`
+	Gitignore    string          `json:"gitignore"`
 }
 
 type TaskDelInfo struct {

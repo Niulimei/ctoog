@@ -28,7 +28,6 @@ translator.db
 **/yarn.lock
 **/package-lock.json
 **/*bak
-**/.vscode
 
 # visual studio code
 **/.history
