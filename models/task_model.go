@@ -139,7 +139,7 @@ type TaskModel struct {
 	MatchInfo []*TaskMatchInfo `json:"matchInfo"`
 
 	// model type
-	ModelType string `json:"modelType,omitempty"`
+	ModelType JsonNullString `json:"modelType,omitempty"`
 
 	// name pair
 	NamePair []*NamePairInfo `json:"namePair"`
@@ -148,7 +148,7 @@ type TaskModel struct {
 	Pvob JsonNullString `json:"pvob,omitempty"`
 
 	// svn Url
-	SvnURL string `json:"svnUrl,omitempty"`
+	SvnURL JsonNullString `json:"svnUrl,omitempty"`
 }
 
 // Validate validates this task model

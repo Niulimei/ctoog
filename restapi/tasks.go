@@ -383,7 +383,7 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		}
 		if len(params.TaskLog.NamePair) > 0 {
 			tx.MustExec("DELETE FROM svn_name_pair WHERE task_id = ?", taskId)
-			for _, namePair  := range params.TaskLog.NamePair {
+			for _, namePair := range params.TaskLog.NamePair {
 				tx.MustExec("INSERT INTO svn_name_pair (task_id, svn_username, git_username, git_email) VALUES(?, ?, ?)",
 					taskId, namePair.SvnUserName, namePair.GitUserName, namePair.GitEmail)
 			}
