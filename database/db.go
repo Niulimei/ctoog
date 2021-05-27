@@ -66,6 +66,9 @@ type TaskModel struct {
 
 	// model type
 	ModelType string `db:"modelType"`
+
+	// gitignore
+	Gitignore string `json:"gitignore,omitempty"`
 }
 
 type WorkerModel struct {

@@ -286,12 +286,13 @@ func cc2Git(workerTaskModel Task, gitUrl string) {
 	cwd, _ := os.Getwd()
 	var cmds []*exec.Cmd
 	for _, match := range workerTaskModel.Matches {
-		cmd := exec.Command("/bin/bash", "-c",
-			fmt.Sprintf(`echo %s | su - %s -c '/usr/bin/bash %s/script/cc2git/cc2git.sh "%s" "%s" "%s" "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s"'`,
-				workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
-				match.Stream, gitUrl, match.Branch, workerTaskModel.TaskId,
-				workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail, workerTaskModel.Keep,
-				strings.ReplaceAll(workerTaskModel.Gitignore, " ", "")))
+		cmdStr := fmt.Sprintf(`echo %s | su - %s -c '/usr/bin/bash %s/script/cc2git/cc2git.sh "%s" "%s" "%s" "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s"'`,
+			workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
+			match.Stream, gitUrl, match.Branch, workerTaskModel.TaskId,
+			workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail, workerTaskModel.Keep,
+			strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""))
+		log.Infoln(cmdStr)
+		cmd := exec.Command("/bin/bash", "-c", cmdStr)
 		cmds = append(cmds, cmd)
 	}
 	go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmds)
@@ -312,11 +313,12 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	cwd, _ := os.Getwd()
 	var cmds []*exec.Cmd
 	userFile := geneUsersFile(workerTaskModel)
-	cmd := exec.Command("/bin/bash", "-c",
-		fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s"`,
-			cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
-			workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail,
-			workerTaskModel.Keep, userFile, strings.ReplaceAll(workerTaskModel.Gitignore, " ", "")))
+	cmdStr := fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s"`,
+		cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
+		workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail,
+		workerTaskModel.Keep, userFile, strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""))
+	log.Infoln(cmdStr)
+	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	cmds = append(cmds, cmd)
 	go infoServerTaskCompleted(&workerTaskModel, serverFlag, cmds)
 	return http.StatusOK
