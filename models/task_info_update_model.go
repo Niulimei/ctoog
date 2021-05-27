@@ -49,6 +49,9 @@ type TaskInfoUpdateModel struct {
 	// git user
 	GitUser string `json:"gitUser,omitempty"`
 
+	// gitignore
+	Gitignore string `json:"gitignore,omitempty"`
+
 	// include empty
 	IncludeEmpty bool `json:"includeEmpty,omitempty"`
 

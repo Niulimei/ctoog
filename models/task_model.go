@@ -126,6 +126,9 @@ type TaskModel struct {
 	// git user
 	GitUser JsonNullString `json:"gitUser,omitempty" db:"git_user"`
 
+	// gitignore
+	Gitignore string `json:"gitignore,omitempty"`
+
 	// include empty
 	IncludeEmpty JsonNullBool `json:"includeEmpty,omitempty" db:"include_empty"`
 

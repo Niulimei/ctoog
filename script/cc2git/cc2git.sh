@@ -9,8 +9,8 @@
 
 export LANG="zh_CN.UTF-8"
 set -e
-workdir=$(cd $(dirname $0); pwd)
-source ${workdir}/common.sh
+workdir=$(cd "$(dirname "$0")"; pwd)
+source "${workdir}"/common.sh
 
 initGitRepo(){
   echo "Initializing git repository..."
@@ -124,7 +124,7 @@ pullCCAndPush(){
 main(){
   mkdir -p ${ccTmpRootPath} -m 777
   mkdir -p ${gitTmpRootPath} -m 777
-  pullCCAndPush $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10}
+  pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}"
 }
 
-main $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10}
+main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}"

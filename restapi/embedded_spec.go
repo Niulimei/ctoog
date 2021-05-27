@@ -1643,6 +1643,9 @@ func init() {
         "gitRepo": {
           "type": "string"
         },
+        "gitignore": {
+          "type": "string"
+        },
         "id": {
           "type": "integer"
         },
@@ -1653,6 +1656,9 @@ func init() {
           "type": "string"
         },
         "lastCompleteDateTime": {
+          "type": "string"
+        },
+        "modelType": {
           "type": "string"
         },
         "pvob": {
@@ -1697,6 +1703,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {
@@ -1796,6 +1805,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {
@@ -3614,6 +3626,9 @@ func init() {
         "gitRepo": {
           "type": "string"
         },
+        "gitignore": {
+          "type": "string"
+        },
         "id": {
           "type": "integer"
         },
@@ -3624,6 +3639,9 @@ func init() {
           "type": "string"
         },
         "lastCompleteDateTime": {
+          "type": "string"
+        },
+        "modelType": {
           "type": "string"
         },
         "pvob": {
@@ -3668,6 +3686,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {
@@ -3767,6 +3788,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {

@@ -9,7 +9,7 @@
 
 export LANG="zh_CN.UTF-8"
 set -e
-workdir=$(cd $(dirname $0); pwd)
+workdir=$(cd "$(dirname "$0")"; pwd)
 source "${workdir}"/common.sh
 
 configGitRepo(){
@@ -78,7 +78,7 @@ pullCCAndPush(){
 
 main(){
   mkdir -p "${gitTmpRootPath}" -m 777
-  pullCCAndPush $1 $2 $3 $4 $5 $6 $7 $8
+  pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8"
 }
 
-main $1 $2 $3 $4 $5 $6 $7 $8
+main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8"

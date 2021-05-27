@@ -1041,6 +1041,10 @@ definitions:
         type: boolean
       svnUrl:
         type: string
+      modelType:
+        type: string
+      gitignore:
+        type: string
   TaskInfoUpdateModel:
     type: object
     properties:
@@ -1079,6 +1083,8 @@ definitions:
       svnUrl:
         type: string
       modelType:
+        type: string
+      gitignore:
         type: string
       keep:
         type: string
@@ -1138,6 +1144,8 @@ definitions:
       svnUrl:
         type: string
       modelType:
+        type: string
+      gitignore:
         type: string
       namePair:
         type: array
