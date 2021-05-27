@@ -19,8 +19,17 @@ import (
 var planColumns = []string{"id", "status", "origin_type", "pvob", "component", "dir", "origin_url", "translate_type", "target_url", "subsystem", "config_lib", "business_group", "team", "supporter", "supporter_tel", "creator", "tip", "project_type", "purpose", "plan_start_time", "plan_switch_time", "actual_start_time", "actual_switch_time", "effect", "task_id", "extra1", "extra2", "extra3"}
 
 func buildParams(params operations.ListPlanParams) map[string]string {
-	//TODO
-	return map[string]string{}
+	ret := map[string]string{}
+	if params.Group != nil && *params.Group != "" {
+		ret["business_group"] = *params.Group
+	}
+	if params.Team != nil && *params.Team != "" {
+		ret["team"] = *params.Team
+	}
+	if params.Supporter != nil && *params.Supporter != "" {
+		ret["supporter"] = *params.Supporter
+	}
+	return ret
 }
 func buildPlanWhereSQL(queryParams map[string]string) (string, []interface{}, error) {
 	l := len(queryParams)
@@ -31,7 +40,7 @@ func buildPlanWhereSQL(queryParams map[string]string) (string, []interface{}, er
 		placeholderIndex := int32(1)
 		for k, v := range queryParams {
 			switch k {
-			case "status":
+			case "business_group", "team", "supporter":
 				sqlKeys, sqlValues, placeholderIndex = utils.GeneWhereLike(k, v, placeholderIndex, sqlKeys, sqlValues)
 			}
 		}

@@ -803,6 +803,21 @@ paths:
           required: true
           default: 0
           type: integer
+        - name: group
+          in: query
+          required: false
+          type: string
+          description: "事业群"
+        - name: team
+          in: query
+          required: false
+          type: string
+          description: "项目组"
+        - name: supporter
+          in: query
+          required: false
+          type: string
+          description: "联系人"
         - name: Authorization
           in: header
           required: true

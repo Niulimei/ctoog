@@ -48,6 +48,10 @@ type ListPlanParams struct {
 	  In: header
 	*/
 	Authorization string
+	/*事业群
+	  In: query
+	*/
+	Group *string
 	/*
 	  Required: true
 	  In: query
@@ -60,6 +64,14 @@ type ListPlanParams struct {
 	  Default: 0
 	*/
 	Offset int64
+	/*联系人
+	  In: query
+	*/
+	Supporter *string
+	/*项目组
+	  In: query
+	*/
+	Team *string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -77,6 +89,11 @@ func (o *ListPlanParams) BindRequest(r *http.Request, route *middleware.MatchedR
 		res = append(res, err)
 	}
 
+	qGroup, qhkGroup, _ := qs.GetOK("group")
+	if err := o.bindGroup(qGroup, qhkGroup, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	qLimit, qhkLimit, _ := qs.GetOK("limit")
 	if err := o.bindLimit(qLimit, qhkLimit, route.Formats); err != nil {
 		res = append(res, err)
@@ -84,6 +101,16 @@ func (o *ListPlanParams) BindRequest(r *http.Request, route *middleware.MatchedR
 
 	qOffset, qhkOffset, _ := qs.GetOK("offset")
 	if err := o.bindOffset(qOffset, qhkOffset, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qSupporter, qhkSupporter, _ := qs.GetOK("supporter")
+	if err := o.bindSupporter(qSupporter, qhkSupporter, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qTeam, qhkTeam, _ := qs.GetOK("team")
+	if err := o.bindTeam(qTeam, qhkTeam, route.Formats); err != nil {
 		res = append(res, err)
 	}
 	if len(res) > 0 {
@@ -108,6 +135,24 @@ func (o *ListPlanParams) bindAuthorization(rawData []string, hasKey bool, format
 		return err
 	}
 	o.Authorization = raw
+
+	return nil
+}
+
+// bindGroup binds and validates parameter Group from query.
+func (o *ListPlanParams) bindGroup(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Group = &raw
 
 	return nil
 }
@@ -160,6 +205,42 @@ func (o *ListPlanParams) bindOffset(rawData []string, hasKey bool, formats strfm
 		return errors.InvalidType("offset", "query", "int64", raw)
 	}
 	o.Offset = value
+
+	return nil
+}
+
+// bindSupporter binds and validates parameter Supporter from query.
+func (o *ListPlanParams) bindSupporter(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Supporter = &raw
+
+	return nil
+}
+
+// bindTeam binds and validates parameter Team from query.
+func (o *ListPlanParams) bindTeam(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Team = &raw
 
 	return nil
 }

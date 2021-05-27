@@ -142,6 +142,24 @@ func init() {
           },
           {
             "type": "string",
+            "description": "事业群",
+            "name": "group",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "项目组",
+            "name": "team",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "联系人",
+            "name": "supporter",
+            "in": "query"
+          },
+          {
+            "type": "string",
             "name": "Authorization",
             "in": "header",
             "required": true
@@ -2122,6 +2140,24 @@ func init() {
             "name": "offset",
             "in": "query",
             "required": true
+          },
+          {
+            "type": "string",
+            "description": "事业群",
+            "name": "group",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "项目组",
+            "name": "team",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "联系人",
+            "name": "supporter",
+            "in": "query"
           },
           {
             "type": "string",
