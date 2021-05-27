@@ -669,6 +669,26 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /frontend_configs:
+    get:
+      summary: 前端配置
+      description: ''
+      operationId: GetFrontConfig
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: 前端配置
+          schema:
+            type: array
+            items:
+              type: string
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /schedules:
     post:
       summary: 创建定时任务

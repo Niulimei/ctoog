@@ -9,15 +9,18 @@ import (
 
 func GetALlSvnName(svnUrl, svnUser, svnPassword string) []string {
 	tmp := strings.SplitN(svnUrl, "//", 2)
-	svnUrl = tmp[0] + "//" + svnUser + ":" + svnPassword + "@" + tmp[1]
-	cmd := exec.Command("svn", "log", "--quiet", svnUrl)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return nil
+	var names []string
+	if len(tmp) == 2 {
+		svnUrl = tmp[0] + "//" + svnUser + ":" + svnPassword + "@" + tmp[1]
+		cmd := exec.Command("svn", "log", "--quiet", svnUrl)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return nil
+		}
+		result := string(out)
+		//log.Debug("cmd", cmd.String(), "result:", result)
+		names = strings.Split(result, "\n")
 	}
-	result := string(out)
-	//log.Debug("cmd", cmd.String(), "result:", result)
-	names := strings.Split(result, "\n")
 	return names
 }
 

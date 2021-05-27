@@ -25,17 +25,17 @@ func init() {
 		for {
 			select {
 			case <-t.C:
-				log.Info("ticker begin")
+				log.Debug("ticker begin")
 				var taskLogs []*database.TaskLog
 				now := time.Now()
 				start := now.Add(time.Hour * -1).Format("2006-01-02 15:04:05")
-				log.Info("start", start)
-				log.Info(database.DB.Select(&taskLogs,
+				log.Debug("start", start)
+				log.Debug(database.DB.Select(&taskLogs,
 					"SELECT * FROM task_log WHERE start_time < $1 AND status = 'running'", start))
 				tx, err := database.DB.Begin()
 				if err == nil {
 					for _, taskLog := range taskLogs {
-						log.Info("auto close task log ", taskLog.LogId)
+						log.Debug("auto close task log ", taskLog.LogId)
 						tx.Exec("UPDATE task_log SET status = 'failed', end_time = $1 WHERE log_id = $2",
 							now.Format("2006-01-02 15:04:05"), taskLog.LogId)
 						tx.Exec("UPDATE task SET status = 'failed' WHERE id = $1", taskLog.TaskId)
@@ -284,34 +284,38 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	username := params.HTTPRequest.Header.Get("username")
 	var query, queryCount string
 	user := getUserInfo(username)
-	if *params.ModelType == "clearcase" || *params.ModelType == "svn" {
+	var tasks []*models.TaskInfoModel
+	var count int64
+	var err error
+	if *params.ModelType == "clearcase" || *params.ModelType == "" {
 		if user.RoleID == int64(AdminRole) {
 			query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
 				" status, include_empty, git_email, dir, keep" +
-				" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
-			queryCount = "SELECT count(id) FROM task;"
+				" FROM task WHERE model_type = 'clearcase' ORDER BY id LIMIT $1 OFFSET $2;"
+			queryCount = "SELECT count(id) FROM task WHERE model_type = 'clearcase';"
+			err = database.DB.Select(&tasks, query, params.Limit, params.Offset)
 		} else {
 			query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
 				" status, include_empty, git_email, dir, keep" +
-				" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
-			queryCount = "SELECT count(id) FROM task WHERE creator = $1;"
+				" FROM task WHERE creator = $1 and model_type = 'clearcase' ORDER BY id LIMIT $2 OFFSET $3;"
+			queryCount = "SELECT count(id) FROM task WHERE creator = $1 and model_type = 'clearcase';"
+			err = database.DB.Select(&tasks, query, username, params.Limit, params.Offset)
 		}
 	} else if *params.ModelType == "svn" {
 		if user.RoleID == int64(AdminRole) {
 			query = "SELECT git_url, id, last_completed_date_time," +
 				" status, include_empty, git_email, keep, svn_url" +
-				" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
-			queryCount = "SELECT count(id) FROM task;"
+				" FROM task WHERE model_type = 'snv' ORDER BY id LIMIT $1 OFFSET $2;"
+			queryCount = "SELECT count(id) FROM task WHERE model_type = 'svn';"
+			err = database.DB.Select(&tasks, query, params.Limit, params.Offset)
 		} else {
 			query = "SELECT git_url, id, last_completed_date_time," +
 				" status, include_empty, git_email, keep, svn_url" +
-				" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
-			queryCount = "SELECT count(id) FROM task WHERE creator = $1;"
+				" FROM task WHERE creator = $1 and model_type = 'svn' ORDER BY id LIMIT $2 OFFSET $3;"
+			queryCount = "SELECT count(id) FROM task WHERE creator = $1 and model_type = 'svn';"
+			err = database.DB.Select(&tasks, query, username, params.Limit, params.Offset)
 		}
 	}
-	var tasks []*models.TaskInfoModel
-	var count int64
-	err := database.DB.Select(&tasks, query, username, params.Limit, params.Offset)
 	if err != nil {
 		log.Error(err)
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: "Sql Error"})

@@ -242,10 +242,14 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 				planParams.Status, planId)
 			var err error
 			if plan.TaskID == 0 {
+				modelType := "clearcase"
+				if plan.OriginType == "svn" {
+					modelType = "svn"
+				}
 				r, err := tx.Exec("INSERT OR REPLACE INTO task (pvob, component, git_url,"+
-					"status, last_completed_date_time, creator, dir, worker_id)"+
-					" VALUES (?, ?, ?, 'init', '', ?, ?, 0)",
-					plan.Pvob, plan.Component, plan.TargetURL, username, plan.Dir)
+					"status, last_completed_date_time, creator, dir, worker_id, model_type)"+
+					" VALUES (?, ?, ?, 'init', '', ?, ?, 0, ?)",
+					plan.Pvob, plan.Component, plan.TargetURL, username, plan.Dir, modelType)
 				if err == nil {
 					taskID, _ = r.LastInsertId()
 				} else {

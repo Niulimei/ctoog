@@ -36,6 +36,35 @@ func init() {
   },
   "basePath": "/api",
   "paths": {
+    "/frontend_configs": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "前端配置",
+        "operationId": "GetFrontConfig",
+        "responses": {
+          "200": {
+            "description": "前端配置",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "consumes": [
@@ -2049,6 +2078,35 @@ func init() {
   },
   "basePath": "/api",
   "paths": {
+    "/frontend_configs": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "前端配置",
+        "operationId": "GetFrontConfig",
+        "responses": {
+          "200": {
+            "description": "前端配置",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "consumes": [

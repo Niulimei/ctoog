@@ -63,6 +63,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		DeleteTaskCacheHandler: DeleteTaskCacheHandlerFunc(func(params DeleteTaskCacheParams) middleware.Responder {
 			return middleware.NotImplemented("operation DeleteTaskCache has not yet been implemented")
 		}),
+		GetFrontConfigHandler: GetFrontConfigHandlerFunc(func(params GetFrontConfigParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetFrontConfig has not yet been implemented")
+		}),
 		GetPlanHandler: GetPlanHandlerFunc(func(params GetPlanParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetPlan has not yet been implemented")
 		}),
@@ -185,6 +188,8 @@ type TranslatorAPI struct {
 	DeleteTaskHandler DeleteTaskHandler
 	// DeleteTaskCacheHandler sets the operation handler for the delete task cache operation
 	DeleteTaskCacheHandler DeleteTaskCacheHandler
+	// GetFrontConfigHandler sets the operation handler for the get front config operation
+	GetFrontConfigHandler GetFrontConfigHandler
 	// GetPlanHandler sets the operation handler for the get plan operation
 	GetPlanHandler GetPlanHandler
 	// GetTaskHandler sets the operation handler for the get task operation
@@ -330,6 +335,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.DeleteTaskCacheHandler == nil {
 		unregistered = append(unregistered, "DeleteTaskCacheHandler")
+	}
+	if o.GetFrontConfigHandler == nil {
+		unregistered = append(unregistered, "GetFrontConfigHandler")
 	}
 	if o.GetPlanHandler == nil {
 		unregistered = append(unregistered, "GetPlanHandler")
@@ -519,6 +527,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/tasks/cache/{id}"] = NewDeleteTaskCache(o.context, o.DeleteTaskCacheHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/frontend_configs"] = NewGetFrontConfig(o.context, o.GetFrontConfigHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
