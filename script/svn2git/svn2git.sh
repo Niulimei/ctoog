@@ -54,7 +54,11 @@ pullCCAndPush(){
     find "${tmpGitDir}" -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
   fi
   bash "${workdir}"/changeCharSet.sh "${tmpGitDir}"
-  echo -e "${gitignoreContent}" >./.gitignore
+  if [[ -n "${gitignoreContent}" ]]; then
+    echo -e "${gitignoreContent}" >./.gitignore
+  else
+    rm -rf ./.gitignore
+  fi
   git add -A .
   echo "Pushing code..."
   if $tmpGitDirExist; then
