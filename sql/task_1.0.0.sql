@@ -1,5 +1,5 @@
-ALTER TABLE task ADD COLUMN svnUrl varchar(256) DEFAULT '';
-ALTER TABLE task ADD COLUMN modelType varchar(256) DEFAULT 'clearcase';
+ALTER TABLE task ADD COLUMN svn_url varchar(256) DEFAULT '';
+ALTER TABLE task ADD COLUMN model_type varchar(256) DEFAULT 'clearcase';
 ALTER TABLE task ADD COLUMN gitignore text DEFAULT '';
 
 CREATE TABLE svn_name_pair (
