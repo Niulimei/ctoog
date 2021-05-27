@@ -235,14 +235,17 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	taskID := params.ID
 	task := &models.TaskModel{}
-	log.Debug(database.DB.Get(task, "SELECT cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep, model_type, svn_url"+
-		" FROM task WHERE id = $1", taskID))
 	if task.ModelType.String == "clearcase" || task.ModelType.String == "" {
+		log.Debug(database.DB.Get(task, "SELECT cc_password,"+
+			" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep, model_type"+
+			" FROM task WHERE id = $1", taskID))
 		var matchInfo []*models.TaskMatchInfo
 		database.DB.Select(&matchInfo, "SELECT git_branch, stream FROM match_info WHERE task_id = $1", taskID)
 		task.MatchInfo = matchInfo
 	} else if task.ModelType.String == "svn" {
+		log.Debug(database.DB.Get(task, "SELECT cc_password,"+
+			" cc_user, git_password, git_url, git_user, include_empty, git_email, keep, model_type, svn_url"+
+			" FROM task WHERE id = $1", taskID))
 		var namePairInfo []*models.NamePairInfo
 		database.DB.Select(&namePairInfo, "SELECT git_username, git_email, svn_username FROM name_pair WHERE task_id = ?", taskID)
 		task.NamePair = namePairInfo
@@ -281,16 +284,30 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	username := params.HTTPRequest.Header.Get("username")
 	var query, queryCount string
 	user := getUserInfo(username)
-	if user.RoleID == int64(AdminRole) {
-		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-			" status, include_empty, git_email, dir, keep, svn_url" +
-			" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
-		queryCount = "SELECT count(id) FROM task;"
-	} else {
-		query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-			" status, include_empty, git_email, dir, keep, svn_url" +
-			" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
-		queryCount = "SELECT count(id) FROM task WHERE creator = $1;"
+	if *params.ModelType == "clearcase" || *params.ModelType == "svn" {
+		if user.RoleID == int64(AdminRole) {
+			query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
+				" status, include_empty, git_email, dir, keep" +
+				" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
+			queryCount = "SELECT count(id) FROM task;"
+		} else {
+			query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
+				" status, include_empty, git_email, dir, keep" +
+				" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
+			queryCount = "SELECT count(id) FROM task WHERE creator = $1;"
+		}
+	} else if *params.ModelType == "svn" {
+		if user.RoleID == int64(AdminRole) {
+			query = "SELECT git_url, id, last_completed_date_time," +
+				" status, include_empty, git_email, keep, svn_url" +
+				" FROM task WHERE creator = $1 or 1 = 1 ORDER BY id LIMIT $2 OFFSET $3;"
+			queryCount = "SELECT count(id) FROM task;"
+		} else {
+			query = "SELECT git_url, id, last_completed_date_time," +
+				" status, include_empty, git_email, keep, svn_url" +
+				" FROM task WHERE creator = $1 ORDER BY id LIMIT $2 OFFSET $3;"
+			queryCount = "SELECT count(id) FROM task WHERE creator = $1;"
+		}
 	}
 	var tasks []*models.TaskInfoModel
 	var count int64
