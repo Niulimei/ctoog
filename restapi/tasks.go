@@ -229,7 +229,7 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 	}
 	go startTask(taskId)
 	utils.RecordLog(utils.Info, utils.AddTask, "", fmt.Sprintf("TaskId: %d", taskId), 0)
-	return operations.NewCreateTaskCreated().WithPayload(&models.OK{Message: "ok"})
+	return operations.NewCreateTaskCreated().WithPayload(&models.OK{Message: strconv.Itoa(int(taskId))})
 }
 
 func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
