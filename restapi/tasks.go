@@ -237,7 +237,7 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	taskID := params.ID
 	task := &models.TaskModel{}
 	log.Debug(database.DB.Get(task, "SELECT status, cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep, model_type, svn_url, gitignore"+
+		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep, model_type, svn_url, gitignore, worker_id"+
 		" FROM task WHERE id = $1", taskID))
 	if task.ModelType.String == "clearcase" || task.ModelType.String == "" {
 		var matchInfo []*models.TaskMatchInfo
@@ -251,6 +251,13 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 		log.Error("not supporrt type:", task.ModelType.String)
 		return operations.NewCreateTaskInternalServerError().WithPayload(
 			&models.ErrorModel{Message: fmt.Sprintf("Not support type error: %+v", task.ModelType.String), Code: 500})
+	}
+	if task.WorkerId.Int64 != 0 {
+		worker := &database.WorkerModel{}
+		err := database.DB.Get(worker, "SELECT worker_url FROM worker WHERE id = ?", task.WorkerId)
+		if err == nil {
+			task.WorkerURL.String = worker.WorkerUrl
+		}
 	}
 	var logList []*models.TaskLogInfo
 	database.DB.Select(&logList, "SELECT duration, end_time, log_id, start_time, status FROM task_log WHERE task_id = $1 ORDER BY log_id DESC", taskID)

@@ -1898,6 +1898,9 @@ func init() {
         },
         "svnUrl": {
           "type": "string"
+        },
+        "workerUrl": {
+          "type": "string"
         }
       }
     },
@@ -3942,6 +3945,9 @@ func init() {
           "type": "string"
         },
         "svnUrl": {
+          "type": "string"
+        },
+        "workerUrl": {
           "type": "string"
         }
       }

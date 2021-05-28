@@ -152,6 +152,12 @@ type TaskModel struct {
 
 	// svn Url
 	SvnURL JsonNullString `json:"svn_url,omitempty" db:"svn_url"`
+
+	// worker Url
+	WorkerURL JsonNullString `json:"workerUrl,omitempty"`
+
+	// worker id
+	WorkerId JsonNullInt64 `json:"workerId,omitempty" db:"worker_id"`
 }
 
 // Validate validates this task model
