@@ -11,9 +11,10 @@ import { useModel } from 'umi';
 import dayjs from 'dayjs';
 import { guid } from '@/utils/utils';
 import classnames from 'classnames';
+import {toJS} from 'mobx';
 import { observer } from 'mobx-react';
 import type { Plan } from '@/typings/model';
-import { Row, Col, Form, message, Button, Checkbox, Input } from 'antd';
+import { Row, Col, Form, message, Button, Checkbox, Input, AutoComplete } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import type { FormInstance } from 'antd/es/form';
 import { plan as planServices, task as taskService } from '@/services';
@@ -42,6 +43,19 @@ const FormSection: React.FC<FormSectionProps> = ({ left, title, right, wholeLine
     {wholeLine && <div>{wholeLine}</div>}
   </div>
 );
+
+const FieldAutoComplete = props => {
+  const streamObj = toJS(props.options);
+  let arr = Object.keys(streamObj).map(item => {
+    return {label: item, value: item}
+  });
+
+  return (
+     <Form.Item {...props}>
+       <AutoComplete options={arr || []} />
+     </Form.Item>
+  )
+}
 
 /** 生成表单项 */
 const formFieldsGenerator = (fields: any) => {
@@ -445,10 +459,11 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
             Array.from(Array(branchFieldNum), (_, index) => [
               {
                 name: ['matchInfo', index, 'stream'],
-                component: ProFormSelect,
+                component: FieldAutoComplete,
                 label: '开发流',
                 placeholder: '请选择开发流',
                 valueEnum: valueEnum.stream,
+                options: valueEnum.stream,
                 showSearch: true,
                 required: true,
                 rules: [
