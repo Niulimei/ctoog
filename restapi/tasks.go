@@ -209,9 +209,9 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		tx.Commit()
 	} else if modelType == "svn" {
 		r := database.DB.MustExec("INSERT INTO task (cc_user, cc_password, git_url,"+
-			"git_user, git_password, status, last_completed_date_time, creator, worker_id, model_type, include_empty, keep, svn_url)"+
-			" VALUES ($1, $2, $3, $4, $5, 'init', '', $6, 0, 'svn', $7, $8, $9)",
-			taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL, taskInfo.GitUser, taskInfo.GitPassword, username, taskInfo.IncludeEmpty, taskInfo.Keep, taskInfo.SvnURL)
+			"git_user, git_password, status, last_completed_date_time, creator, worker_id, model_type, include_empty, keep, svn_url, gitignore)"+
+			" VALUES ($1, $2, $3, $4, $5, 'init', '', $6, 0, 'svn', $7, $8, $9, $10)",
+			taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL, taskInfo.GitUser, taskInfo.GitPassword, username, taskInfo.IncludeEmpty, taskInfo.Keep, taskInfo.SvnURL, taskInfo.Gitignore)
 		taskId, err = r.LastInsertId()
 		if err != nil {
 			return operations.NewCreateTaskInternalServerError().WithPayload(
@@ -360,15 +360,15 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 	taskId := params.ID
 	log.Debug(taskId)
 	log.Debug("update task:", params.TaskLog)
+	task := &database.TaskModel{}
+	err := database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
+	taskLogInfo := params.TaskLog
+	if err != nil {
+		log.Error(err)
+		return middleware.Error(404, models.ErrorModel{Message: "没发现任务"})
+	}
 	if params.TaskLog.LogID != "" {
 		tx := database.DB.MustBegin()
-		task := &database.TaskModel{}
-		err := database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
-		taskLogInfo := params.TaskLog
-		if err != nil {
-			log.Error(err)
-			return middleware.Error(404, models.ErrorModel{Message: "没发现任务"})
-		}
 		tx.MustExec("UPDATE task_log SET status = $1, end_time = $2, duration = $3 WHERE log_id = $4",
 			taskLogInfo.Status, taskLogInfo.EndTime, taskLogInfo.Duration, params.TaskLog.LogID)
 		tx.MustExec("UPDATE task SET status = $1, last_completed_date_time = $2 WHERE id = $3",
@@ -377,6 +377,10 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		utils.RecordLog(utils.Info, utils.UpdateTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
 		log.Debug("task update commit:", tx.Commit())
 	} else {
+		if task.Status == "running" {
+			log.Error(err)
+			return middleware.Error(400, models.ErrorModel{Message: "执行中的任务不可以修改"})
+		}
 		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
 		if params.TaskLog.ModelType == "clearcase" || params.TaskLog.ModelType == "" {
 			if isCCInfoChange(params) {
@@ -407,7 +411,6 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 			}
 		}
 		utils.RecordLog(utils.Info, utils.UpdateTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
-		go startTask(taskIdInt)
 		utils.RecordLog(utils.Info, utils.StartTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
 	}
 
