@@ -70,7 +70,15 @@ func GetAllComponent(pvob string) []string {
 			components = append(components, line)
 		}
 	}
-	return components
+	parseComponents := make([]string, 0, 10)
+	for _, component := range components {
+		parseComponents = append(parseComponents, component)
+		if strings.Count(component, "/") > 2 {
+			tmp := strings.Split(component, "/")
+			parseComponents = append(parseComponents, "/"+tmp[1]+"/"+tmp[2])
+		}
+	}
+	return parseComponents
 }
 
 func checkStreamComponent(pvob, component, stream string) bool {

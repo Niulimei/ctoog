@@ -549,7 +549,7 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
-  /svn_username_pairs/{id}:
+  /svn_username_pairs:
     get:
       summary: svn用户名列表列表
       description: ''
@@ -559,8 +559,16 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: "id"
-          in: "path"
+        - name: "svn_url"
+          in: "query"
+          required: true
+          type: "string"
+        - name: "svn_user"
+          in: "query"
+          required: true
+          type: "string"
+        - name: "svn_password"
+          in: "query"
           required: true
           type: "string"
       responses:
@@ -583,8 +591,8 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: "id"
-          in: "path"
+        - name: "task_id"
+          in: "query"
           required: true
           type: string
         - name: usernamePairInfo
@@ -657,6 +665,26 @@ paths:
           description: 成功
           schema:
             $ref: '#/definitions/OK'
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /frontend_configs:
+    get:
+      summary: 前端配置
+      description: ''
+      operationId: GetFrontConfig
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: 前端配置
+          schema:
+            type: array
+            items:
+              type: string
         '500':
           description: 内部错误
           schema:
@@ -803,6 +831,21 @@ paths:
           required: true
           default: 0
           type: integer
+        - name: group
+          in: query
+          required: false
+          type: string
+          description: "事业群"
+        - name: team
+          in: query
+          required: false
+          type: string
+          description: "项目组"
+        - name: supporter
+          in: query
+          required: false
+          type: string
+          description: "联系人"
         - name: Authorization
           in: header
           required: true
@@ -1041,6 +1084,10 @@ definitions:
         type: boolean
       svnUrl:
         type: string
+      modelType:
+        type: string
+      gitignore:
+        type: string
   TaskInfoUpdateModel:
     type: object
     properties:
@@ -1080,6 +1127,8 @@ definitions:
         type: string
       modelType:
         type: string
+      gitignore:
+        type: string
       keep:
         type: string
       matchInfo:
@@ -1100,7 +1149,7 @@ definitions:
   NamePairInfo:
     type: object
     properties:
-      snvUserName:
+      svnUserName:
         type: string
       gitUserName:
         type: string
@@ -1138,6 +1187,8 @@ definitions:
       svnUrl:
         type: string
       modelType:
+        type: string
+      gitignore:
         type: string
       namePair:
         type: array

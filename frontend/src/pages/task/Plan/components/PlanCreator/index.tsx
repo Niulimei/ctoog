@@ -517,7 +517,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
               label="事业群"
               placeholder="请选择事业群"
               options={GroupOptions}
-              rules={[{ required: true, message: '请选择 PVOB' }]}
+              rules={[{ required: true, message: '请选择 事业群' }]}
             />
             <ProFormText
               name="team"

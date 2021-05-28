@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ctgb/restapi"
 	"ctgb/utils"
 	"fmt"
 	"io/ioutil"
@@ -98,12 +99,12 @@ func main() {
 	log.Print("- - - - - - - - - - - - - - -")
 	log.Print("daemon started")
 
-	tmp := &conf{}
+	tmp := &restapi.Conf{}
 	content, _ := ioutil.ReadFile("./translator-worker.yaml")
 	yaml.Unmarshal(content, tmp)
-	serverFlag = tmp.ServerAddr
-	go pingServer(tmp.Host, tmp.Port)
-	http.HandleFunc("/new_task", taskHandler) //	设置访问路由
-	http.HandleFunc("/delete_task", deleteTaskHandler)
+	restapi.ServerFlag = tmp.ServerAddr
+	go restapi.PingServer(tmp.Host, tmp.Port)
+	http.HandleFunc("/new_task", restapi.WorkerTaskHandler) //	设置访问路由
+	http.HandleFunc("/delete_task", restapi.DeleteWorkerTaskCacheHandler)
 	log.Fatal(http.ListenAndServe(tmp.Host+":"+strconv.Itoa(tmp.Port), nil))
 }

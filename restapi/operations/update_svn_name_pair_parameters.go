@@ -13,6 +13,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/validate"
 
 	"ctgb/models"
 )
@@ -36,9 +37,9 @@ type UpdateSvnNamePairParams struct {
 
 	/*
 	  Required: true
-	  In: path
+	  In: query
 	*/
-	ID string
+	TaskID string
 	/*对应信息
 	  Required: true
 	  In: body
@@ -55,8 +56,10 @@ func (o *UpdateSvnNamePairParams) BindRequest(r *http.Request, route *middleware
 
 	o.HTTPRequest = r
 
-	rID, rhkID, _ := route.Params.GetOK("id")
-	if err := o.bindID(rID, rhkID, route.Formats); err != nil {
+	qs := runtime.Values(r.URL.Query())
+
+	qTaskID, qhkTaskID, _ := qs.GetOK("task_id")
+	if err := o.bindTaskID(qTaskID, qhkTaskID, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -95,16 +98,23 @@ func (o *UpdateSvnNamePairParams) BindRequest(r *http.Request, route *middleware
 	return nil
 }
 
-// bindID binds and validates parameter ID from path.
-func (o *UpdateSvnNamePairParams) bindID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+// bindTaskID binds and validates parameter TaskID from query.
+func (o *UpdateSvnNamePairParams) bindTaskID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("task_id", "query", rawData)
+	}
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
 
 	// Required: true
-	// Parameter is provided by construction from the route
-	o.ID = raw
+	// AllowEmptyValue: false
+
+	if err := validate.RequiredString("task_id", "query", raw); err != nil {
+		return err
+	}
+	o.TaskID = raw
 
 	return nil
 }

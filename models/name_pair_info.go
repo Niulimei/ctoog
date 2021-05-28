@@ -23,8 +23,8 @@ type NamePairInfo struct {
 	// git user name
 	GitUserName string `json:"gitUserName,omitempty" db:"git_username"`
 
-	// snv user name
-	SnvUserName string `json:"snvUserName,omitempty" db:"svn_username"`
+	// svn user name
+	SvnUserName string `json:"svnUserName,omitempty" db:"svn_username"`
 }
 
 // Validate validates this name pair info

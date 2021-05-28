@@ -1,9 +1,8 @@
-package main
+package restapi
 
 const adminJwtToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6ImFkbWluIn0.ZZX3Z0zbeCWGhjsdtCxrf3O4xTQ4QYc38AED6RLSUG0`
 
-var stop = make(chan struct{})
-var serverFlag string
+var ServerFlag string
 
 type commandOut struct {
 	Logid   int64  `json:"log_id"`
@@ -46,15 +45,13 @@ type Task struct {
 	IncludeEmpty bool
 	Matches      []MatchInfo
 	Keep         string
-	// model type
-	ModelType string `json:"modelType,omitempty"`
-	// name pair
-	NamePair []*NamePairInfo `json:"namePair"`
-	// svn Url
-	SvnURL string `json:"svnUrl,omitempty"`
+	ModelType    string          `json:"modelType,omitempty"`
+	NamePair     []*NamePairInfo `json:"namePair"`
+	SvnURL       string          `json:"svnUrl,omitempty"`
+	Gitignore    string          `json:"gitignore"`
 }
 
-type TaskDelInfo struct {
+type WorkerTaskDelInfo struct {
 	TaskId     int64  `json:"task_id"`
 	CcPassword string `json:"cc_password"`
 	CcUser     string `json:"cc_user"`
@@ -62,7 +59,7 @@ type TaskDelInfo struct {
 	ModelType  string `json:"modelType,omitempty"`
 }
 
-type conf struct {
+type Conf struct {
 	Host       string `yaml:"host"`
 	Port       int    `yaml:"port"`
 	ServerAddr string `yaml:"server_addr"`

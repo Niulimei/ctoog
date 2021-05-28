@@ -36,6 +36,35 @@ func init() {
   },
   "basePath": "/api",
   "paths": {
+    "/frontend_configs": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "前端配置",
+        "operationId": "GetFrontConfig",
+        "responses": {
+          "200": {
+            "description": "前端配置",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "consumes": [
@@ -139,6 +168,24 @@ func init() {
             "name": "offset",
             "in": "query",
             "required": true
+          },
+          {
+            "type": "string",
+            "description": "事业群",
+            "name": "group",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "项目组",
+            "name": "team",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "联系人",
+            "name": "supporter",
+            "in": "query"
           },
           {
             "type": "string",
@@ -576,7 +623,7 @@ func init() {
         }
       }
     },
-    "/svn_username_pairs/{id}": {
+    "/svn_username_pairs": {
       "get": {
         "consumes": [
           "application/json"
@@ -589,8 +636,20 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "id",
-            "in": "path",
+            "name": "svn_url",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "svn_user",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "svn_password",
+            "in": "query",
             "required": true
           }
         ],
@@ -624,8 +683,8 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "id",
-            "in": "path",
+            "name": "task_id",
+            "in": "query",
             "required": true
           },
           {
@@ -1440,7 +1499,7 @@ func init() {
         "gitUserName": {
           "type": "string"
         },
-        "snvUserName": {
+        "svnUserName": {
           "type": "string"
         }
       }
@@ -1643,6 +1702,9 @@ func init() {
         "gitRepo": {
           "type": "string"
         },
+        "gitignore": {
+          "type": "string"
+        },
         "id": {
           "type": "integer"
         },
@@ -1653,6 +1715,9 @@ func init() {
           "type": "string"
         },
         "lastCompleteDateTime": {
+          "type": "string"
+        },
+        "modelType": {
           "type": "string"
         },
         "pvob": {
@@ -1697,6 +1762,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {
@@ -1796,6 +1864,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {
@@ -2007,6 +2078,35 @@ func init() {
   },
   "basePath": "/api",
   "paths": {
+    "/frontend_configs": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "前端配置",
+        "operationId": "GetFrontConfig",
+        "responses": {
+          "200": {
+            "description": "前端配置",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "consumes": [
@@ -2110,6 +2210,24 @@ func init() {
             "name": "offset",
             "in": "query",
             "required": true
+          },
+          {
+            "type": "string",
+            "description": "事业群",
+            "name": "group",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "项目组",
+            "name": "team",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "联系人",
+            "name": "supporter",
+            "in": "query"
           },
           {
             "type": "string",
@@ -2547,7 +2665,7 @@ func init() {
         }
       }
     },
-    "/svn_username_pairs/{id}": {
+    "/svn_username_pairs": {
       "get": {
         "consumes": [
           "application/json"
@@ -2560,8 +2678,20 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "id",
-            "in": "path",
+            "name": "svn_url",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "svn_user",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "svn_password",
+            "in": "query",
             "required": true
           }
         ],
@@ -2595,8 +2725,8 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "name": "id",
-            "in": "path",
+            "name": "task_id",
+            "in": "query",
             "required": true
           },
           {
@@ -3411,7 +3541,7 @@ func init() {
         "gitUserName": {
           "type": "string"
         },
-        "snvUserName": {
+        "svnUserName": {
           "type": "string"
         }
       }
@@ -3614,6 +3744,9 @@ func init() {
         "gitRepo": {
           "type": "string"
         },
+        "gitignore": {
+          "type": "string"
+        },
         "id": {
           "type": "integer"
         },
@@ -3624,6 +3757,9 @@ func init() {
           "type": "string"
         },
         "lastCompleteDateTime": {
+          "type": "string"
+        },
+        "modelType": {
           "type": "string"
         },
         "pvob": {
@@ -3668,6 +3804,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {
@@ -3767,6 +3906,9 @@ func init() {
           "type": "string"
         },
         "gitUser": {
+          "type": "string"
+        },
+        "gitignore": {
           "type": "string"
         },
         "includeEmpty": {

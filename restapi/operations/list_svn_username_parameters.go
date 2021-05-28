@@ -9,8 +9,10 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/validate"
 )
 
 // NewListSvnUsernameParams creates a new ListSvnUsernameParams object
@@ -32,9 +34,19 @@ type ListSvnUsernameParams struct {
 
 	/*
 	  Required: true
-	  In: path
+	  In: query
 	*/
-	ID string
+	SvnPassword string
+	/*
+	  Required: true
+	  In: query
+	*/
+	SvnURL string
+	/*
+	  Required: true
+	  In: query
+	*/
+	SvnUser string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -46,8 +58,20 @@ func (o *ListSvnUsernameParams) BindRequest(r *http.Request, route *middleware.M
 
 	o.HTTPRequest = r
 
-	rID, rhkID, _ := route.Params.GetOK("id")
-	if err := o.bindID(rID, rhkID, route.Formats); err != nil {
+	qs := runtime.Values(r.URL.Query())
+
+	qSvnPassword, qhkSvnPassword, _ := qs.GetOK("svn_password")
+	if err := o.bindSvnPassword(qSvnPassword, qhkSvnPassword, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qSvnURL, qhkSvnURL, _ := qs.GetOK("svn_url")
+	if err := o.bindSvnURL(qSvnURL, qhkSvnURL, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qSvnUser, qhkSvnUser, _ := qs.GetOK("svn_user")
+	if err := o.bindSvnUser(qSvnUser, qhkSvnUser, route.Formats); err != nil {
 		res = append(res, err)
 	}
 	if len(res) > 0 {
@@ -56,16 +80,65 @@ func (o *ListSvnUsernameParams) BindRequest(r *http.Request, route *middleware.M
 	return nil
 }
 
-// bindID binds and validates parameter ID from path.
-func (o *ListSvnUsernameParams) bindID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+// bindSvnPassword binds and validates parameter SvnPassword from query.
+func (o *ListSvnUsernameParams) bindSvnPassword(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("svn_password", "query", rawData)
+	}
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
 
 	// Required: true
-	// Parameter is provided by construction from the route
-	o.ID = raw
+	// AllowEmptyValue: false
+
+	if err := validate.RequiredString("svn_password", "query", raw); err != nil {
+		return err
+	}
+	o.SvnPassword = raw
+
+	return nil
+}
+
+// bindSvnURL binds and validates parameter SvnURL from query.
+func (o *ListSvnUsernameParams) bindSvnURL(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("svn_url", "query", rawData)
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+	// AllowEmptyValue: false
+
+	if err := validate.RequiredString("svn_url", "query", raw); err != nil {
+		return err
+	}
+	o.SvnURL = raw
+
+	return nil
+}
+
+// bindSvnUser binds and validates parameter SvnUser from query.
+func (o *ListSvnUsernameParams) bindSvnUser(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("svn_user", "query", rawData)
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+	// AllowEmptyValue: false
+
+	if err := validate.RequiredString("svn_user", "query", raw); err != nil {
+		return err
+	}
+	o.SvnUser = raw
 
 	return nil
 }

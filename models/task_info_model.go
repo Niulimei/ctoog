@@ -29,6 +29,9 @@ type TaskInfoModel struct {
 	// git repo
 	GitRepo JsonNullString `json:"gitRepo,omitempty" db:"git_url"`
 
+	// gitignore
+	Gitignore string `json:"gitignore,omitempty"`
+
 	// id
 	ID JsonNullInt64 `json:"id,omitempty"`
 
@@ -41,6 +44,9 @@ type TaskInfoModel struct {
 	// last complete date time
 	LastCompleteDateTime JsonNullString `json:"lastCompleteDateTime,omitempty" db:"last_completed_date_time"`
 
+	// model type
+	ModelType string `json:"modelType,omitempty" db:"model_type"`
+
 	// pvob
 	Pvob JsonNullString `json:"pvob,omitempty"`
 
@@ -48,7 +54,7 @@ type TaskInfoModel struct {
 	Status JsonNullString `json:"status,omitempty"`
 
 	// svn Url
-	SvnURL string `json:"svnUrl,omitempty"`
+	SvnURL string `json:"svnUrl,omitempty" db:"svn_url"`
 }
 
 // Validate validates this task info model

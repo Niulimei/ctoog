@@ -429,7 +429,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             >
               <Input
                 size="small"
-                disabled={mode === 'update'}
+                disabled={false}
                 style={{ width: 128, marginLeft: 12 }}
                 placeholder="请输入占位文件名"
               />

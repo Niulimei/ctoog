@@ -15,8 +15,11 @@ import (
 
 // ListPlanURL generates an URL for the list plan operation
 type ListPlanURL struct {
-	Limit  int64
-	Offset int64
+	Group     *string
+	Limit     int64
+	Offset    int64
+	Supporter *string
+	Team      *string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -52,6 +55,14 @@ func (o *ListPlanURL) Build() (*url.URL, error) {
 
 	qs := make(url.Values)
 
+	var groupQ string
+	if o.Group != nil {
+		groupQ = *o.Group
+	}
+	if groupQ != "" {
+		qs.Set("group", groupQ)
+	}
+
 	limitQ := swag.FormatInt64(o.Limit)
 	if limitQ != "" {
 		qs.Set("limit", limitQ)
@@ -60,6 +71,22 @@ func (o *ListPlanURL) Build() (*url.URL, error) {
 	offsetQ := swag.FormatInt64(o.Offset)
 	if offsetQ != "" {
 		qs.Set("offset", offsetQ)
+	}
+
+	var supporterQ string
+	if o.Supporter != nil {
+		supporterQ = *o.Supporter
+	}
+	if supporterQ != "" {
+		qs.Set("supporter", supporterQ)
+	}
+
+	var teamQ string
+	if o.Team != nil {
+		teamQ = *o.Team
+	}
+	if teamQ != "" {
+		qs.Set("team", teamQ)
 	}
 
 	_result.RawQuery = qs.Encode()

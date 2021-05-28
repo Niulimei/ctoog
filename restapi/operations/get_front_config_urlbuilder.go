@@ -11,21 +11,15 @@ import (
 	golangswaggerpaths "path"
 )
 
-// ListSvnUsernameURL generates an URL for the list svn username operation
-type ListSvnUsernameURL struct {
-	SvnPassword string
-	SvnURL      string
-	SvnUser     string
-
+// GetFrontConfigURL generates an URL for the get front config operation
+type GetFrontConfigURL struct {
 	_basePath string
-	// avoid unkeyed usage
-	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ListSvnUsernameURL) WithBasePath(bp string) *ListSvnUsernameURL {
+func (o *GetFrontConfigURL) WithBasePath(bp string) *GetFrontConfigURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -33,15 +27,15 @@ func (o *ListSvnUsernameURL) WithBasePath(bp string) *ListSvnUsernameURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *ListSvnUsernameURL) SetBasePath(bp string) {
+func (o *GetFrontConfigURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *ListSvnUsernameURL) Build() (*url.URL, error) {
+func (o *GetFrontConfigURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/svn_username_pairs"
+	var _path = "/frontend_configs"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -49,30 +43,11 @@ func (o *ListSvnUsernameURL) Build() (*url.URL, error) {
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
-	qs := make(url.Values)
-
-	svnPasswordQ := o.SvnPassword
-	if svnPasswordQ != "" {
-		qs.Set("svn_password", svnPasswordQ)
-	}
-
-	svnURLQ := o.SvnURL
-	if svnURLQ != "" {
-		qs.Set("svn_url", svnURLQ)
-	}
-
-	svnUserQ := o.SvnUser
-	if svnUserQ != "" {
-		qs.Set("svn_user", svnUserQ)
-	}
-
-	_result.RawQuery = qs.Encode()
-
 	return &_result, nil
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *ListSvnUsernameURL) Must(u *url.URL, err error) *url.URL {
+func (o *GetFrontConfigURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -83,17 +58,17 @@ func (o *ListSvnUsernameURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *ListSvnUsernameURL) String() string {
+func (o *GetFrontConfigURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *ListSvnUsernameURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *GetFrontConfigURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on ListSvnUsernameURL")
+		return nil, errors.New("scheme is required for a full url on GetFrontConfigURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on ListSvnUsernameURL")
+		return nil, errors.New("host is required for a full url on GetFrontConfigURL")
 	}
 
 	base, err := o.Build()
@@ -107,6 +82,6 @@ func (o *ListSvnUsernameURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *ListSvnUsernameURL) StringFull(scheme, host string) string {
+func (o *GetFrontConfigURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }
