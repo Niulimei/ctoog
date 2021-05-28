@@ -101,10 +101,11 @@ func sendCommandOut(server string, cmd *exec.Cmd, task *Task, tmpCmdOutFile stri
 
 	err := cmd.Wait()
 	log.Errorln(err)
-
-	time.Sleep(time.Second * 2)
-	stop <- struct{}{}
-	os.RemoveAll(tmpCmdOutFile)
+	go func() {
+		time.Sleep(time.Second * 60)
+		stop <- struct{}{}
+		os.RemoveAll(tmpCmdOutFile)
+	}()
 	return err
 }
 
