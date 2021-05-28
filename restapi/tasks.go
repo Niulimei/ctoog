@@ -236,7 +236,7 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	taskID := params.ID
 	task := &models.TaskModel{}
-	log.Debug(database.DB.Get(task, "SELECT cc_password,"+
+	log.Debug(database.DB.Get(task, "SELECT status, cc_password,"+
 		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep, model_type, svn_url, gitignore"+
 		" FROM task WHERE id = $1", taskID))
 	if task.ModelType.String == "clearcase" || task.ModelType.String == "" {
