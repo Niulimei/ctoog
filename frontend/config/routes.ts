@@ -18,10 +18,24 @@
         exact: true,
       },
       {
+        name: 'SVN迁移任务',
+        path: '/task/svn',
+        component: './task/Svn',
+        exact: true,
+        access: 'svnRoute'
+      },
+      {
         hideInMenu: true,
         name: '任务详情',
         path: '/task/detail',
         component: './task/Detail',
+      },
+      {
+        hideInMenu: true,
+        name: 'SVN任务详情',
+        path: '/task/svnDetail',
+        component: './task/Detail/svnList',
+        access: 'svnRoute'
       },
       {
         access: 'isAdmin',

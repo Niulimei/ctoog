@@ -10,7 +10,7 @@ import type { ProColumns } from '@ant-design/pro-table';
 import PlanStatusSwitcher from './components/PlanStatusSwitcher';
 
 type Actions = Record<
-  'updatePlan' | 'deletePlan' | 'execTask' | 'toggleStatus' | 'gotoTaskDetail',
+  'updatePlan' | 'deletePlan' | 'execTask' | 'execSvnTask' | 'toggleStatus' | 'gotoTaskDetail' | 'gotoSvnTaskDetail',
   (payload: Plan.Item) => void
 >;
 
@@ -128,6 +128,13 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
                       </Button>
                     </Menu.Item>
                   )}
+                  {item.originType === 'svn' && (
+                    <Menu.Item key={item.status === '未迁移' ? 'execSvnTask' : 'gotoSvnTaskDetail'}>
+                      <Button size="small" type="link">
+                        执行迁移任务
+                      </Button>
+                    </Menu.Item>
+                  )}
                 </Menu>
               }
             >
@@ -158,6 +165,11 @@ const PlanList: React.FC = () => {
       tableRef.current.reload();
       message.success('计划删除成功');
     },
+    async execSvnTask({ id }) {
+      const { message: msg } = await planServices.updatePlan(id, { status: '迁移中' });
+      const taskId = id && msg;
+      history.push(`/task/svnDetail?id=${taskId}`);
+    },
     async execTask({ id }) {
       const { message: msg } = await planServices.updatePlan(id, { status: '迁移中' });
       const taskId = id && msg;
@@ -168,6 +180,9 @@ const PlanList: React.FC = () => {
     },
     gotoTaskDetail({ task_id }) {
       history.push(`/task/detail?id=${task_id}`);
+    },
+     gotoSvnTaskDetail({ task_id }) {
+      history.push(`/task/svnDetail?id=${task_id}`);
     },
   };
   /** 提示信息 */

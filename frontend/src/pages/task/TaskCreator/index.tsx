@@ -9,7 +9,7 @@ import { task as taskService } from '@/services';
 import { useClearCaseSelectEnum } from '@/utils/hooks';
 import { Button, message, Form, Checkbox, Input } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { ModalForm, ProFormSelect as FormSelect, ProFormText } from '@ant-design/pro-form';
+import { ModalForm, ProFormSelect as FormSelect, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 
 import styles from './style.less';
 
@@ -393,6 +393,12 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             </>,
           ]),
         )}
+        <div className={classnames(styles.ignore)}>
+          <ProFormTextArea
+            name="gitignore"
+            placeholder="请输入 gitignore信息"
+          />
+        </div>
         <div className={classnames(styles.col, styles.keep)}>
           <span>
             <Form.Item valuePropName="checked" noStyle name="includeEmpty">

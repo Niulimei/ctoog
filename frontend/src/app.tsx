@@ -21,7 +21,9 @@ export const initialStateConfig = {
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
   currentUser?: User.Base;
+  RouteList?: any[];
   fetchUserInfo?: () => Promise<User.Base | undefined>;
+  fetchRouteInfo?: () => Promise<User.Base | undefined>;
 }> {
   const fetchUserInfo = async () => {
     try {
@@ -32,17 +34,30 @@ export async function getInitialState(): Promise<{
     }
     return undefined;
   };
+  const fetchRouteInfo = async () => {
+    try {
+      const RouteList = await user.getPermission();
+      return RouteList;
+    } catch (error) {
+      history.push(loginPath);
+    }
+    return undefined;
+  };
   // 如果是登录页面，不执行
   if (history.location.pathname !== loginPath) {
     const currentUser = await fetchUserInfo();
+    const RouteList = await fetchRouteInfo();
     return {
       fetchUserInfo,
+      fetchRouteInfo,
+      RouteList,
       currentUser,
       settings: {},
     };
   }
   return {
     fetchUserInfo,
+    fetchRouteInfo,
     settings: {},
   };
 }

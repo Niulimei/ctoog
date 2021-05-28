@@ -7,12 +7,16 @@ import {
   ProFormTextArea,
   ProFormDatePicker,
 } from '@ant-design/pro-form';
+import { useModel } from 'umi';
 import dayjs from 'dayjs';
+import { guid } from '@/utils/utils';
+import classnames from 'classnames';
 import { observer } from 'mobx-react';
 import type { Plan } from '@/typings/model';
-import { Row, Col, Form, message } from 'antd';
+import { Row, Col, Form, message, Button, Checkbox, Input } from 'antd';
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import type { FormInstance } from 'antd/es/form';
-import { plan as planServices } from '@/services';
+import { plan as planServices, task as taskService } from '@/services';
 import { useClearCaseSelectEnum } from '@/utils/hooks';
 import { useToggle, useMount, useUpdate } from 'react-use';
 
@@ -39,7 +43,59 @@ const FormSection: React.FC<FormSectionProps> = ({ left, title, right, wholeLine
   </div>
 );
 
+/** 生成表单项 */
+const formFieldsGenerator = (fields: any) => {
+  const renderFieldComponent = ({ component, name, required, rules, ...restProps }: any) => {
+    const requiredRules = [
+      {
+        required: true,
+        message: restProps.placeholder ? restProps.placeholder : `${name} 为必填参数`,
+      },
+    ];
+    // eslint-disable-next-line no-param-reassign
+    rules = (rules || []).concat(required && requiredRules).filter(Boolean);
+
+    return React.createElement(component, {
+      key: name,
+      required,
+      rules,
+      name,
+      ...restProps,
+    });
+  };
+
+  /** 判断当前的节点是不是带有require属性 */
+  const isRequired = (node: any): boolean => {
+    if(node?.props?.rules){
+      if(Array.isArray(node.props.rules) && node.props.rules[0]){
+        return node.props.rules[0].hasOwnProperty('required')  || node.props.rules[1].hasOwnProperty('required')
+      }
+    }
+    return false
+
+  }
+
+  return fields.map((nodes: any) => {
+    const key = guid();
+
+    const [leftNode, rightNode, actionNode] = nodes.map((node: any) =>
+      node.component ? renderFieldComponent(node) : node,
+    );
+    // console.log(leftNode);
+
+    return (
+      <div className={styles.col} key={key}>
+        <div className={classnames(styles.row, styles.left, isRequired(leftNode) ? styles.must : '')}>{leftNode}</div>
+        <div className={classnames(styles.row, styles.right, isRequired(rightNode) ? styles.must : '')}>{rightNode}</div>
+        {actionNode ? <div className={styles.action}>{actionNode}</div> : null}
+      </div>
+    );
+  });
+};
+
 const OriginTypeOptions = ['ClearCase', 'ICDP(Gerrit)', '私服'];
+
+const ExType = ['svn'];
 
 const TranslateTypeOptions = ['项目组自己迁移', '工作组帮迁移'];
 
@@ -76,6 +132,13 @@ const CustomChangeHandlers: Partial<
     dispatch({ type: 'getComponentValueEnum', payload: value });
     form.setFieldsValue({ configLib: value });
   },
+  component(form, value, dispatch) {
+    dispatch({type: 'stream', payload: { component: value, pvob: form.getFieldValue('pvob') }});
+    const { matchInfo } = form.getFieldsValue(['matchInfo']);
+    form.setFieldsValue({
+      matchInfo: (matchInfo || []).map((info: any) => ({ ...info, stream: '' })),
+    });
+  },
   plan_start_time(form, value) {
     const switchTime = form.getFieldValue('plan_switch_time');
     if (dayjs(switchTime).isAfter(dayjs(value)))
@@ -91,12 +154,14 @@ interface IPlanCreatorProps {
 }
 
 const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
+  const { initialState } = useModel('@@initialState');
   const [form] = Form.useForm();
+  const [branchFieldNum, setBranchFieldNum] = React.useState(1);
   const { dispatch: clearCaseEnumDispatch, valueEnum } = useClearCaseSelectEnum();
   const [visible, toggleVisible] = useToggle(false);
   const forceUpdate = useUpdate();
   const modalRef = React.useRef<{ planId: string }>({ planId: '' });
-
+  const { RouteList = [] } = initialState;
   /** 更新模式
    * 1. 回填表单数据
    * 2. pvob component matchInfo 为可修改配置，其他表单项只读
@@ -110,11 +175,16 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       if (mode === 'update' && id) {
         modalRef.current.planId = id;
         const fieldValues = await planServices.getPlanDetail(id);
+        modalRef.current.task_id = fieldValues?.task_id;
         if (fieldValues.originType === 'ClearCase') {
           clearCaseEnumDispatch('pvob', {});
           clearCaseEnumDispatch('component', { pvob: fieldValues.pvob });
+          clearCaseEnumDispatch('stream', { component: fieldValues.component, pvob: fieldValues.pvob });
+          const { taskModel: taskFieldValues } = await taskService.getTaskDetail(fieldValues?.task_id);
+          form.setFieldsValue({...fieldValues, ...taskFieldValues});
+        } else {
+          form.setFieldsValue(fieldValues);
         }
-        form.setFieldsValue(fieldValues);
         toggleVisible(true);
       } else {
         toggleVisible(true);
@@ -128,11 +198,13 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
     try {
       if (isUpdateMode) {
         await planServices.updatePlan(modalRef.current.planId, values);
+        await taskService.updateTask(modalRef.current.task_id, values);
       } else {
-        await planServices.createPlan(values);
+        const {message: task_id} = await taskService.createTask(values);
+        await planServices.createPlan({...values, task_id: Number(task_id)});
       }
       message.success(`迁移计划${actionText}成功`);
-      onSuccess?.();
+      // onSuccess?.();
       return true;
     } catch (err) {
       // message.error(`迁移任务${actionText}出现异常`);
@@ -154,6 +226,9 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       case 'getComponentValueEnum':
         clearCaseEnumDispatch('component', { pvob: payload });
         break;
+      case 'stream':
+        clearCaseEnumDispatch('stream', { pvob: payload?.pvob, component: payload?.component });
+        break;
       default:
         break;
     }
@@ -165,6 +240,22 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
     });
   };
 
+   const addBranchField = () => {
+    setBranchFieldNum((num) => num + 1);
+  };
+
+     /** matchInfo 字段不重复 */
+  const isDuplicateMatchInfoItem = (key: 'stream' | 'gitBranch', inputVal?: string) => {
+    if (!inputVal || !inputVal.trim()) return false;
+    const matchInfo = form.getFieldValue('matchInfo');
+    if (Array.isArray(matchInfo)) {
+      const values = matchInfo.map((item) => item[key]);
+      const len = values.filter((val) => val === inputVal).length;
+      if (len >= 2) return true;
+    }
+    return false;
+  };
+
   return (
     <ModalForm<Plan.Base>
       form={form}
@@ -174,7 +265,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       onFinish={handleFinish}
       initialValues={InitialValues}
       title={`${actionText}迁移计划`}
-      modalProps={{ okText: actionText }}
+      modalProps={{ okText: actionText, bodyStyle: {maxHeight: 'calc(100vh - 300px)', overflow: "scroll"} }}
       onValuesChange={handleFormValuesChange}
       onVisibleChange={(vis) => toggleVisible(vis)}
     >
@@ -186,7 +277,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
               name="originType"
               radioType="button"
               label="迁移任务类型"
-              options={OriginTypeOptions}
+              options={RouteList.includes('svnRoute') ? OriginTypeOptions.concat(ExType) : OriginTypeOptions}
               rules={[{ required: true, message: '请选择迁移任务类型' }]}
             />
 
@@ -213,6 +304,18 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                   label="子目录"
                   placeholder="请输入组件子目录，如果为空则将迁移整个组件"
                 />
+                <ProFormText
+                  name="ccUser"
+                  label="CC用户名"
+                  rules={[{ required: true, message: '请填写 CC 用户名' }]}
+                  placeholder="请输入 CC 用户名"
+                />
+                <ProFormText.Password
+                  name="ccPassword"
+                  label="CC密码"
+                  rules={[{ required: true, message: '请填写 CC 密码' }]}
+                  placeholder="请输入 CC 密码"
+                />
               </>
             ) : (
               <ProFormText
@@ -234,7 +337,12 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
               options={TranslateTypeOptions}
               rules={[{ required: true, message: '请选择迁移方式' }]}
             />
-            <ProFormText name="targetUrl" label="目标仓库地址" placeholder="请填写目标仓库地址" />
+            <ProFormText
+              name="targetUrl"
+              label="目标仓库地址"
+              placeholder="请填写目标仓库地址"
+              rules={[{ required: true, message: '请填写目标仓库地址' }]}
+            />
             <ProFormDatePicker
               name="plan_start_time"
               label="计划迁移日期"
@@ -256,9 +364,131 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                 },
               ]}
             />
+            <ProFormTextArea
+              name="gitignore"
+              label="gitignore"
+              placeholder="请输入 gitignore"
+            />
+            {
+              form.getFieldValue('originType') === 'ClearCase' && (
+                <>
+                  <ProFormText
+                    name="gitEmail"
+                    label="Git Email"
+                    placeholder="请填写Git Email"
+                    rules={[{ required: true, message: '请输入 Git Email，格式：云桌面账号@ccbft.com', pattern: /^[^@]+@ccbft.com$/, }]}
+                  />
+                  <ProFormText
+                    name="gitUser"
+                    label="git 用户名"
+                    rules={[{ required: true, message: '请填写 git 用户名' }]}
+                    placeholder="请输入 git 用户名"
+                  />
+                  <ProFormText.Password
+                    name="gitPassword"
+                    label="git 密码"
+                    rules={[{ required: true, message: '请填写 git 密码' }]}
+                    placeholder="请输入 git 密码"
+                  />
+                </>
+              )
+            }
           </>
         }
       />
+      {
+        form.getFieldValue('originType') === 'ClearCase' && <div className={styles.gutter}>
+          <h4 className={styles.sectionHeader}>CC开发流对应分支关系</h4>
+          {formFieldsGenerator(
+            Array.from(Array(branchFieldNum), (_, index) => [
+              {
+                name: ['matchInfo', index, 'stream'],
+                component: ProFormSelect,
+                label: '开发流',
+                placeholder: '请选择开发流',
+                valueEnum: valueEnum.stream,
+                showSearch: true,
+                required: true,
+                rules: [
+                  {
+                    // eslint-disable-next-line @typescript-eslint/no-shadow
+                    async validator(_: any, value: string) {
+                      if (isDuplicateMatchInfoItem('stream', value))
+                        throw new Error('不能出现重复的开发流');
+                    },
+                  },
+                ],
+              },
+              {
+                name: ['matchInfo', index, 'gitBranch'],
+                component: ProFormText,
+                placeholder: '请输入Git对应分支',
+                label: '分支',
+                required: true,
+                valueEnum: valueEnum.stream,
+                rules: [
+                  {
+                    // eslint-disable-next-line @typescript-eslint/no-shadow
+                    async validator(_: any, value: string) {
+                      if (isDuplicateMatchInfoItem('gitBranch', value))
+                        throw new Error('不能出现重复的 Git 分支');
+                    },
+                  },
+                ],
+              },
+              <>
+                {branchFieldNum !== 1 && (
+                  <Button
+                    key="delete"
+                    icon={<MinusOutlined/>}
+                    className={styles.deleteButton}
+                    onClick={() => deleteBranch(index)}
+                  />
+                )}
+                {index === branchFieldNum - 1 && (
+                  <Button key="add" type="primary" icon={<PlusOutlined/>} onClick={addBranchField}/>
+                )}
+              </>,
+            ]),
+          )}
+           <div className={classnames(styles.col, styles.keep)}>
+          <span>
+            <Form.Item valuePropName="checked" noStyle name="includeEmpty">
+              <Checkbox />
+            </Form.Item>
+            <span className={styles.label}>是否保留空目录</span>
+          </span>
+          <span className={styles.keep}>
+            <span className={classnames(styles.label, styles.keepLabel)}>占位文件名</span>
+            <Form.Item
+              name={['keep']}
+              rules={[
+                {
+                  async validator(_, value) {
+                    const { includeEmpty } = form.getFieldsValue(['includeEmpty']);
+                    if (includeEmpty && !value) {
+                      throw new Error('文件名称不能为空');
+                    }
+                    const invalidated = /[^a-z0-9-_.]+/.test(value);
+                    if (invalidated) {
+                      throw new Error(
+                        '文件名称字符只能包括：字母、数字、"."(点)、"_"(下划线)和"-"(连字符)',
+                      );
+                    }
+                  },
+                },
+              ]}
+            >
+              <Input
+                size="small"
+                style={{ width: 128, marginLeft: 12 }}
+                placeholder="请输入占位文件名"
+              />
+            </Form.Item>
+          </span>
+        </div>
+        </div>
+      }
       <FormSection
         title="系统管理信息"
         left={
