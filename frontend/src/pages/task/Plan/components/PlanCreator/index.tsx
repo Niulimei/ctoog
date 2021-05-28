@@ -225,7 +225,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
             modelType: values?.originType,
             ...values
           });
-        } else {
+        } else if (values?.originType === 'ClearCase') {
           await taskService.updateTask(modalRef.current.task_id, {
             ...values
           });
@@ -239,7 +239,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
              modelType: values?.originType,
            });
            task_id = taskId;
-        } else {
+        }  else if (values?.originType === 'ClearCase')  {
            const {message: otherTaskId} = await taskService.createTask({
              ...values,
            });
