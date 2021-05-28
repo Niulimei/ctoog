@@ -111,7 +111,9 @@ const OriginTypeOptions = ['ClearCase', 'ICDP(Gerrit)', '私服'];
 
 const ExType = ['svn'];
 
-const TranslateTypeOptions = ['项目组自己迁移', '工作组帮迁移'];
+const TranslateCCTypeOptions = ['项目组自己迁移', '工作组帮迁移'];
+
+const TranslateTypeOptions = ['项目组自己迁移'];
 
 const GroupOptions = [
   '北京事业群',
@@ -342,6 +344,9 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                 <ProFormSelect
                   name="pvob"
                   label="PVOB"
+                  fieldProps={{
+                    getPopupContainer: triggerNode => triggerNode.parentElement
+                  }}
                   placeholder="请选择 PVOB"
                   valueEnum={valueEnum.pvob}
                   rules={[{ required: true, message: '请选择 PVOB' }]}
@@ -350,6 +355,9 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                 <ProFormSelect
                   name="component"
                   label="组件"
+                   fieldProps={{
+                    getPopupContainer: triggerNode => triggerNode.parentElement
+                  }}
                   placeholder="请选择组件"
                   valueEnum={valueEnum.component}
                   rules={[{ required: true, message: '请选择组件' }]}
@@ -390,7 +398,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
               name="translateType"
               radioType="button"
               label="迁移方式"
-              options={TranslateTypeOptions}
+              options={form.getFieldValue('originType') === 'ClearCase' ? TranslateCCTypeOptions : TranslateTypeOptions}
               rules={[{ required: true, message: '请选择迁移方式' }]}
             />
             <ProFormText
@@ -402,12 +410,18 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
             <ProFormDatePicker
               name="plan_start_time"
               label="计划迁移日期"
+              fieldProps={{
+                getPopupContainer: triggerNode => triggerNode.parentElement
+              }}
               placeholder="请选择计划迁移日期"
               rules={[{ required: true, message: '请选择计划迁移日期' }]}
             />
             <ProFormDatePicker
               name="plan_switch_time"
               label="计划切换日期"
+               fieldProps={{
+                 getPopupContainer: triggerNode => triggerNode.parentElement
+               }}
               placeholder="请选择计划切换日期"
               rules={[
                 { required: true, message: '请选择计划切换日期' },
@@ -574,6 +588,9 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
             <ProFormSelect
               name="group"
               label="事业群"
+              fieldProps={{
+                getPopupContainer: triggerNode => triggerNode.parentElement
+              }}
               placeholder="请选择事业群"
               options={GroupOptions}
               rules={[{ required: true, message: '请选择 事业群' }]}
