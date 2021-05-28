@@ -5,7 +5,7 @@
 import { User } from '@/typings/model';
 
 export default function access(initialState: { currentUser?: User.Base | undefined }) {
-  const { currentUser, RouteList  } = initialState || {};
+  const { currentUser, RouteList = []  } = initialState || {};
   return {
     isLogin: currentUser,
     svnRoute: () => RouteList.includes('svnRoute'),

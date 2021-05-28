@@ -111,9 +111,9 @@ const TaskDetail = () => {
               启动任务
             </Button>
           ) : null,
-          <Button key="updateTask" onClick={actions.updateTask}>
-            修改任务
-          </Button>,
+          // <Button key="updateTask" onClick={actions.updateTask}>
+          //   修改任务
+          // </Button>,
           <Button key="clearCache" loading={isLoading} onClick={actions.clearCache}>
             删除缓存
           </Button>,

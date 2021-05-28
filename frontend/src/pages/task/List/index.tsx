@@ -72,30 +72,35 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
             <Button size="small" type="link" onClick={() => actions.gotoDetail(item.id)}>
               详情
             </Button>
-            <Dropdown
-              overlay={
-                <Menu>
-                  <Menu.Item>
-                    <Button size="small" type="link" onClick={() => actions.updateTask(item.id)}>
-                      修改任务
-                    </Button>
-                  </Menu.Item>
+            {/*<Dropdown*/}
+            {/*  overlay={*/}
+            {/*    <Menu>*/}
+            {/*      <Menu.Item>*/}
+            {/*        <Button size="small" type="link" onClick={() => actions.updateTask(item.id)}>*/}
+            {/*          修改任务*/}
+            {/*        </Button>*/}
+            {/*      </Menu.Item>*/}
 
-                  {item.status !== Task.Status.RUNNING && (
-                    <Menu.Item>
-                      <Button size="small" type="link" onClick={() => actions.startTask(item.id)}>
-                        启动任务
-                      </Button>
-                    </Menu.Item>
-                  )}
-                </Menu>
-              }
-            >
-              <Button size="small" type="link">
-                更多
-                <DownOutlined />
+            {/*      {item.status !== Task.Status.RUNNING && (*/}
+            {/*        <Menu.Item>*/}
+            {/*          <Button size="small" type="link" onClick={() => actions.startTask(item.id)}>*/}
+            {/*            启动任务*/}
+            {/*          </Button>*/}
+            {/*        </Menu.Item>*/}
+            {/*      )}*/}
+            {/*    </Menu>*/}
+            {/*  }*/}
+            {/*>*/}
+            {/*  <Button size="small" type="link">*/}
+            {/*    更多*/}
+            {/*    <DownOutlined />*/}
+            {/*  </Button>*/}
+            {/*</Dropdown>*/}
+            {item.status !== Task.Status.RUNNING && (
+              <Button size="small" type="link" onClick={() => actions.startTask(item.id)}>
+                启动任务
               </Button>
-            </Dropdown>
+            )}
           </>
         );
       },

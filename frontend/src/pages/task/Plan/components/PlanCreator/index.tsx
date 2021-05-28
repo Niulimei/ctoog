@@ -175,17 +175,24 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       if (mode === 'update' && id) {
         modalRef.current.planId = id;
         const fieldValues = await planServices.getPlanDetail(id);
+        const { taskModel: taskFieldValues } = await taskService.getTaskDetail(fieldValues?.task_id);
         modalRef.current.task_id = fieldValues?.task_id;
         if (fieldValues.originType === 'ClearCase') {
           clearCaseEnumDispatch('pvob', {});
           clearCaseEnumDispatch('component', { pvob: fieldValues.pvob });
           clearCaseEnumDispatch('stream', { component: fieldValues.component, pvob: fieldValues.pvob });
-          const { taskModel: taskFieldValues } = await taskService.getTaskDetail(fieldValues?.task_id);
           form.setFieldsValue({...fieldValues, ...taskFieldValues});
         } else {
-          form.setFieldsValue(fieldValues);
+          form.setFieldsValue({...fieldValues, gitignore:taskFieldValues?.gitignore });
         }
-        toggleVisible(true);
+
+        if (taskFieldValues?.status === 'running') {
+          toggleVisible(false);
+          message.error('任务正在执行不可进行修改');
+        } else {
+          toggleVisible(true);
+        }
+
       } else {
         toggleVisible(true);
       }
@@ -198,13 +205,36 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
     try {
       if (isUpdateMode) {
         await planServices.updatePlan(modalRef.current.planId, values);
-        await taskService.updateTask(modalRef.current.task_id, values);
+        if (values?.originType === 'svn') {
+          await taskService.updateTask(modalRef.current.task_id, {
+            svn_url: values?.originUrl,
+            modelType: values?.originType,
+            ...values
+          });
+        } else {
+          await taskService.updateTask(modalRef.current.task_id, {
+            ...values
+          });
+        }
       } else {
-        const {message: task_id} = await taskService.createTask(values);
+        let task_id = ''
+         if (values?.originType === 'svn') {
+           const {message: taskId} = await taskService.createTask({
+             ...values,
+             svn_url: values?.originUrl,
+             modelType: values?.originType,
+           });
+           task_id = taskId;
+        } else {
+           const {message: otherTaskId} = await taskService.createTask({
+             ...values,
+           });
+           task_id = otherTaskId;
+        }
         await planServices.createPlan({...values, task_id: Number(task_id)});
       }
       message.success(`迁移计划${actionText}成功`);
-      // onSuccess?.();
+      onSuccess?.();
       return true;
     } catch (err) {
       // message.error(`迁移任务${actionText}出现异常`);
@@ -244,6 +274,17 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
     setBranchFieldNum((num) => num + 1);
   };
 
+   const deleteBranch = (pos: number) => {
+    setBranchFieldNum((num) => num - 1);
+    const { matchInfo } = form.getFieldsValue(['matchInfo']);
+    if (Array.isArray(matchInfo)) {
+      matchInfo.splice(pos, 1);
+      form.setFieldsValue({
+        matchInfo,
+      });
+    }
+  };
+
      /** matchInfo 字段不重复 */
   const isDuplicateMatchInfoItem = (key: 'stream' | 'gitBranch', inputVal?: string) => {
     if (!inputVal || !inputVal.trim()) return false;
@@ -269,6 +310,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       onValuesChange={handleFormValuesChange}
       onVisibleChange={(vis) => toggleVisible(vis)}
     >
+      <div className={classnames(styles.container)}>
       <FormSection
         left={
           <>
@@ -481,7 +523,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
             >
               <Input
                 size="small"
-                style={{ width: 128, marginLeft: 12 }}
+                style={{ width: 128, marginLeft: 12, marginTop: 10 }}
                 placeholder="请输入占位文件名"
               />
             </Form.Item>
@@ -492,12 +534,14 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       <FormSection
         title="系统管理信息"
         left={
-          <ProFormText
-            name="subsystem"
-            label="物理子系统英文简称"
-            placeholder="请输入物理子系统英文简称"
-            rules={[{ required: true, message: '请输入物理子系统英文简称' }]}
-          />
+          <div className={classnames(styles.expecialField)}>
+            <ProFormText
+              name="subsystem"
+              label="物理子系统英文简称"
+              placeholder="请输入物理子系统英文简称"
+              rules={[{ required: true, message: '请输入物理子系统英文简称' }]}
+            />
+          </div>
         }
         right={
           <ProFormText
@@ -566,6 +610,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
           </>
         }
       />
+        </div>
     </ModalForm>
   );
 };

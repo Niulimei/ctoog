@@ -5,7 +5,7 @@ import classnames from 'classnames';
 import { guid } from '@/utils/utils';
 import type { FormInstance } from 'antd/es/form';
 import { task as taskService, svn as svnService } from '@/services';
-import { Button, message, Form, Modal, Checkbox, Input } from 'antd';
+import { Button, message, Form, Modal, Checkbox, Input, Empty } from 'antd';
 import { StepsForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 
 import styles from './style.less';
@@ -166,7 +166,12 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
           modalRef.current.taskId = id;
           const { taskModel: fieldValues } = await taskService.getTaskDetail(id);
           form.setFieldsValue(fieldValues);
-          toggleVisible(true);
+          if (fieldValues?.status === 'running') {
+            toggleVisible(false);
+            message.error('任务正在执行不可进行修改');
+          } else {
+            toggleVisible(true);
+          }
         } else {
           toggleVisible(true);
         }
@@ -414,6 +419,11 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             },
           ]),
         )}
+           {
+             svnList.length === 0 && (
+               <Empty />
+             )
+           }
            </div>
       </StepsForm.StepForm>
     </StepsForm>

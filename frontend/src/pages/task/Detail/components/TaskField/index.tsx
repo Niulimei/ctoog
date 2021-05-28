@@ -36,6 +36,8 @@ const descriptionsGenerator = (fieldKeys: string[], data: any) => {
     gitPassword: 'Git 密码',
     dir: '组件子目录',
     keep: '文件占位名',
+    gitignore: 'gitignore文件',
+    workerUrl: '执行机器'
   };
 
   // 序列化
@@ -87,6 +89,8 @@ const TaskDetail: React.FC<{ data?: Task.Detail['taskModel'] }> = ({ data }) => 
           'ccPassword',
           'gitPassword',
           'dir',
+          'gitignore',
+          'workerUrl'
         ],
         data,
       )}

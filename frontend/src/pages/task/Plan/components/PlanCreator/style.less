@@ -20,6 +20,23 @@
   max-height: calc(100vh - 200px);
 }
 
+.container {
+  :global {
+    .ant-form-item-label {
+      width: 120px;
+      overflow: hidden;
+    }
+  }
+
+  .expecialField {
+    :global {
+      .ant-form-item-label {
+        width: 150px;
+        overflow: hidden;
+      }
+    }
+  }
+}
 .gutter {
   padding-left: 24px;
   padding-bottom: 30px;
