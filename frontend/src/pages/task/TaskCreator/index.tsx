@@ -1,5 +1,6 @@
 import React from 'react';
 import { useMount } from 'react-use';
+import {toJS} from 'mobx';
 import { observer } from 'mobx-react';
 import { useToggle } from 'react-use';
 import classnames from 'classnames';
@@ -7,9 +8,9 @@ import { guid } from '@/utils/utils';
 import type { FormInstance } from 'antd/es/form';
 import { task as taskService } from '@/services';
 import { useClearCaseSelectEnum } from '@/utils/hooks';
-import { Button, message, Form, Checkbox, Input } from 'antd';
+import { Button, message, Form, Checkbox, Input, AutoComplete } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { ModalForm, ProFormSelect as FormSelect, ProFormText } from '@ant-design/pro-form';
+import { ModalForm, ProFormSelect as FormSelect, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 
 import styles from './style.less';
 
@@ -143,6 +144,19 @@ const formFieldsGenerator = (fields: any) => {
     );
   });
 };
+
+const FieldAutoComplete = props => {
+  const streamObj = toJS(props.options);
+  let arr = Object.keys(streamObj).map(item => {
+    return {label: item, value: item}
+  });
+
+  return (
+     <Form.Item {...props}>
+       <AutoComplete options={arr || []} />
+     </Form.Item>
+  )
+}
 
 const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   const { onSuccess, actionRef } = props;
@@ -347,9 +361,10 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
           Array.from(Array(branchFieldNum), (_, index) => [
             {
               name: ['matchInfo', index, 'stream'],
-              component: ProFormSelect,
+              component: FieldAutoComplete,
               placeholder: '请选择开发流',
               valueEnum: valueEnum.stream,
+              options: valueEnum.stream,
               showSearch: true,
               required: true,
               rules: [
@@ -393,6 +408,12 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             </>,
           ]),
         )}
+        <div className={classnames(styles.ignore)}>
+          <ProFormTextArea
+            name="gitignore"
+            placeholder="请输入 gitignore信息"
+          />
+        </div>
         <div className={classnames(styles.col, styles.keep)}>
           <span>
             <Form.Item valuePropName="checked" noStyle name="includeEmpty">

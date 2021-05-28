@@ -1,10 +1,10 @@
 import React from 'react';
 import { Task } from '@/typings/model';
-import TaskCreator from '../TaskCreator';
+import TaskCreator from '../SvnTaskCreator';
 import { useLocation, useHistory } from 'umi';
-import TaskField from './components/TaskField';
+import TaskField from './components/TaskField/svnTaskField';
 import TaskLogger from './components/TaskLogger';
-import { task as taskService } from '@/services';
+import { task as taskService, svn as svnService } from '@/services';
 import { Empty, Button, Modal, message } from 'antd';
 import TaskLogTable from './components/TaskLogTable';
 import { PageContainer } from '@ant-design/pro-layout';
@@ -81,7 +81,7 @@ const TaskDetail = () => {
     },
   };
   React.useEffect(() => {
-    taskService.getTaskDetail(taskId).then((data) => {
+    taskService.getTaskDetail(taskId, 'svn').then((data) => {
       if (taskId) {
         if (!data.taskModel.ccUser) {
           Modal.warn({
@@ -111,9 +111,9 @@ const TaskDetail = () => {
               启动任务
             </Button>
           ) : null,
-          // <Button key="updateTask" onClick={actions.updateTask}>
-          //   修改任务
-          // </Button>,
+          <Button key="updateTask" onClick={actions.updateTask}>
+            修改任务
+          </Button>,
           <Button key="clearCache" loading={isLoading} onClick={actions.clearCache}>
             删除缓存
           </Button>,

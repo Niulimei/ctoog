@@ -8,8 +8,10 @@ export const getTasks = (params: API.PaginationRequestParams) => {
 };
 
 /** 获取任务详情 */
-export const getTaskDetail = (id: string) => {
-  return request.get(`/tasks/${id}`);
+export const getTaskDetail = (id: string, modelType: string) => {
+  return request.get(`/tasks/${id}`, {
+    modelType
+  });
 };
 
 /** 创建迁移任务 */

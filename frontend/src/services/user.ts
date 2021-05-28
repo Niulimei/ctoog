@@ -36,3 +36,10 @@ export const registerUser = (userRegisterInfo: any)=>{
     data: userRegisterInfo
   })
 }
+
+/** 获取路由以及按钮权限 */
+export const getPermission = (userRegisterInfo: any)=>{
+  return request.get('/frontend_configs', {
+    data: userRegisterInfo
+  })
+}

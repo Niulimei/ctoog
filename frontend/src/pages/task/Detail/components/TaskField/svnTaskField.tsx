@@ -3,6 +3,8 @@ import classnames from 'classnames';
 import { guid } from '@/utils/utils';
 import { useToggle } from 'react-use';
 import type { Task } from '@/typings/model';
+import ProTable from '@ant-design/pro-table';
+import type { ProColumns } from '@ant-design/pro-table';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 import styles from './style.less';
@@ -22,14 +24,21 @@ const PrivacyPassword: React.FC<{ value: string }> = ({ value }) => {
   );
 };
 
+export type Member = {
+  avatar: string;
+  realName: string;
+  nickName: string;
+  email: string;
+  outUserNo: string;
+  phone: string;
+  role: RoleType;
+  permission?: string[];
+};
+
 const descriptionsGenerator = (fieldKeys: string[], data: any) => {
   const labels: Record<string, string> = {
-    pvob: 'PVOB',
-    component: 'Component',
-    ccUser: 'CC 用户名',
-    gitBranch: 'Git分支',
-    ccPassword: 'CC 密码',
-    stream: 'CC 开发流',
+    ccUser: 'SVN 用户名',
+    ccPassword: 'SVN 密码',
     gitURL: 'Git Repo URL',
     gitUser: 'Git 用户名',
     gitEmail: 'Git Email',
@@ -74,15 +83,35 @@ const descriptionsGenerator = (fieldKeys: string[], data: any) => {
   });
 };
 
+const columns: ProColumns<Member>[] = [
+    {
+      dataIndex: 'svnUserName',
+      title: 'svn 用户名',
+      valueType: 'text',
+      ellipsis: true,
+      colSize: 8
+    },
+    {
+      dataIndex: 'gitUserName',
+      title: 'git 用户名',
+      valueType: 'text',
+      colSize: 8
+    },
+    {
+      dataIndex: 'gitEmail',
+      title: 'git 邮箱',
+      valueType: 'text',
+      colSize: 8
+    }
+]
+
 const TaskDetail: React.FC<{ data?: Task.Detail['taskModel'] }> = ({ data }) => {
   if (!data) return null;
   return (
     <div className={styles.gutter}>
       {descriptionsGenerator(
         [
-          'pvob',
           'gitURL',
-          'component',
           'gitEmail',
           'ccUser',
           'gitUser',
@@ -98,6 +127,15 @@ const TaskDetail: React.FC<{ data?: Task.Detail['taskModel'] }> = ({ data }) => 
       {data.matchInfo?.map((matchInfo) =>
         descriptionsGenerator(['stream', 'gitBranch'], matchInfo),
       )}
+      <div className={styles.table}>
+        <ProTable<Member>
+          columns={columns}
+          dataSource={data?.namePair}
+          pagination={false}
+          toolBarRender={false}
+          search={false}
+        />
+      </div>
       <div className={styles.col}>
         <span className={styles.row}>
           <span>是否保留空目录：{data.includeEmpty ? '是' : '否'}</span>
