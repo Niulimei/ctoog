@@ -256,7 +256,7 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 		worker := &database.WorkerModel{}
 		err := database.DB.Get(worker, "SELECT worker_url FROM worker WHERE id = ?", task.WorkerId)
 		if err == nil {
-			task.WorkerURL.String = worker.WorkerUrl
+			task.WorkerURL.Scan(worker.WorkerUrl)
 		}
 	}
 	var logList []*models.TaskLogInfo
