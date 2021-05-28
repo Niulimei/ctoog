@@ -205,6 +205,7 @@ func DeletePlanHandler(params operations.DeletePlanParams) middleware.Responder 
 func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder {
 	planId := params.ID
 	planParams := params.PlanInfo
+	originType := strings.ToLower(params.PlanInfo.OriginType)
 	var plan database.PlanModel
 	err := database.DB.Get(&plan, "SELECT * FROM plan WHERE id = $1", planId)
 	if err != nil || plan.ID == 0 {
@@ -243,7 +244,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 			var err error
 			if plan.TaskID == 0 {
 				modelType := "clearcase"
-				if plan.OriginType == "svn" {
+				if originType == "svn" {
 					modelType = "svn"
 				}
 				r, err := tx.Exec("INSERT OR REPLACE INTO task (pvob, component, git_url,"+

@@ -127,7 +127,7 @@ type TaskModel struct {
 	GitUser JsonNullString `json:"gitUser,omitempty" db:"git_user"`
 
 	// gitignore
-	Gitignore string `json:"gitignore,omitempty"`
+	Gitignore JsonNullString `json:"gitignore,omitempty"`
 
 	// include empty
 	IncludeEmpty JsonNullBool `json:"includeEmpty,omitempty" db:"include_empty"`
@@ -147,8 +147,17 @@ type TaskModel struct {
 	// pvob
 	Pvob JsonNullString `json:"pvob,omitempty"`
 
+	// status
+	Status JsonNullString `json:"status,omitempty"`
+
 	// svn Url
 	SvnURL JsonNullString `json:"svn_url,omitempty" db:"svn_url"`
+
+	// worker Url
+	WorkerURL JsonNullString `json:"workerUrl,omitempty"`
+
+	// worker id
+	WorkerId JsonNullInt64 `json:"workerId,omitempty" db:"worker_id"`
 }
 
 // Validate validates this task model

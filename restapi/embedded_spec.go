@@ -1893,7 +1893,13 @@ func init() {
         "pvob": {
           "type": "string"
         },
+        "status": {
+          "type": "string"
+        },
         "svnUrl": {
+          "type": "string"
+        },
+        "workerUrl": {
           "type": "string"
         }
       }
@@ -3935,7 +3941,13 @@ func init() {
         "pvob": {
           "type": "string"
         },
+        "status": {
+          "type": "string"
+        },
         "svnUrl": {
+          "type": "string"
+        },
+        "workerUrl": {
           "type": "string"
         }
       }

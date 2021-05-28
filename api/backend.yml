@@ -1184,9 +1184,11 @@ definitions:
           $ref: '#/definitions/TaskMatchInfo'
       includeEmpty:
         type: boolean
-      svnUrl:
+      svn_url:
         type: string
       modelType:
+        type: string
+      status:
         type: string
       gitignore:
         type: string
@@ -1194,6 +1196,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/NamePairInfo'
+      workerUrl:
+        type: string
   TaskRestart:
     type: object
     properties:

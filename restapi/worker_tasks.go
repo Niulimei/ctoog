@@ -81,7 +81,7 @@ func sendCommandOut(server string, cmd *exec.Cmd, task *Task, tmpCmdOutFile stri
 
 	//s := bufio.NewScanner(io.MultiReader(stdout, stderr))
 	tk := time.NewTicker(time.Second * 1)
-	var tmp []string
+	var logContent []string
 	go func(in *[]string) {
 		for {
 			select {
@@ -92,8 +92,8 @@ func sendCommandOut(server string, cmd *exec.Cmd, task *Task, tmpCmdOutFile stri
 				return
 			}
 		}
-	}(&tmp)
-	go readCommandOut(tmpCmdOutFile, &tmp)
+	}(&logContent)
+	go readCommandOut(tmpCmdOutFile, &logContent)
 	//for s.Scan() {
 	//	tmp = append(tmp, s.Text())
 	//	//tmp = append(tmp, utils.Iconv(s.Text(), "gbk", "utf8"))
@@ -101,10 +101,22 @@ func sendCommandOut(server string, cmd *exec.Cmd, task *Task, tmpCmdOutFile stri
 
 	err := cmd.Wait()
 	log.Errorln(err)
-
-	time.Sleep(time.Second * 2)
-	stop <- struct{}{}
-	os.RemoveAll(tmpCmdOutFile)
+	go func() {
+		var count, lastTimeLen int
+		lastTimeLen = len(logContent)
+		for {
+			if len(logContent) == lastTimeLen {
+				count++
+				if count >= 3 {
+					break
+				}
+			}
+			lastTimeLen = len(logContent)
+			time.Sleep(time.Second)
+		}
+		stop <- struct{}{}
+		os.RemoveAll(tmpCmdOutFile)
+	}()
 	return err
 }
 
@@ -303,7 +315,7 @@ func readCommandOut(fileName string, container *[]string) {
 		}
 	}()
 	reader := bufio.NewReader(file)
-	var tick = time.NewTicker(100 * time.Millisecond)
+	var tick = time.NewTicker(300 * time.Millisecond)
 	func() {
 		for {
 			select {
