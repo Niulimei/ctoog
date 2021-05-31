@@ -260,7 +260,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 					})
 				}
 			} else {
-				tx.Exec("UPDATE task SET pvob = $1, component = $2, git_url = $3, status = 'init', "+
+				tx.Exec("UPDATE task SET pvob = $1, component = $2, git_url = $3, "+
 					"last_completed_date_time = '', creator = $4, dir = $5, worker_id = 0 WHERE id = $6", plan.Pvob, plan.Component,
 					plan.TargetURL, username, plan.Dir, plan.TaskID)
 			}
