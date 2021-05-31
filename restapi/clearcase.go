@@ -5,6 +5,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	log "github.com/sirupsen/logrus"
 	"os/exec"
+	"sort"
 	"strings"
 	"time"
 )
@@ -52,6 +53,17 @@ func GetAllPvob() {
 	return
 }
 
+func RemoveDuplicatesAndEmpty(a []string) (ret []string){
+	aLen := len(a)
+	for i:=0; i < aLen; i++{
+		if (i > 0 && a[i-1] == a[i]) || len(a[i])==0{
+			continue
+		}
+		ret = append(ret, a[i])
+	}
+	return
+}
+
 func GetAllComponent(pvob string) []string {
 	components := make([]string, 0, 10)
 	args := `lscomp -fmt "%[root_dir]p\n" -invob ` + pvob
@@ -78,6 +90,8 @@ func GetAllComponent(pvob string) []string {
 			parseComponents = append(parseComponents, "/"+tmp[1]+"/"+tmp[2])
 		}
 	}
+	sort.Strings(parseComponents)
+	parseComponents = RemoveDuplicatesAndEmpty(parseComponents)
 	return parseComponents
 }
 

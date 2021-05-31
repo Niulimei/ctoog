@@ -24,7 +24,7 @@ func (v JsonNullInt64) MarshalJSON() ([]byte, error) {
 	if v.Valid {
 		return json.Marshal(v.Int64)
 	} else {
-		return json.Marshal(nil)
+		return json.Marshal(0)
 	}
 }
 
@@ -51,7 +51,7 @@ func (v JsonNullString) MarshalJSON() ([]byte, error) {
 	if v.Valid {
 		return json.Marshal(v.String)
 	} else {
-		return json.Marshal(nil)
+		return json.Marshal("")
 	}
 }
 
@@ -78,7 +78,7 @@ func (v JsonNullBool) MarshalJSON() ([]byte, error) {
 	if v.Valid {
 		return json.Marshal(v.Bool)
 	} else {
-		return json.Marshal(nil)
+		return json.Marshal(false)
 	}
 }
 
