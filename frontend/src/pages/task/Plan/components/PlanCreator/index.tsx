@@ -346,7 +346,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       onFinish={handleFinish}
       initialValues={InitialValues}
       title={`${actionText}迁移计划`}
-      modalProps={{ okText: actionText, bodyStyle: {maxHeight: 'calc(100vh - 300px)', overflow: "scroll"} }}
+      modalProps={{ okText: actionText, bodyStyle: {maxHeight: 'calc(100vh - 200px)', overflow: "scroll"}, style: {top: 50} }}
       onValuesChange={handleFormValuesChange}
       onVisibleChange={(vis) => toggleVisible(vis)}
     >
