@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   ModalForm,
   ProFormText,
@@ -49,10 +49,30 @@ const FieldAutoComplete = props => {
   let arr = Object.keys(streamObj).map(item => {
     return {label: item, value: item}
   });
+  const [streamOptions, setStreamOptions] = useState([]);
+
+  const onSearch = useCallback(value => {
+    if (value) {
+      setStreamOptions([{label: value, value}]);
+      arr.map(item => {
+        if (item.value === value) {
+          setStreamOptions([]);
+        }
+      })
+    } else {
+      setStreamOptions([]);
+    }
+
+  }, [setStreamOptions]);
 
   return (
      <Form.Item {...props}>
-       <AutoComplete options={arr || []} />
+       <AutoComplete
+         options={streamOptions.concat(arr) || []}
+         filterOption={true}
+         onSearch={onSearch}
+         getPopupContainer={triggerNode => triggerNode.parentElement}
+       />
      </Form.Item>
   )
 }
@@ -225,10 +245,12 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
           await taskService.updateTask(modalRef.current.task_id, {
             svn_url: values?.originUrl,
             modelType: values?.originType,
+            gitURL: values?.targetUrl,
             ...values
           });
         } else if (values?.originType === 'ClearCase') {
           await taskService.updateTask(modalRef.current.task_id, {
+            gitURL: values?.targetUrl,
             ...values
           });
         }
@@ -237,12 +259,14 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
          if (values?.originType === 'svn') {
            const {message: taskId} = await taskService.createTask({
              ...values,
+             gitURL: values?.targetUrl,
              svn_url: values?.originUrl,
              modelType: values?.originType,
            });
            task_id = taskId;
         }  else if (values?.originType === 'ClearCase')  {
            const {message: otherTaskId} = await taskService.createTask({
+             gitURL: values?.targetUrl,
              ...values,
            });
            task_id = otherTaskId;
