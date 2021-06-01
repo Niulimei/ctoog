@@ -79,7 +79,7 @@ func main() {
 		}
 	}
 	logFile := "log/translator-worker.log"
-	os.MkdirAll(filepath.Dir(logFile), 0640)
+	os.MkdirAll(filepath.Dir(logFile), 0666)
 	cntxt := &daemon.Context{
 		PidFileName: "translator-worker.pid",
 		PidFilePerm: 0644,
