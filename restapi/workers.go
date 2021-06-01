@@ -42,7 +42,7 @@ func PingWorkerHandler(params operations.PingWorkerParams) middleware.Responder 
 	host := params.WorkerInfo.Host
 	port := params.WorkerInfo.Port
 	url := host + ":" + strconv.FormatInt(port, 10)
-	log.Println("worker url", url)
+	log.Debugf("worker url", url)
 	worker := &database.WorkerModel{}
 	err := database.DB.Get(worker, "SELECT * FROM worker WHERE worker_url = $1", url)
 	now := time.Now().Format("2006-01-02 15:04:05")
