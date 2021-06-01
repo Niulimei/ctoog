@@ -152,7 +152,7 @@ func doSend(req *http.Request) {
 			return
 		}
 	}
-	log.Info("info server success")
+	log.Debug("info server success")
 	resp.Body.Close()
 }
 
@@ -326,7 +326,9 @@ func readCommandOut(fileName string, container *[]string) {
 						return
 					}
 				}
-				*container = append(*container, line)
+				if line != "" {
+					*container = append(*container, line)
+				}
 			case <-stopRead:
 				return
 			}
