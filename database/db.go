@@ -142,7 +142,7 @@ func init() {
 			startTime := time.Now().Format("2006.01.02-15:04:05")
 			cmd := exec.Command("cp", "translator.db", "backup/translator-"+startTime+".back")
 			cmd.Run()
-			time.Sleep(time.Minute * 10)
+			time.Sleep(time.Hour * 24)
 		}
 	}()
 	go func() {
