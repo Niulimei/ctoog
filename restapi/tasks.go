@@ -188,6 +188,18 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		if len(taskInfo.Dir.String) > 0 && !strings.HasPrefix(taskInfo.Dir.String, "/") {
 			taskInfo.Dir.String = "/" + taskInfo.Dir.String
 		}
+		if !taskInfo.IncludeEmpty.Valid {
+			taskInfo.IncludeEmpty.Scan(false)
+		}
+		if !taskInfo.Keep.Valid {
+			taskInfo.Keep.Scan("")
+		}
+		if !taskInfo.Dir.Valid {
+			taskInfo.Dir.Scan("")
+		}
+		if !taskInfo.Gitignore.Valid {
+			taskInfo.Gitignore.Scan("")
+		}
 		r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
 			"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id, model_type, gitignore)"+
 			" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase', $14)",
@@ -296,13 +308,13 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 		if user.RoleID == int64(AdminRole) {
 			query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
 				" status, include_empty, git_email, dir, keep" +
-				" FROM task WHERE model_type = 'clearcase' ORDER BY id LIMIT $1 OFFSET $2;"
+				" FROM task WHERE model_type = 'clearcase' ORDER BY id DESC LIMIT $1 OFFSET $2;"
 			queryCount = "SELECT count(id) FROM task WHERE model_type = 'clearcase';"
 			err = database.DB.Select(&tasks, query, params.Limit, params.Offset)
 		} else {
 			query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
 				" status, include_empty, git_email, dir, keep" +
-				" FROM task WHERE creator = $1 and model_type = 'clearcase' ORDER BY id LIMIT $2 OFFSET $3;"
+				" FROM task WHERE creator = $1 and model_type = 'clearcase' ORDER BY id DESC LIMIT $2 OFFSET $3;"
 			queryCount = "SELECT count(id) FROM task WHERE creator = $1 and model_type = 'clearcase';"
 			err = database.DB.Select(&tasks, query, username, params.Limit, params.Offset)
 		}
@@ -310,13 +322,13 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 		if user.RoleID == int64(AdminRole) {
 			query = "SELECT git_url, id, last_completed_date_time," +
 				" status, include_empty, git_email, keep, svn_url" +
-				" FROM task WHERE model_type = 'svn' ORDER BY id LIMIT $1 OFFSET $2;"
+				" FROM task WHERE model_type = 'svn' ORDER BY id DESC LIMIT $1 OFFSET $2;"
 			queryCount = "SELECT count(id) FROM task WHERE model_type = 'svn';"
 			err = database.DB.Select(&tasks, query, params.Limit, params.Offset)
 		} else {
 			query = "SELECT git_url, id, last_completed_date_time," +
 				" status, include_empty, git_email, keep, svn_url" +
-				" FROM task WHERE creator = $1 and model_type = 'svn' ORDER BY id LIMIT $2 OFFSET $3;"
+				" FROM task WHERE creator = $1 and model_type = 'svn' ORDER BY id DESC LIMIT $2 OFFSET $3;"
 			queryCount = "SELECT count(id) FROM task WHERE creator = $1 and model_type = 'svn';"
 			err = database.DB.Select(&tasks, query, username, params.Limit, params.Offset)
 		}
