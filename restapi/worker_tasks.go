@@ -45,7 +45,7 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd, tmpCmd
 		log.Error(err)
 		return
 	}
-	log.Printf("playlod: %+v\n", data)
+	log.Debugf("playlod: %+v\n", data)
 	body := bytes.NewReader(payloadBytes)
 
 	req, err := http.NewRequest("PUT",
@@ -75,7 +75,7 @@ func sendCommandOut(server string, cmd *exec.Cmd, task *Task, tmpCmdOutFile stri
 	//}
 
 	if err := cmd.Start(); err != nil {
-		log.Println(err)
+		log.Errorln(err)
 		return err
 	}
 
@@ -125,7 +125,7 @@ func sender(server string, data *commandOut) {
 	if err != nil {
 		log.Error(err)
 	}
-	log.Printf("playlod: %+v\n", data)
+	log.Debugf("playlod: %+v\n", data)
 	body := bytes.NewReader(payloadBytes)
 
 	req, err := http.NewRequest("POST",
