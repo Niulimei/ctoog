@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -84,10 +85,12 @@ func main() {
 			return
 		}
 	}
+	logFile := "log/translator-server.log"
+	os.MkdirAll(filepath.Dir(logFile), 0640)
 	cntxt := &daemon.Context{
 		PidFileName: "translator-server.pid",
 		PidFilePerm: 0644,
-		LogFileName: "translator-server.log",
+		LogFileName: logFile,
 		LogFilePerm: 0640,
 		WorkDir:     "./",
 		Umask:       027,
@@ -112,6 +115,7 @@ func main() {
 	tmp := &conf{}
 	content, _ := ioutil.ReadFile("./translator-server.yaml")
 	yaml.Unmarshal(content, tmp)
+	go restapi.DumpLogFile(logFile)
 	swaggerSpec, err := loads.Embedded(restapi.SwaggerJSON, restapi.FlatSwaggerJSON)
 	if err != nil {
 		log.Fatalln(err)

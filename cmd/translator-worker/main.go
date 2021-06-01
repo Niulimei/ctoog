@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -77,10 +78,12 @@ func main() {
 			return
 		}
 	}
+	logFile := "log/translator-worker.log"
+	os.MkdirAll(filepath.Dir(logFile), 0640)
 	cntxt := &daemon.Context{
 		PidFileName: "translator-worker.pid",
 		PidFilePerm: 0644,
-		LogFileName: "translator-worker.log",
+		LogFileName: logFile,
 		LogFilePerm: 0640,
 		WorkDir:     "./",
 		Umask:       027,
@@ -103,6 +106,7 @@ func main() {
 	content, _ := ioutil.ReadFile("./translator-worker.yaml")
 	yaml.Unmarshal(content, tmp)
 	restapi.ServerFlag = tmp.ServerAddr
+	go restapi.DumpLogFile(logFile)
 	go restapi.PingServer(tmp.Host, tmp.Port)
 	http.HandleFunc("/new_task", restapi.WorkerTaskHandler) //	设置访问路由
 	http.HandleFunc("/delete_task", restapi.DeleteWorkerTaskCacheHandler)
