@@ -28,3 +28,8 @@ export const updatePlan = (id: string, data: any) => {
 export const deletePlan = (id: string) => {
   return request.delete(`/plans/${id}`);
 };
+
+/** 批量导入计划 */
+export const importPlan = data => {
+  return request.post(`/import/plan`, data);
+};

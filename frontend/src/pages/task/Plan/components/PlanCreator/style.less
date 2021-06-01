@@ -103,3 +103,16 @@
     margin-right: 8px;
   }
 }
+
+.formContainer {
+  @media screen and (min-width: 1400px) {
+    :global {
+      .ant-modal {
+        top: 50px !important;
+      }
+      .ant-modal-body {
+        max-height: calc(100vh - 200px) !important;
+      }
+    }
+}
+}

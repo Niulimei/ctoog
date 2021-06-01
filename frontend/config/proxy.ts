@@ -12,5 +12,10 @@ export default {
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
+    '/import/': {
+      target: 'http://192.168.81.38:8993',
+      changeOrigin: true,
+      pathRewrite: { '^': '' },
+    },
   },
 };
