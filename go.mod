@@ -8,7 +8,6 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/go-openapi/analysis v0.20.1 // indirect
 	github.com/go-openapi/errors v0.20.0
 	github.com/go-openapi/loads v0.20.2
@@ -17,7 +16,6 @@ require (
 	github.com/go-openapi/strfmt v0.20.1
 	github.com/go-openapi/swag v0.19.15
 	github.com/go-openapi/validate v0.20.2
-	github.com/go-swagger/go-swagger v0.27.0 // indirect
 	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/jinzhu/copier v0.3.0
@@ -25,12 +23,10 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7
-	github.com/pelletier/go-toml v1.9.1 // indirect
 	github.com/sevlyar/go-daemon v0.1.5
 	github.com/sirupsen/logrus v1.6.0
 	go.mongodb.org/mongo-driver v1.5.2 // indirect
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
 	golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea // indirect
-	golang.org/x/tools v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )

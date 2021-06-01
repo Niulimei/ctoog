@@ -54,3 +54,4 @@ release.tar.gz
 translator-*.*
 
 /backup
+/log

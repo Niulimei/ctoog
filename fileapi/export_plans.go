@@ -3,13 +3,14 @@ package fileapi
 import (
 	"bytes"
 	"ctgb/database"
-	"github.com/360EntSecGroup-Skylar/excelize/v2"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/360EntSecGroup-Skylar/excelize/v2"
+	log "github.com/sirupsen/logrus"
 )
 
 func WritePlansIntoExcel(plans []*database.PlanModel, dest string) (*bytes.Buffer, error) {
@@ -84,7 +85,7 @@ func PlansExportHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	} else {
-		log.Println("Send File:", des)
+		log.Debug("Send File:", des)
 		w.Header().Add("Content-Disposition", "attachment")
 		//w.Header().Add("Content-Type", "application/vnd.ms-excel")
 		w.Header().Add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

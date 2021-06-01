@@ -1,11 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useHistory } from 'umi';
 import type { Plan } from '@/typings/model';
 import ProTable from '@ant-design/pro-table';
 import { DownOutlined, SmileOutlined } from '@ant-design/icons';
 import { plan as planServices } from '@/services';
 import PlanCreator from './components/PlanCreator';
-import { Button, Menu, Dropdown, message, notification } from 'antd';
+import { Button, Menu, Dropdown, message, notification, Upload } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
 import PlanStatusSwitcher from './components/PlanStatusSwitcher';
 
@@ -13,6 +13,23 @@ type Actions = Record<
   'updatePlan' | 'deletePlan' | 'execTask' | 'execSvnTask' | 'toggleStatus' | 'gotoTaskDetail' | 'gotoSvnTaskDetail',
   (payload: Plan.Item) => void
 >;
+
+const GroupOptions = [
+  '北京事业群',
+  '厦门事业群',
+  '成都事业群',
+  '深圳事业群',
+  '上海事业群',
+  '广州事业群',
+  '广研事业群',
+  '武汉事业群',
+  '基础技术中心',
+  '实施管理中心',
+  '大数据中心',
+  '产品经营中心',
+  '智能云事业部',
+  '交付事业部',
+];
 
 const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
   const handleMenuClick = (item: any, key: any) => {
@@ -42,6 +59,7 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       title: '迁移状态',
       dataIndex: 'status',
       ellipsis: true,
+      hideInSearch: true,
     },
     {
       title: '源仓库信息',
@@ -57,13 +75,14 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       title: '事业群',
       dataIndex: 'group',
       ellipsis: true,
-      hideInSearch: true,
+      hideInSearch: false,
+      valueEnum: GroupOptions,
     },
     {
       title: '项目组',
       dataIndex: 'team',
       ellipsis: true,
-      hideInSearch: true,
+      hideInSearch: false,
     },
     {
       title: '计划迁移时间',
@@ -95,6 +114,14 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       ellipsis: true,
       hideInSearch: true,
       width: 80,
+    },
+    {
+      title: '对接人姓名',
+      dataIndex: 'supporter',
+      ellipsis: true,
+      hideInSearch: false,
+      width: 80,
+      hideInTable: true
     },
     {
       title: '操作',
@@ -151,10 +178,29 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
 };
 
 const PlanList: React.FC = () => {
+  const [importLoading, setImportLoading] = useState<boolean>(false);
   const tableRef = React.useRef<any>();
   const planCreatorRef = React.useRef<any>();
   const planStatusSwitcherRef = React.useRef<any>();
   const history = useHistory();
+
+  const beforeonChange = (props) => {
+    const {file = {}} = props;
+    let status = file?.status;
+    setImportLoading(true);
+    if (status === "uploading") {
+      setImportLoading(true);
+    } else if (status === 'done') {
+      message.success('上传成功!');
+      tableRef?.current?.reload();
+      setImportLoading(false);
+    } else if (status === 'error') {
+      message.error('上传失败!');
+      setImportLoading(false);
+    } else {
+      setImportLoading(false);
+    }
+  };
 
   const actions: Actions = {
     updatePlan({ id }) {
@@ -206,32 +252,44 @@ const PlanList: React.FC = () => {
         rowKey="id"
         scroll={{ x: 1500 }}
         actionRef={tableRef}
-        request={async ({ pageSize = 10, current }) => {
+        request={async ({ pageSize = 10, current, group: groupIndex, team, supporter}) => {
+          const group = GroupOptions[groupIndex];
           const { planInfo, count } = await planServices.getPlans({
             offset: (current! - 1 || 0) * pageSize,
             limit: pageSize || 10,
+            team,
+            supporter,
+            group
           });
-
           return {
             data: planInfo,
             success: true,
             total: count,
+            team,
+            supporter,
+            group,
           };
         }}
         columns={getColumns(actions)}
-        search={false}
+        search={{
+          defaultCollapsed: false,
+          span: 6
+        }}
         toolBarRender={() => [
-          <Button size="small"
-            type="primary"
-            onClick={() => {
-              notification.open({
-                message: `友情提示`,
-                description,
-                icon: <SmileOutlined style={{ color: '#108ee9' }} />,
-              });
-            }}
-          >批量计划导入
-          </Button>,
+          <Upload
+            action="/import/plan"
+            name="uploadFile"
+            withCredentials={true}
+            showUploadList={false}
+            onChange={beforeonChange}
+          >
+            <Button
+              size="small"
+              type="primary"
+              loading={importLoading}
+            >批量计划导入
+            </Button>
+          </Upload>,
           <Button
             size="small"
             type="primary"
