@@ -342,11 +342,15 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       form={form}
       width="1000px"
       visible={visible}
+      className={classnames(styles.formContainer)}
       layout="horizontal"
       onFinish={handleFinish}
       initialValues={InitialValues}
       title={`${actionText}迁移计划`}
-      modalProps={{ okText: actionText, bodyStyle: {maxHeight: 'calc(100vh - 200px)', overflow: "scroll"}, style: {top: 50} }}
+      modalProps={{
+        okText: actionText,
+        bodyStyle: {maxHeight: 'calc(100vh - 108px)', overflowY: "scroll", overflowX: "hidden"}, style: {top: 0}
+      }}
       onValuesChange={handleFormValuesChange}
       onVisibleChange={(vis) => toggleVisible(vis)}
     >
