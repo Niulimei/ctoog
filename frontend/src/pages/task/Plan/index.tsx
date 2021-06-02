@@ -196,7 +196,13 @@ const PlanList: React.FC = () => {
       tableRef?.current?.reload();
       setImportLoading(false);
     } else if (status === 'error') {
-      message.error('上传失败!');
+      const status = file?.error?.status;
+      const errorMsg = file?.response;
+      if (status === 400 || status === 500) {
+        message.error(errorMsg || '上传失败!');
+      } else {
+        message.error('上传失败!');
+      }
       setImportLoading(false);
     } else {
       setImportLoading(false);
