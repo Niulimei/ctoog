@@ -216,6 +216,8 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
           const {taskModel: taskFields} = await taskService.getTaskDetail(fieldValues?.task_id);
           taskModels = taskFields;
           modalRef.current.task_id = fieldValues?.task_id;
+        } else {
+          modalRef.current.task_id = null;
         }
         if (fieldValues.originType === 'ClearCase') {
           clearCaseEnumDispatch('pvob', {});
