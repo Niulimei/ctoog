@@ -241,7 +241,6 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 			username := params.HTTPRequest.Header.Get("username")
 			tx.Exec("UPDATE plan SET status = $1 WHERE id = $2",
 				planParams.Status, planId)
-			var err error
 			if plan.TaskID == 0 {
 				modelType := "clearcase"
 				if originType == "svn" {

@@ -6,6 +6,7 @@ import (
 )
 
 var configs = []string{"svnRoute"}
+
 //var configs = []string{"svnRoute"}
 
 func GetFrontendConfig(params operations.GetFrontConfigParams) middleware.Responder {
