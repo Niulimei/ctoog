@@ -211,18 +211,24 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       if (mode === 'update' && id) {
         modalRef.current.planId = id;
         const fieldValues = await planServices.getPlanDetail(id);
-        const { taskModel: taskFieldValues } = await taskService.getTaskDetail(fieldValues?.task_id);
-        modalRef.current.task_id = fieldValues?.task_id;
+        let taskModels = {};
+        if (fieldValues?.task_id) {
+          const {taskModel: taskFields} = await taskService.getTaskDetail(fieldValues?.task_id);
+          taskModels = taskFields;
+          modalRef.current.task_id = fieldValues?.task_id;
+        } else {
+          modalRef.current.task_id = null;
+        }
         if (fieldValues.originType === 'ClearCase') {
           clearCaseEnumDispatch('pvob', {});
           clearCaseEnumDispatch('component', { pvob: fieldValues.pvob });
           clearCaseEnumDispatch('stream', { component: fieldValues.component, pvob: fieldValues.pvob });
-          form.setFieldsValue({...fieldValues, ...taskFieldValues});
+          form.setFieldsValue({...fieldValues, ...taskModels});
         } else {
-          form.setFieldsValue({...fieldValues, gitignore:taskFieldValues?.gitignore });
+          form.setFieldsValue({...fieldValues, gitignore:taskModels?.gitignore });
         }
 
-        if (taskFieldValues?.status === 'running') {
+        if (taskModels?.status === 'running') {
           toggleVisible(false);
           message.error('任务正在执行不可进行修改');
         } else {
@@ -240,8 +246,8 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
   const handleFinish = async (values: Plan.Base) => {
     try {
       if (isUpdateMode) {
-        await planServices.updatePlan(modalRef.current.planId, values);
         if (values?.originType === 'svn') {
+          await planServices.updatePlan(modalRef.current.planId, values);
           await taskService.updateTask(modalRef.current.task_id, {
             svn_url: values?.originUrl,
             modelType: values?.originType,
@@ -249,10 +255,24 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
             ...values
           });
         } else if (values?.originType === 'ClearCase') {
-          await taskService.updateTask(modalRef.current.task_id, {
-            gitURL: values?.targetUrl,
-            ...values
-          });
+          let newTaskId = null;
+          if (modalRef?.current?.task_id) {
+            await taskService.updateTask(modalRef.current.task_id, {
+              gitURL: values?.targetUrl,
+              ...values
+            });
+            newTaskId = modalRef.current.task_id;
+          } else {
+            const {message: otherTaskId} = await taskService.createTask({
+               gitURL: values?.targetUrl,
+               ...values,
+             });
+            newTaskId = otherTaskId;
+          }
+
+          await planServices.updatePlan(modalRef.current.planId, {...values, task_id: Number(newTaskId)});
+        } else {
+          await planServices.updatePlan(modalRef.current.planId, values);
         }
       } else {
         let task_id = ''
