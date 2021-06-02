@@ -74,12 +74,14 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error("open upload file err:", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	rows, err := excel.GetRows("Sheet1")
 	if err != nil {
 		log.Error("open upload file err:", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	rows = rows[1:]
@@ -87,6 +89,7 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 	if !check {
 		log.Error(message)
 		http.Error(w, message, http.StatusBadRequest)
+		return
 	}
 	for _, row := range rows {
 		if len(row) < 34 {
