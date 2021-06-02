@@ -299,6 +299,9 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 		}
 		if planParams.TaskID != 0 {
 			database.DB.Exec("UPDATE plan SET task_id = ? WHERE id = ?", planParams.TaskID, planId)
+			if plan.Status == "未迁移" {
+				database.DB.Exec("UPDATE plan SET status = '迁移中' WHERE id = ?", planId)
+			}
 		}
 	}
 	if taskID == 0 {
