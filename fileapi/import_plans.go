@@ -8,7 +8,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -45,15 +44,24 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 
 	rows = rows[1:]
 	for _, row := range rows {
-		_, err = strconv.Atoi(row[0])
-		if err != nil {
-			break
-		}
 		taskType := strings.ToLower(row[2])
 		if taskType != "clearcase" {
 			continue
 		} else {
 			taskType = "ClearCase"
+		}
+		log.Info("taskType", taskType)
+		var needColumn = []int{2, 3, 4, 6, 7, 10, 11, 12, 15, 16, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33}
+		var checkColumn = true
+		for _, index := range needColumn {
+			if row[index] == "" {
+				log.Info("row index is blank:", index)
+				checkColumn = false
+				break
+			}
+		}
+		if !checkColumn {
+			continue
 		}
 		pvob := row[3]
 		component := row[4]
@@ -67,6 +75,9 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 			includeEmpty = false
 		}
 		keep := row[9]
+		if includeEmpty && keep == "" {
+			continue
+		}
 		ccUser := row[10]
 		ccPassword := row[11]
 		workType := row[12]
@@ -93,7 +104,8 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 			" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase', $14)",
 			pvob, component, ccUser, ccPassword, gitUrl, gitUser, gitPassword, "init", "Admin",
 			includeEmpty, "default@cfbft.com", dir, keep, gitignore)
-		taskId, _ := r.LastInsertId()
+		taskId, err := r.LastInsertId()
+		log.Info("Inset task:", taskId, " ", err)
 		database.DB.Exec("INSERT INTO "+
 			"match_info (task_id, stream, git_branch) "+
 			"VALUES($1, $2, $3)",
@@ -107,7 +119,7 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 			strings.Join(planColumns[1:], ","), strings.Join(ph, ","))
 		_, err = database.DB.Exec(sqlStr,
 			"迁移中",
-			"clearcase",
+			taskType,
 			pvob,
 			component,
 			dir,
@@ -134,6 +146,9 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 			"",
 			"",
 		)
+	}
+	if err != nil {
+		log.Error("insert plan err:", err)
 	}
 
 	fmt.Fprintf(w, "Successfully Uploaded File\n")
