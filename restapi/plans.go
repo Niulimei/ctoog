@@ -241,6 +241,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 			username := params.HTTPRequest.Header.Get("username")
 			tx.Exec("UPDATE plan SET status = $1 WHERE id = $2",
 				planParams.Status, planId)
+			var err error
 			if plan.TaskID == 0 {
 				modelType := "clearcase"
 				if originType == "svn" {
@@ -262,6 +263,15 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 				tx.Exec("UPDATE task SET pvob = $1, component = $2, git_url = $3, "+
 					"last_completed_date_time = '', creator = $4, dir = $5 WHERE id = $6", plan.Pvob, plan.Component,
 					plan.TargetURL, username, plan.Dir, plan.TaskID)
+			}
+			if taskID != 0 {
+				_, err = tx.Exec("UPDATE plan SET task_id=? where id=?", taskID, planId)
+				if err != nil {
+					return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
+						Code:    500,
+						Message: err.Error(),
+					})
+				}
 			}
 		}
 		tx.Commit()
@@ -287,21 +297,15 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 		if err != nil {
 			log.Error("update plan failed:", err)
 		}
+		if planParams.TaskID != 0 {
+			database.DB.Exec("UPDATE plan SET task_id = ? WHERE id = ?", planParams.TaskID, planId)
+		}
 	}
 	if taskID == 0 {
 		return operations.NewUpdatePlanCreated().WithPayload(&models.OK{
 			Message: "ok",
 		})
 	} else {
-		if taskID != 0 {
-			_, err = database.DB.Exec("UPDATE plan SET task_id=? where id=?", taskID, planId)
-			if err != nil {
-				return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
-					Code:    500,
-					Message: err.Error(),
-				})
-			}
-		}
 		return operations.NewUpdatePlanCreated().WithPayload(&models.OK{
 			Message: strconv.FormatInt(taskID, 10),
 		})
