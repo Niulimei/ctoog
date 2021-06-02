@@ -4,6 +4,7 @@ import type { Plan } from '@/typings/model';
 import ProTable from '@ant-design/pro-table';
 import { DownOutlined, SmileOutlined } from '@ant-design/icons';
 import { plan as planServices } from '@/services';
+import {authTokenAction} from '@/utils/request';
 import PlanCreator from './components/PlanCreator';
 import { Button, Menu, Dropdown, message, notification, Upload } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
@@ -279,6 +280,9 @@ const PlanList: React.FC = () => {
            <Upload
             action="/import/plan"
             name="uploadFile"
+            headers={{
+              Authorization: authTokenAction.get()
+            }}
             withCredentials={true}
             showUploadList={false}
             onChange={beforeonChange}
