@@ -135,7 +135,9 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 		purpose := row[32]
 		effect := row[33]
 		var taskId int64
+		var status = "未迁移"
 		if taskType == "ClearCase" {
+			status = "迁移中"
 			r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
 				"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id, model_type, gitignore)"+
 				" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase', $14)",
@@ -156,7 +158,7 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 		sqlStr := fmt.Sprintf("INSERT INTO plan (%s) VALUES (%s)",
 			strings.Join(planColumns[1:], ","), strings.Join(ph, ","))
 		_, err = database.DB.Exec(sqlStr,
-			"迁移中",
+			status,
 			taskType,
 			pvob,
 			component,
