@@ -11,9 +11,47 @@ import (
 	"strings"
 )
 
+func checkData(rows [][]string) (bool, string) {
+	rows = rows[1:]
+	var checkColumn = true
+	for index, row := range rows {
+		if len(row) < 34 {
+			break
+		}
+		taskType := strings.ToLower(row[2])
+		if taskType == "clearcase" {
+			taskType = "ClearCase"
+		}
+		if taskType != "ClearCase" {
+			continue
+		}
+		var needColumn = []int{2, 3, 4, 6, 7, 10, 11, 12, 15, 16, 19}
+		for _, i := range needColumn {
+			if row[i] == "" {
+				log.Info("row index is blank:", index)
+				checkColumn = false
+				return false, fmt.Sprintf("第%d行第%d列数据不全", index+2, i)
+			}
+		}
+		var includeEmpty bool
+		if row[8] == "是" || row[8] == "Yes" || row[8] == "yes" || row[8] == "Y" {
+			includeEmpty = true
+		} else {
+			includeEmpty = false
+		}
+		keep := row[9]
+		if includeEmpty && keep == "" {
+			return false, fmt.Sprintf("第%d行第%d列数据不全", index+2, 10)
+		}
+	}
+	return checkColumn, ""
+}
+
 func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 	// Maximum upload of 10 MB files
 	r.ParseMultipartForm(10 << 20)
+
+	username := r.Header.Get("username")
 
 	// Get handler for filename, size and headers
 	file, _, err := r.FormFile("uploadFile")
@@ -28,41 +66,38 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Copy the uploaded file to the created file on the filesystem
 	if _, err := io.Copy(buf, file); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	excel, err := excelize.OpenReader(buf)
 	if err != nil {
 		log.Error("open upload file err:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	rows, err := excel.GetRows("Sheet1")
 	if err != nil {
 		log.Error("open upload file err:", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	rows = rows[1:]
+	check, message := checkData(rows)
+	if !check {
+		log.Error(message)
+		http.Error(w, message, http.StatusBadRequest)
+	}
 	for _, row := range rows {
-		taskType := strings.ToLower(row[2])
-		if taskType != "clearcase" {
+		if len(row) < 34 {
+			log.Info("不足34，跳过:", row)
 			continue
-		} else {
+		}
+		taskType := strings.ToLower(row[2])
+		if taskType == "clearcase" {
 			taskType = "ClearCase"
 		}
 		log.Info("taskType", taskType)
-		var needColumn = []int{2, 3, 4, 6, 7, 10, 11, 12, 15, 16, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33}
-		var checkColumn = true
-		for _, index := range needColumn {
-			if row[index] == "" {
-				log.Info("row index is blank:", index)
-				checkColumn = false
-				break
-			}
-		}
-		if !checkColumn {
-			continue
-		}
 		pvob := row[3]
 		component := row[4]
 		dir := row[5]
@@ -75,9 +110,6 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 			includeEmpty = false
 		}
 		keep := row[9]
-		if includeEmpty && keep == "" {
-			continue
-		}
 		ccUser := row[10]
 		ccPassword := row[11]
 		workType := row[12]
@@ -99,17 +131,20 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 		projectType := row[31]
 		purpose := row[32]
 		effect := row[33]
-		r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
-			"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id, model_type, gitignore)"+
-			" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase', $14)",
-			pvob, component, ccUser, ccPassword, gitUrl, gitUser, gitPassword, "init", "Admin",
-			includeEmpty, "default@cfbft.com", dir, keep, gitignore)
-		taskId, err := r.LastInsertId()
-		log.Info("Inset task:", taskId, " ", err)
-		database.DB.Exec("INSERT INTO "+
-			"match_info (task_id, stream, git_branch) "+
-			"VALUES($1, $2, $3)",
-			taskId, stream, branch)
+		var taskId int64
+		if taskType == "ClearCase" {
+			r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
+				"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id, model_type, gitignore)"+
+				" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase', $14)",
+				pvob, component, ccUser, ccPassword, gitUrl, gitUser, gitPassword, "init", "Admin",
+				includeEmpty, "default@cfbft.com", dir, keep, gitignore)
+			taskId, err = r.LastInsertId()
+			log.Info("Inset task:", taskId, " ", err)
+			database.DB.Exec("INSERT INTO "+
+				"match_info (task_id, stream, git_branch) "+
+				"VALUES($1, $2, $3)",
+				taskId, stream, branch)
+		}
 		var planColumns = []string{"id", "status", "origin_type", "pvob", "component", "dir", "origin_url", "translate_type", "target_url", "subsystem", "config_lib", "business_group", "team", "supporter", "supporter_tel", "creator", "tip", "project_type", "purpose", "plan_start_time", "plan_switch_time", "actual_start_time", "actual_switch_time", "effect", "task_id", "extra1", "extra2", "extra3"}
 		var ph []string
 		for i := 1; i <= len(planColumns[1:]); i++ {
@@ -132,7 +167,7 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 			team,
 			supporterName,
 			supporterTel,
-			"admin",
+			username,
 			tip,
 			projectType,
 			purpose,
