@@ -276,17 +276,20 @@ const PlanList: React.FC = () => {
           span: 6
         }}
         toolBarRender={() => [
-           <Button size="small"
-            type="primary"
-            onClick={() => {
-              notification.open({
-                message: `友情提示`,
-                description,
-                icon: <SmileOutlined style={{ color: '#108ee9' }} />,
-              });
-            }}
-          >批量计划导入
-          </Button>,
+           <Upload
+            action="/import/plan"
+            name="uploadFile"
+            withCredentials={true}
+            showUploadList={false}
+            onChange={beforeonChange}
+          >
+            <Button
+              size="small"
+              type="primary"
+              loading={importLoading}
+            >批量计划导入
+            </Button>
+          </Upload>,
           <Button
             size="small"
             type="primary"
