@@ -49,16 +49,23 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			break
 		}
-		taskType := row[2]
+		taskType := strings.ToLower(row[2])
 		if taskType != "clearcase" {
 			continue
+		} else {
+			taskType = "ClearCase"
 		}
 		pvob := row[3]
 		component := row[4]
 		dir := row[5]
 		stream := row[6]
 		branch := row[7]
-		includeEmpty := row[8]
+		var includeEmpty bool
+		if row[8] == "是" || row[8] == "Yes" || row[8] == "yes" || row[8] == "Y" {
+			includeEmpty = true
+		} else {
+			includeEmpty = false
+		}
 		keep := row[9]
 		ccUser := row[10]
 		ccPassword := row[11]
@@ -93,10 +100,13 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 			taskId, stream, branch)
 		var planColumns = []string{"id", "status", "origin_type", "pvob", "component", "dir", "origin_url", "translate_type", "target_url", "subsystem", "config_lib", "business_group", "team", "supporter", "supporter_tel", "creator", "tip", "project_type", "purpose", "plan_start_time", "plan_switch_time", "actual_start_time", "actual_switch_time", "effect", "task_id", "extra1", "extra2", "extra3"}
 		var ph []string
+		for i := 1; i <= len(planColumns[1:]); i++ {
+			ph = append(ph, "?")
+		}
 		sqlStr := fmt.Sprintf("INSERT INTO plan (%s) VALUES (%s)",
 			strings.Join(planColumns[1:], ","), strings.Join(ph, ","))
 		_, err = database.DB.Exec(sqlStr,
-			"未迁移",
+			"迁移中",
 			"clearcase",
 			pvob,
 			component,
