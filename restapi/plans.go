@@ -264,15 +264,6 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 					"last_completed_date_time = '', creator = $4, dir = $5 WHERE id = $6", plan.Pvob, plan.Component,
 					plan.TargetURL, username, plan.Dir, plan.TaskID)
 			}
-			if taskID != 0 {
-				_, err = tx.Exec("UPDATE plan SET task_id=? where id=?", taskID, planId)
-				if err != nil {
-					return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
-						Code:    500,
-						Message: err.Error(),
-					})
-				}
-			}
 		}
 		tx.Commit()
 	} else {
@@ -303,6 +294,15 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 			Message: "ok",
 		})
 	} else {
+		if taskID != 0 {
+			_, err = database.DB.Exec("UPDATE plan SET task_id=? where id=?", taskID, planId)
+			if err != nil {
+				return operations.NewUpdatePlanInternalServerError().WithPayload(&models.ErrorModel{
+					Code:    500,
+					Message: err.Error(),
+				})
+			}
+		}
 		return operations.NewUpdatePlanCreated().WithPayload(&models.OK{
 			Message: strconv.FormatInt(taskID, 10),
 		})
