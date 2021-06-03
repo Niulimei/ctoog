@@ -73,7 +73,7 @@ func DumpLogFile(logFile string) {
 			log.Debug(err)
 			continue
 		}
-		err = ioutil.WriteFile(logFile+"_"+N.Format("2006.01.02_15:04:05"), co, s.Mode())
+		err = ioutil.WriteFile(logFile+"_"+time.Now().Format("2006.01.02_15:04:05"), co, s.Mode())
 		if err != nil {
 			log.Debug(err)
 			continue
