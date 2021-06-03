@@ -71,12 +71,12 @@ pullCCAndPush(){
       git push origin --tags
       set -e
     else
-      git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')"
+      git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')" >/dev/null
       git push origin --all
       git push origin --tags
     fi
   else
-    git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')"
+    git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')" >/dev/null
     git push origin --all
     git push origin --tags
   fi

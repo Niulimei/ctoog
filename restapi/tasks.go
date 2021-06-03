@@ -336,7 +336,7 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	return operations.NewListTaskOK().WithPayload(tasksPage)
 }
 
-func isCCInfoChange(params operations.UpdateTaskParams) bool {
+func isCCInfoChange(params operations.UpdateTaskParams) (*models.TaskModel, bool) {
 	oldTaskInfo := &models.TaskModel{}
 	database.DB.Get(oldTaskInfo, "SELECT cc_password,"+
 		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep"+
@@ -357,9 +357,9 @@ func isCCInfoChange(params operations.UpdateTaskParams) bool {
 		strings.Join(oldStreams, "_") != strings.Join(paramStreams, "_") ||
 		oldTaskInfo.CcUser.String != params.TaskLog.CcUser ||
 		oldTaskInfo.CcPassword.String != params.TaskLog.CcPassword {
-		return true
+		return oldTaskInfo, true
 	}
-	return false
+	return oldTaskInfo, false
 }
 
 func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder {
@@ -390,9 +390,9 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		}
 		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
 		if params.TaskLog.ModelType == "clearcase" || params.TaskLog.ModelType == "" {
-			if isCCInfoChange(params) {
+			if oldTaskInfo, changed := isCCInfoChange(params); changed {
 				log.Infoln("Is cleaning cache...")
-				DeleteCache(taskIdInt)
+				deleteCache(taskIdInt, oldTaskInfo)
 			}
 		}
 		log.Debug("update params:", params.TaskLog)
@@ -554,14 +554,33 @@ func getTaskInfo(taskID int64) (*TaskDelInfo, bool) {
 
 func DeleteCache(taskID int64) (int, string) {
 	taskInfo, cacheExist := getTaskInfo(taskID)
-	log.Infoln("taskInfo: ", taskInfo)
-	log.Infoln("cacheExist: ", cacheExist)
+	log.Debugln("taskInfo: ", taskInfo)
+	log.Debugln("cacheExist: ", cacheExist)
 	if !cacheExist {
 		return http.StatusOK, "ok"
 	}
 	if taskInfo == nil {
 		return http.StatusInternalServerError, "get task info fail"
 	}
+	return doDelReq(taskInfo)
+}
+
+func deleteCache(taskID int64, oldTaskInfo *models.TaskModel) (int, string) {
+	taskInfo, cacheExist := getTaskInfo(taskID)
+	log.Debugln("taskInfo: ", taskInfo)
+	log.Debugln("cacheExist: ", cacheExist)
+	if !cacheExist {
+		return http.StatusOK, "ok"
+	}
+	if taskInfo == nil {
+		return http.StatusInternalServerError, "get task info fail"
+	}
+	taskInfo.CcUser = oldTaskInfo.CcUser.String
+	taskInfo.CcPassword = oldTaskInfo.CcPassword.String
+	return doDelReq(taskInfo)
+}
+
+func doDelReq(taskInfo *TaskDelInfo) (int, string) {
 	workerUrl := taskInfo.WorkerURL
 	taskInfo.WorkerURL = ""
 	workerTaskModelByte, _ := json.Marshal(taskInfo)
