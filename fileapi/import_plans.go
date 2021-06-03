@@ -17,16 +17,13 @@ func checkData(rows [][]string) (bool, string) {
 		if len(row) < 34 {
 			break
 		}
-		taskType := strings.ToLower(row[2])
-		if taskType == "clearcase" {
-			taskType = "ClearCase"
-		}
-		if taskType != "ClearCase" {
-			continue
-		}
+		taskType := row[2]
 		if taskType != "ClearCase" && taskType != "私服" && taskType != "ICDP(Gerrit)" {
 			log.Error("taskType not support: ", taskType)
 			return false, fmt.Sprintf("第%d行 任务类型错误", index+2)
+		}
+		if taskType != "ClearCase" {
+			continue
 		}
 		var needColumn = []int{2, 3, 4, 6, 7, 10, 11, 12, 15, 16, 19}
 		for _, i := range needColumn {
@@ -99,9 +96,9 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 			log.Info("不足34，跳过:", row)
 			continue
 		}
-		taskType := strings.ToLower(row[2])
-		if taskType == "clearcase" {
-			taskType = "ClearCase"
+		taskType := row[2]
+		if taskType != "ClearCase" && taskType != "ICDP(Gerrit)" && taskType != "私服" {
+			continue
 		}
 		log.Info("taskType", taskType)
 		pvob := row[3]
@@ -148,7 +145,7 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 				pvob, component, ccUser, ccPassword, gitUrl, gitUser, gitPassword, "init", "Admin",
 				includeEmpty, "default@cfbft.com", dir, keep, gitignore)
 			taskId, err = r.LastInsertId()
-			log.Info("Inset task:", taskId, " ", err)
+			log.Info("Insert task:", taskId, " ", err)
 			database.DB.Exec("INSERT INTO "+
 				"match_info (task_id, stream, git_branch) "+
 				"VALUES($1, $2, $3)",
