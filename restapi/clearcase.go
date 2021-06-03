@@ -1,13 +1,17 @@
 package restapi
 
 import (
+	"ctgb/database"
 	"ctgb/restapi/operations"
-	"github.com/go-openapi/runtime/middleware"
-	log "github.com/sirupsen/logrus"
+	"database/sql"
+	"encoding/json"
 	"os/exec"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/go-openapi/runtime/middleware"
+	log "github.com/sirupsen/logrus"
 )
 
 var pvobs []string
@@ -15,19 +19,25 @@ var pvobs []string
 func init() {
 	go func() {
 		GetAllPvob()
-		t := time.NewTimer(time.Second * 600)
+		t := time.NewTicker(time.Second * 600)
 		for {
 			select {
 			case <-t.C:
 				GetAllPvob()
-				t.Reset(time.Second * 600)
 			}
+		}
+	}()
+
+	go func() {
+		for {
+			updateStream()
+			time.Sleep(time.Hour)
 		}
 	}()
 }
 
 func GetAllPvob() {
-	pvobs = make([]string, 0, 10)
+	pvobs = make([]string, 0)
 	cmd := exec.Command("cleartool", "lsvob", "-l")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -50,6 +60,7 @@ func GetAllPvob() {
 			pvobs = append(pvobs, pvob)
 		}
 	}
+	sort.Strings(pvobs)
 	return
 }
 
@@ -65,7 +76,7 @@ func RemoveDuplicatesAndEmpty(a []string) (ret []string){
 }
 
 func GetAllComponent(pvob string) []string {
-	components := make([]string, 0, 10)
+	components := make([]string, 0)
 	args := `lscomp -fmt "%[root_dir]p\n" -invob ` + pvob
 	cmd := exec.Command("cleartool", strings.Split(args, " ")...)
 	out, err := cmd.CombinedOutput()
@@ -82,7 +93,7 @@ func GetAllComponent(pvob string) []string {
 			components = append(components, line)
 		}
 	}
-	parseComponents := make([]string, 0, 10)
+	parseComponents := make([]string, 0)
 	for _, component := range components {
 		parseComponents = append(parseComponents, component)
 		if strings.Count(component, "/") > 2 {
@@ -130,7 +141,7 @@ func checkStreamComponent(pvob, component, stream string) bool {
 }
 
 func GetAllStream(pvob, component string) []string {
-	streams := make([]string, 0, 10)
+	streams := make([]string, 0)
 	args := `lsstream -s -invob ` + pvob
 	cmd := exec.Command("cleartool", strings.Split(args, " ")...)
 	out, err := cmd.CombinedOutput()
@@ -167,5 +178,74 @@ func ListPvobComponentHandler(params operations.ListPvobComponentParams) middlew
 func ListPvobComponentStreamHandler(params operations.ListPvobComponentStreamParams) middleware.Responder {
 	pvob := params.PvobID
 	component := params.ComponentID
-	return operations.NewListPvobComponentStreamOK().WithPayload(GetAllStream(pvob, component))
+	streams, err := getStreamFromDB(pvob, component)
+	if err != nil && err != sql.ErrNoRows {
+		return operations.NewListPvobComponentStreamInternalServerError()
+	}
+	if err == sql.ErrNoRows {
+		streamsReal := GetAllStream(pvob, component)
+		saveStreamToDB(pvob, component, streamsReal)
+		streams = streamsReal
+	}
+	return operations.NewListPvobComponentStreamOK().WithPayload(streams)
+}
+
+func saveStreamToDB(pvob, component string, stream []string) error {
+	streamStr, err := json.Marshal(stream)
+	if err != nil {
+		return err
+	}
+	_, err = database.DB.Exec("INSERT OR REPLACE INTO cc_repo (pvob, component, stream) VALUES (?,?,?)", pvob, component, streamStr)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getStreamFromDB(pvob, component string) ([]string, error) {
+	var total int
+	var stream string
+	err := database.DB.Get(&total, "SELECT count(1) from cc_repo where pvob=? and component=?", pvob, component)
+	if err != nil && err != sql.ErrNoRows {
+		log.Errorln(err.Error())
+		return []string{}, err
+	}
+	if total != 1 {
+		database.DB.Exec("DELETE FROM cc_repo where pvob=? and component=?", pvob, component)
+		return []string{}, sql.ErrNoRows
+	}
+	err = database.DB.Get(&stream, "SELECT stream from cc_repo where pvob=? and component=?", pvob, component)
+	if err != nil {
+		log.Errorln(err.Error())
+		return []string{}, err
+	}
+
+	var ret []string
+	err = json.Unmarshal([]byte(stream), &ret)
+	if err != nil {
+		log.Errorln(err.Error())
+		return []string{}, err
+	} else {
+		return ret, nil
+	}
+}
+
+type PC struct {
+	Pvob      string
+	Component string
+}
+
+func updateStream() {
+	var pc []PC
+	err := database.DB.Select(&pc, "SELECT pvob, component FROM cc_repo")
+	if err != nil {
+		database.DB.Exec("DELETE FROM cc_repo")
+		return
+	}
+	for _, v := range pc {
+		err = saveStreamToDB(v.Pvob, v.Component, GetAllStream(v.Pvob, v.Component))
+		if err != nil {
+			database.DB.Exec("DELETE FROM cc_repo WHERE pvob=? AND component=?", v.Pvob, v.Component)
+		}
+	}
 }
