@@ -50,7 +50,7 @@ export const useCacheRequestParams = (key: string) => {
 };
 
 type OptionItem = Record<string, string>;
-type OptionType = 'component' | 'pvob' | 'stream';
+type OptionType = 'component' | 'pvob' | 'stream' | 'clearStream' | 'clearComponent';
 const initialOptionState = { component: {}, pvob: {}, stream: {} } as Record<
   OptionType,
   OptionItem
@@ -93,6 +93,12 @@ export const useClearCaseSelectEnum = () => {
           if (!payload.pvob || !payload.component) throw Error('pvob is required');
           res = await task.getStreams(payload.pvob, payload.component);
           set('stream', listToOptions(res));
+          break;
+        case 'clearStream':
+          set('stream', listToOptions([]));
+          break;
+        case 'clearComponent':
+          set('component', listToOptions([]));
           break;
         default:
           break;

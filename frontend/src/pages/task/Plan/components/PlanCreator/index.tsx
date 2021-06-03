@@ -165,10 +165,18 @@ const CustomChangeHandlers: Partial<
     dispatch({ type: 'forceUpdate' });
   },
   pvob(form, value, dispatch) {
+    dispatch({type: 'clearComponent', payload: {}});
+    dispatch({type: 'clearStream', payload: {}});
     dispatch({ type: 'getComponentValueEnum', payload: value });
-    form.setFieldsValue({ configLib: value });
+    const { matchInfo } = form.getFieldsValue(['matchInfo']);
+    form.setFieldsValue({
+      configLib: value,
+      component: null,
+      matchInfo: (matchInfo || []).map((info: any) => ({ ...info, stream: '' })),
+    });
   },
   component(form, value, dispatch) {
+    dispatch({type: 'clearStream', payload: {}});
     dispatch({type: 'stream', payload: { component: value, pvob: form.getFieldValue('pvob') }});
     const { matchInfo } = form.getFieldsValue(['matchInfo']);
     form.setFieldsValue({
@@ -319,6 +327,11 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       case 'stream':
         clearCaseEnumDispatch('stream', { pvob: payload?.pvob, component: payload?.component });
         break;
+      case 'clearStream':
+        clearCaseEnumDispatch('clearStream', {});
+        break;
+      case 'clearComponent':
+        clearCaseEnumDispatch('clearComponent', {});
       default:
         break;
     }
