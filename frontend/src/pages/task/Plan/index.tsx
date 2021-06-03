@@ -246,14 +246,12 @@ const PlanList: React.FC = () => {
     return (
       <>
         <div className={classnames(styles.modalTxt)}>
-            目前有事业群反映，物理子系统过多，逐个填报过于繁琐,如果想批量录入，工作组提供了临时的批量导入方案。
-          现提供仓库迁移范围模板，事业群同事可以编辑迁移范围模板excel，由工作组每日进行导入
-          1）模板存放地址：云上，\\128.194.1.13\\全生命周期it管理\\工作目录\\仓库迁移信息\\仓库迁移范围信息-模板.xlsx
-          事业群可以复制模板，修改名称为【仓库迁移范围信息-事业群.xlsx】进行填写
-          填写前请先阅读同级文件【readme.txt】
-          2）如果无法访问共享的，请使用sftp填报
-          地址：128.194.225.15 用户名密码：repinf/inf0525
-          存放位置：/home/ap/repinf
+          <span>目前有事业群反映，物理子系统过多，逐个填报过于繁琐,如果想批量录入，工作组提供了临时的批量导入方案。
+          现提供仓库迁移范围模板，事业群同事可以编辑迁移范围模板excel，由工作组每日进行导入</span>
+          <span>(1）模板存放地址：云上，\128.194.1.13\全生命周期it管理\工作目录\仓库迁移信息\仓库迁移范围信息-模板.xlsx
+          事业群可以复制模板，修改名称为【仓库迁移范围信息-事业群.xlsx】进行填写,填写前请先阅读同级文件【readme.txt】</span>
+          <span>(2）如果无法访问共享的，请使用sftp填报地址：128.194.225.15 用户名密码：repinf/inf0525
+          存放位置：/home/ap/repinf</span>
         </div>
         <Upload
           action="/import/plan"
@@ -265,6 +263,7 @@ const PlanList: React.FC = () => {
           withCredentials={true}
           showUploadList={false}
           onChange={beforeonChange}
+          beforeUpload={() => setVisible(false)}
         >
           <Button
             size="large"
