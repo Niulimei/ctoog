@@ -118,11 +118,11 @@ pullCCAndPush(){
       git push origin ${gitBranchName}
       set -e
     else
-      git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')"
+      git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')" >/dev/null
       git push origin ${gitBranchName}
     fi
   else
-    git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')"
+    git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')" >/dev/null
     git push origin ${gitBranchName}
   fi
 }
