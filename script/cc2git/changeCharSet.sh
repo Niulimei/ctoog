@@ -45,15 +45,15 @@ function getDirMaxDepth() {
 changeDirCharSet() {
   targetDir=$1
   maxDepth=$2
-  for ((i=${maxDepth}; i>=1; i--)); do
+  for ((i=maxDepth; i>=1; i--)); do
     for dir in $(find "${targetDir}" -maxdepth ${i} -mindepth ${i} -type d); do
-      dirName=$(dirname $dir)
-      baseName=$(basename $dir)
-      afterChange=$(echo -n ${baseName} | iconv -f gbk -t utf8)
-      if [[ ! ${afterChange} == ${baseName} ]]; then
-        pushd ${dirName} &>/dev/null
-        mv ${baseName} ${afterChange}
-        echo change ${dir} to ${dirName}/${afterChange}
+      dirName=$(dirname "$dir")
+      baseName=$(basename "$dir")
+      afterChange=$(echo -n "${baseName}" | iconv -f gbk -t utf8)
+      if [[ ! "${afterChange}" == "${baseName}" ]]; then
+        pushd "${dirName}" &>/dev/null
+        mv "${baseName}" "${afterChange}"
+        echo change "${dir}" to "${dirName}"/"${afterChange}"
         popd &>/dev/null
       fi
     done
@@ -63,15 +63,15 @@ changeDirCharSet() {
 changeFileCharSet() {
   targetDir=$1
   maxDepth=$2
-  for ((i=$((${maxDepth}+1)); i>=1; i--)); do
+  for ((i=$((maxDepth+1)); i>=1; i--)); do
     for dir in $(find "${targetDir}" -maxdepth ${i} -mindepth ${i} -type f); do
-      dirName=$(dirname $dir)
-      baseName=$(basename $dir)
-      afterChange=$(echo -n ${baseName} | iconv -f gbk -t utf8)
-      if [[ ! ${afterChange} == ${baseName} ]]; then
-        pushd ${dirName} &>/dev/null
-        mv ${baseName} ${afterChange}
-        echo change ${dir} to ${dirName}/${afterChange}
+      dirName=$(dirname "$dir")
+      baseName=$(basename "$dir")
+      afterChange=$(echo -n "${baseName}" | iconv -f gbk -t utf8)
+      if [[ ! "${afterChange}" == "${baseName}" ]]; then
+        pushd "${dirName}" &>/dev/null
+        mv "${baseName}" "${afterChange}"
+        echo change "${dir}" to "${dirName}"/"${afterChange}"
         popd &>/dev/null
       fi
     done
@@ -80,9 +80,9 @@ changeFileCharSet() {
 
 main() {
   maxDepth=$(getDirMaxDepth "${1}")
-  echo ${maxDepth}
-  changeDirCharSet $1 ${maxDepth}
-  changeFileCharSet $1 ${maxDepth}
+  echo "${maxDepth}"
+  changeDirCharSet "$1" "${maxDepth}"
+  changeFileCharSet "$1" "${maxDepth}"
 }
 
-main $1
+main "$1"
