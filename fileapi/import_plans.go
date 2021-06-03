@@ -12,7 +12,6 @@ import (
 )
 
 func checkData(rows [][]string) (bool, string) {
-	rows = rows[1:]
 	var checkColumn = true
 	for index, row := range rows {
 		if len(row) < 34 {
@@ -24,6 +23,10 @@ func checkData(rows [][]string) (bool, string) {
 		}
 		if taskType != "ClearCase" {
 			continue
+		}
+		if taskType != "ClearCase" && taskType != "私服" && taskType != "ICDP(Gerrit)" {
+			log.Error("taskType not support: ", taskType)
+			return false, fmt.Sprintf("第%d行 任务类型错误", index+2)
 		}
 		var needColumn = []int{2, 3, 4, 6, 7, 10, 11, 12, 15, 16, 19}
 		for _, i := range needColumn {
@@ -136,6 +139,7 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 		effect := row[33]
 		var taskId int64
 		var status = "未迁移"
+
 		if taskType == "ClearCase" {
 			status = "迁移中"
 			r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
@@ -186,9 +190,11 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 			"",
 			"",
 		)
-	}
-	if err != nil {
-		log.Error("insert plan err:", err)
+		if err != nil {
+			log.Error("insert plan err:", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	fmt.Fprintf(w, "Successfully Uploaded File\n")
