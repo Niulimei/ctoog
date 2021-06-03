@@ -6,9 +6,11 @@ import { DownOutlined, SmileOutlined } from '@ant-design/icons';
 import { plan as planServices } from '@/services';
 import {authTokenAction} from '@/utils/request';
 import PlanCreator from './components/PlanCreator';
-import { Button, Menu, Dropdown, message, notification, Upload } from 'antd';
+import { Button, Menu, Dropdown, message, notification, Upload, Modal } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
 import PlanStatusSwitcher from './components/PlanStatusSwitcher';
+import styles from './index.less';
+import classnames from "classnames";
 
 type Actions = Record<
   'updatePlan' | 'deletePlan' | 'execTask' | 'execSvnTask' | 'toggleStatus' | 'gotoTaskDetail' | 'gotoSvnTaskDetail',
@@ -180,6 +182,7 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
 
 const PlanList: React.FC = () => {
   const [importLoading, setImportLoading] = useState<boolean>(false);
+  const [visible, setVisible] = useState<boolean>(false);
   const tableRef = React.useRef<any>();
   const planCreatorRef = React.useRef<any>();
   const planStatusSwitcherRef = React.useRef<any>();
@@ -239,14 +242,40 @@ const PlanList: React.FC = () => {
     },
   };
   /** 提示信息 */
-  const description = `目前有事业群反映，物理子系统过多，逐个填报过于繁琐,如果想批量录入，工作组提供了临时的批量导入方案。
-  现提供仓库迁移范围模板，事业群同事可以编辑迁移范围模板excel，由工作组每日进行导入
-  1）模板存放地址：云上，\\128.194.1.13\\全生命周期it管理\\工作目录\\仓库迁移信息\\仓库迁移范围信息-模板.xlsx
-  事业群可以复制模板，修改名称为【仓库迁移范围信息-事业群.xlsx】进行填写
-  填写前请先阅读同级文件【readme.txt】
-  2）如果无法访问共享的，请使用sftp填报
-  地址：128.194.225.15 用户名密码：repinf/inf0525
-  存放位置：/home/ap/repinf`
+  const description = () => {
+    return (
+      <>
+        <div className={classnames(styles.modalTxt)}>
+            目前有事业群反映，物理子系统过多，逐个填报过于繁琐,如果想批量录入，工作组提供了临时的批量导入方案。
+          现提供仓库迁移范围模板，事业群同事可以编辑迁移范围模板excel，由工作组每日进行导入
+          1）模板存放地址：云上，\\128.194.1.13\\全生命周期it管理\\工作目录\\仓库迁移信息\\仓库迁移范围信息-模板.xlsx
+          事业群可以复制模板，修改名称为【仓库迁移范围信息-事业群.xlsx】进行填写
+          填写前请先阅读同级文件【readme.txt】
+          2）如果无法访问共享的，请使用sftp填报
+          地址：128.194.225.15 用户名密码：repinf/inf0525
+          存放位置：/home/ap/repinf
+        </div>
+        <Upload
+          action="/import/plan"
+          name="uploadFile"
+          className={classnames(styles.uploadBtn)}
+          headers={{
+            Authorization: authTokenAction.get()
+          }}
+          withCredentials={true}
+          showUploadList={false}
+          onChange={beforeonChange}
+        >
+          <Button
+            size="large"
+            type="primary"
+            loading={importLoading}
+          >上传文件
+          </Button>
+        </Upload>
+      </>
+    )
+  }
   return (
     <>
       <PlanCreator onSuccess={() => tableRef.current.reload()} actionRef={planCreatorRef} />
@@ -283,23 +312,13 @@ const PlanList: React.FC = () => {
           span: 6
         }}
         toolBarRender={() => [
-           <Upload
-            action="/import/plan"
-            name="uploadFile"
-            headers={{
-              Authorization: authTokenAction.get()
+          <Button size="small"
+            type="primary"
+            onClick={() => {
+              setVisible(true);
             }}
-            withCredentials={true}
-            showUploadList={false}
-            onChange={beforeonChange}
-          >
-            <Button
-              size="small"
-              type="primary"
-              loading={importLoading}
-            >批量计划导入
-            </Button>
-          </Upload>,
+          >批量计划导入
+          </Button>,
           <Button
             size="small"
             type="primary"
@@ -311,6 +330,14 @@ const PlanList: React.FC = () => {
           </Button>,
         ]}
       ></ProTable>
+      <Modal
+        title="批量计划导入"
+        visible={visible}
+        onCancel={() => setVisible(false)}
+        okButtonProps={{ style: { display: 'none' } }}
+      >
+        {description()}
+      </Modal>
     </>
   );
 };
