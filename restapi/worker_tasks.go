@@ -315,7 +315,7 @@ func readCommandOut(fileName string, container *[]string) {
 		}
 	}()
 	reader := bufio.NewReader(file)
-	var tick = time.NewTicker(300 * time.Millisecond)
+	var tick = time.NewTicker(100 * time.Millisecond)
 	func() {
 		for {
 			select {
