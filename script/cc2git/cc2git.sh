@@ -83,11 +83,11 @@ pullCCAndPush(){
   if [[ -d ${tmpCCDir} ]]; then
     tmpCCDirExist=true
     cd ${tmpCCDir}
-    cleartool update .
+    cleartool update . >/dev/null
   else
-    cleartool mkview -snapshot -tag ${combainNameAdapt}_${taskID} -stgloc -auto -stream ${streamName}@${pvobName} ${tmpCCDir}
+    cleartool mkview -snapshot -tag ${combainNameAdapt}_${taskID} -stgloc -auto -stream ${streamName}@${pvobName} ${tmpCCDir} >/dev/null
     cd ${tmpCCDir}
-    cleartool update -add_loadrules .${componentName}
+    cleartool update -add_loadrules .${componentName} >/dev/null
   fi
   if [[ -d ${tmpGitDir} ]]; then
     rm -rf ${tmpGitDir}

@@ -47,7 +47,7 @@ pullCCAndPush(){
     rm -rf "${tmpGitDir}"
     tmpGitDirExist=true
   fi
-  git svn clone "${svnRepoUrl}" --authors-file="${userFile}" --no-metadata --prefix "" "${tmpGitDir}"
+  git svn clone "${svnRepoUrl}" --authors-file="${userFile}" --no-metadata --prefix "" "${tmpGitDir}" >/dev/null
   rm -rf "${userFile}"
   configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
   if [[ ${containEmptyDir} == "true" ]]; then
