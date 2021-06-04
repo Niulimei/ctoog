@@ -7,6 +7,7 @@
 #svnRepoURL，gitRepoURL，任务ID，是否保留空目录(是：true，否：false)，用户名，邮箱, 空目录占位文件名称, 用户名称映射文件
 ######
 
+set -x
 export LANG="zh_CN.UTF-8"
 set -e
 workdir=$(cd "$(dirname "$0")"; pwd)
@@ -53,7 +54,7 @@ pullCCAndPush(){
   if [[ ${containEmptyDir} == "true" ]]; then
     find "${tmpGitDir}" -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
   fi
-  bash "${workdir}"/changeCharSet.sh "${tmpGitDir}"
+#  bash "${workdir}"/changeCharSet.sh "${tmpGitDir}"
   if [[ -n "${gitignoreContent}" ]]; then
     echo -e "${gitignoreContent}" >./.gitignore
   else
