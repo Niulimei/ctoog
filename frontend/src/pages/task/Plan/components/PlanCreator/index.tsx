@@ -257,7 +257,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
         if (values?.originType === 'svn') {
           await planServices.updatePlan(modalRef.current.planId, values);
           await taskService.updateTask(modalRef.current.task_id, {
-            svn_url: values?.originUrl,
+            svnUrl: values?.originUrl,
             modelType: values?.originType,
             gitURL: values?.targetUrl,
             ...values
@@ -288,7 +288,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
            const {message: taskId} = await taskService.createTask({
              ...values,
              gitURL: values?.targetUrl,
-             svn_url: values?.originUrl,
+             svnUrl: values?.originUrl,
              modelType: values?.originType,
            });
            task_id = taskId;
