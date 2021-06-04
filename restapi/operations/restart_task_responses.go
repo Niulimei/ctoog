@@ -25,7 +25,7 @@ type RestartTaskOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.TaskPageInfoModel `json:"body,omitempty"`
+	Payload *models.OK `json:"body,omitempty"`
 }
 
 // NewRestartTaskOK creates RestartTaskOK with default headers values
@@ -35,13 +35,13 @@ func NewRestartTaskOK() *RestartTaskOK {
 }
 
 // WithPayload adds the payload to the restart task o k response
-func (o *RestartTaskOK) WithPayload(payload *models.TaskPageInfoModel) *RestartTaskOK {
+func (o *RestartTaskOK) WithPayload(payload *models.OK) *RestartTaskOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the restart task o k response
-func (o *RestartTaskOK) SetPayload(payload *models.TaskPageInfoModel) {
+func (o *RestartTaskOK) SetPayload(payload *models.OK) {
 	o.Payload = payload
 }
 

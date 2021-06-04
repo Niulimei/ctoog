@@ -439,15 +439,16 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 }
 func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responder {
 	//username, verified := utils.Verify(params.Authorization)
-	taskId := params.RestartTrigger.ID
-	task := &database.TaskModel{}
-	database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
-	if task.Status != "running" {
-		database.DB.MustExec("UPDATE task SET status = 'running' WHERE id = $1", taskId)
-		go startTask(taskId)
+	for _, taskId := range params.RestartTrigger.ID {
+		task := &database.TaskModel{}
+		database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
+		if task.Status != "running" {
+			database.DB.MustExec("UPDATE task SET status = 'running' WHERE id = $1", taskId)
+			go startTask(taskId)
+		}
 	}
-	utils.RecordLog(utils.Info, utils.RestartTask, "", "", 0)
-	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
+	utils.RecordLog(utils.Info, utils.RestartTask, "", fmt.Sprintf("task ID: %v", params.RestartTrigger.ID), 0)
+	return operations.NewRestartTaskOK().WithPayload(&models.OK{
 		Message: "ok",
 	})
 }

@@ -18,7 +18,7 @@ import (
 type TaskRestart struct {
 
 	// id
-	ID int64 `json:"id,omitempty"`
+	ID []int64 `json:"id"`
 }
 
 // Validate validates this task restart
