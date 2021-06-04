@@ -7,6 +7,7 @@
 #pvob名称，component名称，stream名称，gitRepoURL，git目标分支代码，任务ID，是否保留空目录(是：true，否：false)，用户名，邮箱, 空目录占位文件名称, gitignore文件内容
 ######
 
+set -x
 export LANG="zh_CN.UTF-8"
 set -e
 workdir=$(cd "$(dirname "$0")"; pwd)
