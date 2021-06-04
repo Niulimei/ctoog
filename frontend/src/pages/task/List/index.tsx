@@ -1,15 +1,16 @@
-import React from 'react';
+import React, {useState, useCallback, useMemo} from 'react';
 import moment from 'moment';
 import { useHistory } from 'umi';
+import {values, uniq, flatten} from 'lodash';
 import { Task } from '@/typings/model';
-import Table from '@ant-design/pro-table';
+import ProTable from '@ant-design/pro-table';
 /** UploadOutlined */
 import { DownOutlined } from '@ant-design/icons';
 import { task as taskService } from '@/services';
 import TaskCreator from '../TaskCreator';
 import { useCacheRequestParams } from '@/utils/hooks';
 /** Upload */
-import { Button, message, Dropdown, Menu } from 'antd';
+import { Button, message, Table, Space } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
 
 type Actions = Record<
@@ -109,6 +110,7 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
 };
 
 const TaskList: React.FC = () => {
+  const [selectPageRow, setPageSelectRow] = useState({});
   const tableRef = React.useRef<any>(null);
   const creatorModalRef = React.useRef<any>(null);
   const history = useHistory();
@@ -173,11 +175,38 @@ const TaskList: React.FC = () => {
   //   })
   // }
 
+  const setCurrentPageChoosen = useCallback((ids) => {
+      const currentPage = params.current;
+      setPageSelectRow({
+        ...selectPageRow,
+        [currentPage]: ids
+      });
+    }, [params, selectPageRow]);
+
+  const runAll = () => {
+      if (selectedRowKeys.length === 0) {
+        message.error('请选择任务');
+      } else {
+        actions.startTask(selectedRowKeys);
+      }
+  }
+
+  const selectedRowKeys = useMemo(() => {
+    return uniq(flatten(values(selectPageRow))) || [];
+  }, [selectPageRow, params]);
+
   return (
     <>
-      <Table
+      <ProTable
         rowKey="id"
         actionRef={tableRef}
+        rowSelection={{
+          // 自定义选择项参考: https://ant.design/components/table-cn/#components-table-demo-row-selection-custom
+          // 注释该行则默认不显示下拉选项
+          selections: [Table.SELECTION_INVERT],
+          onChange: setCurrentPageChoosen,
+          selectedRowKeys
+        }}
         pagination={{
           pageSize: params.pageSize,
           onChange(num, size = 10) {
@@ -203,20 +232,19 @@ const TaskList: React.FC = () => {
         headerTitle="迁移任务"
         columns={getColumns(actions)}
         toolBarRender={() => [
-          /** 批量上传 */
-          // <Upload accept={excelTypeStr} beforeUpload={validateExcel} showUploadList={false} {...props}>
-          //   <Button icon={<UploadOutlined />}>批量上传</Button>
-          // </Upload>,
-          // <Button
-          //   size="small"
-          //   type="primary"
-          //   onClick={() => {
-          //     creatorModalRef.current.openModal();
-          //   }}
-          // >
-          //   新建迁移任务
-          // </Button>,
+          <Button
+            size="small"
+            type="primary"
+            onClick={() => runAll()}
+          >批量执行</Button>
         ]}
+        tableAlertOptionRender={() => {
+        return (
+          <Space size={16}>
+            <a onClick={() => setPageSelectRow({})}>取消选择</a>
+          </Space>
+        );
+      }}
       />
       <TaskCreator
         actionRef={creatorModalRef}
