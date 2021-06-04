@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd, tmpCmdOutFile string) {
+func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd, tmpCmdOutFile string, endSignal chan struct{}) {
 	data := payload{
 		Logid:  strconv.FormatInt(task.TaskLogId, 10),
 		Status: "completed",
@@ -35,6 +35,7 @@ func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd, tmpCmd
 			break
 		}
 	}
+	endSignal <- struct{}{}
 	end := time.Now()
 	data.Endtime = end.Format("2006-01-02 15:04:05")
 	duration := end.Sub(start).Seconds()
@@ -337,6 +338,7 @@ func readCommandOut(fileName string, container *[]string) {
 }
 
 func cc2Git(workerTaskModel Task, gitUrl string) {
+	var endSignal = make(chan struct{})
 	cwd, _ := os.Getwd()
 	var cmds []*exec.Cmd
 	tmpCmdOutFile := fmt.Sprintf("%s/tmpCmdOut/%d_%d.log", cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)
@@ -351,7 +353,7 @@ func cc2Git(workerTaskModel Task, gitUrl string) {
 		cmd := exec.Command("/bin/bash", "-c", cmdStr)
 		cmds = append(cmds, cmd)
 	}
-	go infoServerTaskCompleted(&workerTaskModel, ServerFlag, cmds, tmpCmdOutFile)
+	go infoServerTaskCompleted(&workerTaskModel, ServerFlag, cmds, tmpCmdOutFile, endSignal)
 }
 
 func geneUsersFile(workerTaskModel Task) string {
@@ -360,17 +362,18 @@ func geneUsersFile(workerTaskModel Task) string {
 	for _, pi := range workerTaskModel.NamePair {
 		buffer.WriteString(fmt.Sprintf("%s = %s <%s>\n", pi.SnvUserName, pi.GitUserName, pi.GitEmail))
 	}
-	fp := filepath.Join(cwd, filepath.Base(workerTaskModel.SvnURL)+"_"+strconv.Itoa(int(workerTaskModel.TaskId))+".txt")
+	fp := filepath.Join(cwd, "tmpCmdOut", filepath.Base(workerTaskModel.SvnURL)+"_"+strconv.Itoa(int(workerTaskModel.TaskId))+".txt")
 	ioutil.WriteFile(fp, []byte(buffer.String()), 0644)
 	return fp
 }
 
 func svn2Git(workerTaskModel Task, gitUrl string) int {
+	var endSignal = make(chan struct{})
 	cwd, _ := os.Getwd()
 	var cmds []*exec.Cmd
-	userFile := geneUsersFile(workerTaskModel)
 	tmpCmdOutFile := fmt.Sprintf("%s/tmpCmdOut/%d_%d.log", cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)
 	exec.Command("/bin/bash", "-c", fmt.Sprintf("mkdir -p %s/tmpCmdOut;touch %s/tmpCmdOut/%d_%d.log", cwd, cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)).Output()
+	userFile := geneUsersFile(workerTaskModel)
 	cmdStr := fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" &> %s`,
 		cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
 		workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail,
@@ -379,7 +382,11 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	log.Infoln(cmdStr)
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	cmds = append(cmds, cmd)
-	go infoServerTaskCompleted(&workerTaskModel, ServerFlag, cmds, tmpCmdOutFile)
+	go infoServerTaskCompleted(&workerTaskModel, ServerFlag, cmds, tmpCmdOutFile, endSignal)
+	go func() {
+		<-endSignal
+		os.RemoveAll(userFile)
+	}()
 	return http.StatusOK
 }
 

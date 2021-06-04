@@ -28,7 +28,7 @@ type NamePairInfo struct {
 	// git user name
 	GitUserName string `json:"gitUserName,omitempty"`
 	// snv user name
-	SnvUserName string `json:"snvUserName,omitempty"`
+	SnvUserName string `json:"svnUserName,omitempty"`
 }
 
 type Task struct {
