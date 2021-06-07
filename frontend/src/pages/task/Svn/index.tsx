@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { useHistory } from 'umi';
+import { useHistory, useModel } from 'umi';
 import { Task } from '@/typings/model';
 import Table from '@ant-design/pro-table';
 /** UploadOutlined */
@@ -98,10 +98,12 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
 };
 
 const TaskList: React.FC = () => {
+  const { initialState } = useModel('@@initialState');
   const tableRef = React.useRef<any>(null);
   const creatorModalRef = React.useRef<any>(null);
   const history = useHistory();
   const { params, setParams } = useCacheRequestParams('taskList');
+  const { RouteList = [] } = initialState;
 
   const actions: Actions = {
     /** 查看任务详情 */
@@ -159,6 +161,11 @@ const TaskList: React.FC = () => {
         headerTitle="迁移任务"
         columns={getColumns(actions)}
         toolBarRender={() => [
+          !RouteList.includes('jianxin') && <Button
+            size="small"
+            type="primary"
+            onClick={() => actions.createTask()}
+          >新建SVN迁移任务</Button>
         ]}
       />
       <TaskCreator

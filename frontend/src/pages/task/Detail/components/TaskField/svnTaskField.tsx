@@ -41,9 +41,8 @@ const descriptionsGenerator = (fieldKeys: string[], data: any) => {
     ccPassword: 'SVN 密码',
     gitURL: 'Git Repo URL',
     gitUser: 'Git 用户名',
-    gitEmail: 'Git Email',
+    svn_url: 'SVN URL',
     gitPassword: 'Git 密码',
-    dir: '组件子目录',
     keep: '文件占位名',
     gitignore: 'gitignore文件',
     workerUrl: '执行机器'
@@ -112,21 +111,25 @@ const TaskDetail: React.FC<{ data?: Task.Detail['taskModel'] }> = ({ data }) => 
       {descriptionsGenerator(
         [
           'gitURL',
-          'gitEmail',
+          'svn_url',
           'ccUser',
           'gitUser',
           'ccPassword',
           'gitPassword',
-          'dir',
           'gitignore',
           'workerUrl'
         ],
         data,
       )}
-      <div className={styles.divider} />
-      {data.matchInfo?.map((matchInfo) =>
-        descriptionsGenerator(['stream', 'gitBranch'], matchInfo),
-      )}
+      <div className={styles.col}>
+        <span className={styles.row}>
+          <span>是否保留空目录：{data.includeEmpty ? '是' : '否'}</span>
+        </span>
+        <span className={styles.row}>
+          <span>占位文件名：{data.keep}</span>
+        </span>
+      </div>
+       <div className={styles.divider} />
       <div className={styles.table}>
         <ProTable<Member>
           columns={columns}
@@ -135,12 +138,6 @@ const TaskDetail: React.FC<{ data?: Task.Detail['taskModel'] }> = ({ data }) => 
           toolBarRender={false}
           search={false}
         />
-      </div>
-      <div className={styles.col}>
-        <span className={styles.row}>
-          <span>是否保留空目录：{data.includeEmpty ? '是' : '否'}</span>
-          <span style={{ marginLeft: '2em' }}>占位文件名：{data.keep}</span>
-        </span>
       </div>
     </div>
   );
