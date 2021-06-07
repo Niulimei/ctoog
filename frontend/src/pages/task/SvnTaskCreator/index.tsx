@@ -1,11 +1,12 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import { observer } from 'mobx-react';
 import { useToggle } from 'react-use';
+import {throttle, map} from 'lodash';
 import classnames from 'classnames';
 import { guid } from '@/utils/utils';
 import type { FormInstance } from 'antd/es/form';
 import { task as taskService, svn as svnService } from '@/services';
-import { Button, message, Form, Modal, Checkbox, Input, Empty } from 'antd';
+import { Button, message, Form, Modal, Checkbox, Input, Empty, Tooltip } from 'antd';
 import { StepsForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 
 import styles from './style.less';
@@ -41,6 +42,8 @@ const renderSvnTitle = (title: string) => {
 const DisablePasswordFieldAutocompleteProps = {
   fieldProps: { autoComplete: 'new-password' },
 };
+
+const { TextArea } = Input;
 
 /** 生成表单项 */
 const formFieldsGenerator = (fields: any) => {
@@ -129,13 +132,14 @@ const formTreeFieldsGenerator = (fields: any) => {
     const [leftNode, rightNode, ExNode] = nodes.map((node: any) =>
       node.component ? renderFieldComponent(node) : node,
     );
-    // console.log(leftNode);
 
     return (
       <div className={styles.col} key={key}>
-        <div className={classnames(styles.leftTitle)}>{leftNode}</div>
-        <div className={classnames(styles.row, styles.left, isRequired(rightNode) ? styles.must : '')}>{rightNode}</div>
-        {ExNode ? <div className={classnames(styles.row, styles.right, isRequired(ExNode) ? styles.must : '')}>{ExNode}</div> : null}
+        <div className={classnames(styles.leftTitles)}>{leftNode}</div>
+        <div className={classnames(styles.rightNodes)}>
+          <div className={classnames(styles.left, isRequired(rightNode) ? styles.must : '')}>{rightNode}</div>
+          {ExNode ? <div className={classnames(styles.right, isRequired(ExNode) ? styles.must : '')}>{ExNode}</div> : null}
+        </div>
       </div>
     );
   });
@@ -149,6 +153,10 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   const [currentNum, setCurrentNum] = useState(0);
   const [visible, toggleVisible] = useToggle(false);
   const modalRef = React.useRef<{ taskId: string }>({ taskId: '' });
+
+  // 两个脚本域的变量
+  const [gitScript, setGitScript] = useState('function main(user) { return user }');
+  const [gitEmailScript, setGitEmailScript] = useState('function main(user) { return user + "@example.com" }');
 
   /** 更新模式
    * 1. 回填表单数据
@@ -236,9 +244,45 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
     setCurrentNum(0);
   }
 
+  const runScript = useCallback(
+    type => {
+      const { namePair } = formUser.getFieldsValue(['namePair']);
+      try {
+        if (type === 'git') {
+          const gitOutPut = map(namePair, item => {
+            return {
+              gitEmail: item?.gitEmail,
+              gitUserName: eval(gitScript + 'main("'+item?.gitUserName+'")'),
+              svnUserName: item?.svnUserName
+            }
+          })
+          formUser.setFieldsValue({'namePair': gitOutPut});
+        } else {
+          const gitEmailOutPut = map(namePair, item => {
+            return {
+              gitEmail: eval(gitEmailScript + 'main("'+item?.gitUserName+'")'),
+              gitUserName: item?.gitUserName,
+              svnUserName: item?.svnUserName
+            }
+          })
+          formUser.setFieldsValue({'namePair': gitEmailOutPut});
+        }
+      } catch (e) {
+        message.error(e);
+      }
+    }, [gitScript, gitEmailScript]
+  );
+
   return (
     <StepsForm
       current={currentNum}
+      containerStyle={{
+        maxHeight: "calc(100vh - 190px)",
+        overflowY: 'scroll',
+        overflowX: 'hidden',
+        width: 'max-content',
+        padding: "0 20px"
+      }}
       onFinish={closeModal}
       onCurrentChange={num => setCurrentNum(num)}
       title={`${actionText}迁移任务`}
@@ -375,10 +419,31 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       <StepsForm.StepForm
           name="user"
           form={formUser}
-          title="SVN用户"
+          title="用户设置"
           onFinish={finishHandler}
         >
-         <div className={styles.gutter}>
+         <div className={classnames([styles.gutter, styles.gutterEx])}>
+           <div className={styles.svnTitle}>
+             <p className={styles.firstNode}>SVN</p>
+             <p className={styles.secondNode}>Git</p>
+           </div>
+            <div className={styles.svnTitle}>
+             <div className={styles.firstNode}>
+               <Tooltip title="脚本执行main函数">
+                 <span>js脚本</span>
+               </Tooltip>
+             </div>
+             <div className={styles.secondNodes}>
+                <div className={classnames([styles.innerRun, styles.innerRunLeft])}>
+                  <ProFormTextArea fieldProps={{value: gitScript, onChange: e => throttle(() => setGitScript(e?.target?.value), 1000)()}} />
+                  <Button type="primary" size="small" onClick={() => runScript('git')}>执行</Button>
+                </div>
+                <div className={styles.innerRun}>
+                  <ProFormTextArea fieldProps={{value: gitEmailScript, onChange: e => setGitEmailScript(e?.target?.value)}} />
+                  <Button type="primary" size="small" onClick={() => runScript('email')}>执行</Button>
+                </div>
+             </div>
+           </div>
         {formTreeFieldsGenerator(
           svnList.map((item, index) => [
             {

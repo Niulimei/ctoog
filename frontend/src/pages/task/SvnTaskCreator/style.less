@@ -21,8 +21,18 @@
   .leftTitle {
     width: 100px;
     flex: none;
-    margin-top: 5px;
     overflow: hidden;
+  }
+
+  .leftTitles {
+    width: 100px;
+    flex: none;
+    overflow: hidden;
+    margin-right: 100px;
+  }
+
+  .rightNodes {
+    display: flex;
   }
 
   .right {
@@ -66,6 +76,20 @@
   }
 }
 
+.gutterEx {
+  padding-left: 0;
+  .rightNodes {
+    flex: 1;
+  }
+  .left {
+    flex: 1;
+  }
+  .right {
+    padding-right: 0;
+    flex: 1;
+  }
+}
+
 .modalForm {
   :global .ant-modal-body {
     max-height: 600px;
@@ -96,5 +120,39 @@
     top: 5px;
     left: -20px;
     font-size: @necessity-font-size;
+  }
+}
+
+.svnTitle {
+  display: flex;
+  .firstNode {
+    width: 200px;
+    font-weight: 600;
+  }
+  .secondNode {
+    flex: 1;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .secondNodes {
+    flex: 1;
+    display: flex;
+    .innerRun {
+      display: flex;
+      width: 47%;
+      margin-bottom: 20px;
+      :global {
+        .ant-btn {
+          height: 100%;
+        }
+        .ant-form-item {
+          margin-bottom: 0;
+        }
+      }
+    }
+    .innerRunLeft {
+      margin-right: 30px;
+    }
   }
 }
