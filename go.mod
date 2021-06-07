@@ -17,6 +17,7 @@ require (
 	github.com/go-openapi/swag v0.19.15
 	github.com/go-openapi/validate v0.20.2
 	github.com/google/go-cmp v0.5.5 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/jinzhu/copier v0.3.0
 	github.com/jmoiron/sqlx v1.3.3
@@ -28,5 +29,6 @@ require (
 	go.mongodb.org/mongo-driver v1.5.2 // indirect
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
 	golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea // indirect
+	gopkg.in/olahol/melody.v1 v1.0.0-20170518105555-d52139073376 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )
