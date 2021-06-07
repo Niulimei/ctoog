@@ -124,7 +124,7 @@ const formFieldsGenerator = (fields: any) => {
       }
     }
     return false
-  
+
   }
 
   return fields.map((nodes: any) => {
@@ -134,7 +134,7 @@ const formFieldsGenerator = (fields: any) => {
       node.component ? renderFieldComponent(node) : node,
     );
     // console.log(leftNode);
-    
+
     return (
       <div className={styles.col} key={key}>
         <div className={classnames(styles.row, styles.left, isRequired(leftNode) ? styles.must : '')}>{leftNode}</div>
@@ -262,7 +262,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       title={`${actionText}迁移任务`}
       onValuesChange={onFormValuesChange}
       onVisibleChange={(vis) => toggleVisible(vis)}
-      modalProps={{ okText: actionText, className: styles.modalForm }}
+      modalProps={{ okText: actionText, className: styles.modalForm, centered: true }}
       initialValues={{ keep: '.gitkeep' }}
     >
       <div className={styles.gutter}>
