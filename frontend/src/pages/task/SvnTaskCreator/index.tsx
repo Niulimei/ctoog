@@ -225,7 +225,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       });
       setSvnList(list || []);
       const preNamesPair = form.getFieldValue('namePair');
-      if (preNamesPair) {
+      if (!preNamesPair) {
         formUser.setFieldsValue({'namePair': preNamesPair});
       } else {
         formUser.setFieldsValue({'namePair': list.map(item => {return {'svnUserName': item, 'gitUserName': item, 'gitEmail': `${item}@example.com`}})})

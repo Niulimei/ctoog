@@ -1,7 +1,7 @@
 import React from 'react';
 import { Task } from '@/typings/model';
 import TaskCreator from '../TaskCreator';
-import { useLocation, useHistory } from 'umi';
+import { useLocation, useHistory, useModel } from 'umi';
 import TaskField from './components/TaskField';
 import TaskLogger from './components/TaskLogger';
 import { task as taskService } from '@/services';
@@ -33,6 +33,7 @@ const tabList = [
 ];
 
 const TaskDetail = () => {
+  const { initialState } = useModel('@@initialState');
   const history = useHistory();
   const location = useLocation<any>();
   const [taskDetail, setTaskDetail] = React.useState<Task.Detail>();
@@ -40,6 +41,8 @@ const TaskDetail = () => {
   const taskLoggerRef = React.useRef<any>();
   const taskCreatorRef = React.useRef<any>();
   const [isLoading, setisLoading] = React.useState(false);
+
+  const { RouteList = [] } = initialState;
 
   const actions = {
     /** 删除任务 */
@@ -111,9 +114,9 @@ const TaskDetail = () => {
               启动任务
             </Button>
           ) : null,
-          // <Button key="updateTask" onClick={actions.updateTask}>
-          //   修改任务
-          // </Button>,
+          (
+            !RouteList.includes('jianxin') &&  <Button key="updateTask" onClick={actions.updateTask}>修改任务</Button>
+          ),
           <Button key="clearCache" loading={isLoading} onClick={actions.clearCache}>
             删除缓存
           </Button>,

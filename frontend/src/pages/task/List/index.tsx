@@ -1,6 +1,6 @@
 import React, {useState, useCallback, useMemo} from 'react';
 import moment from 'moment';
-import { useHistory } from 'umi';
+import { useHistory, useModel } from 'umi';
 import {values, uniq, flatten} from 'lodash';
 import { Task } from '@/typings/model';
 import ProTable from '@ant-design/pro-table';
@@ -10,14 +10,14 @@ import { task as taskService } from '@/services';
 import TaskCreator from '../TaskCreator';
 import { useCacheRequestParams } from '@/utils/hooks';
 /** Upload */
-import { Button, message, Table, Space } from 'antd';
+import { Button, message, Table, Space, Dropdown, Menu } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
 
 type Actions = Record<
   'startTask' | 'gotoDetail' | 'updateTask' | 'createTask',
   (id: number) => void
 >;
-const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
+const getColumns = (actions: Actions, isJianxin): ProColumns<Task.Item>[] => {
   return [
     {
       title: '任务编号',
@@ -73,31 +73,34 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
             <Button size="small" type="link" onClick={() => actions.gotoDetail(item.id)}>
               详情
             </Button>
-            {/*<Dropdown*/}
-            {/*  overlay={*/}
-            {/*    <Menu>*/}
-            {/*      <Menu.Item>*/}
-            {/*        <Button size="small" type="link" onClick={() => actions.updateTask(item.id)}>*/}
-            {/*          修改任务*/}
-            {/*        </Button>*/}
-            {/*      </Menu.Item>*/}
+            {
+              !isJianxin && (
+              <Dropdown
+                overlay={
+                  <Menu>
+                    <Menu.Item>
+                      <Button size="small" type="link" onClick={() => actions.updateTask(item.id)}>
+                        修改任务
+                      </Button>
+                    </Menu.Item>
 
-            {/*      {item.status !== Task.Status.RUNNING && (*/}
-            {/*        <Menu.Item>*/}
-            {/*          <Button size="small" type="link" onClick={() => actions.startTask(item.id)}>*/}
-            {/*            启动任务*/}
-            {/*          </Button>*/}
-            {/*        </Menu.Item>*/}
-            {/*      )}*/}
-            {/*    </Menu>*/}
-            {/*  }*/}
-            {/*>*/}
-            {/*  <Button size="small" type="link">*/}
-            {/*    更多*/}
-            {/*    <DownOutlined />*/}
-            {/*  </Button>*/}
-            {/*</Dropdown>*/}
-            {item.status !== Task.Status.RUNNING && (
+                    {item.status !== Task.Status.RUNNING && (
+                      <Menu.Item>
+                        <Button size="small" type="link" onClick={() => actions.startTask(item.id)}>
+                          启动任务
+                        </Button>
+                      </Menu.Item>
+                    )}
+                  </Menu>
+                }
+              >
+                <Button size="small" type="link">
+                  更多
+                  <DownOutlined/>
+                </Button>
+              </Dropdown>)
+            }
+            {item.status !== Task.Status.RUNNING && isJianxin && (
               <Button size="small" type="link" onClick={() => actions.startTask(item.id)}>
                 启动任务
               </Button>
@@ -110,11 +113,14 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
 };
 
 const TaskList: React.FC = () => {
+  const { initialState } = useModel('@@initialState');
   const [selectPageRow, setPageSelectRow] = useState({});
   const tableRef = React.useRef<any>(null);
   const creatorModalRef = React.useRef<any>(null);
   const history = useHistory();
   const { params, setParams } = useCacheRequestParams('taskList');
+
+  const { RouteList = [] } = initialState;
 
   const actions: Actions = {
     /** 查看任务详情 */
@@ -230,13 +236,18 @@ const TaskList: React.FC = () => {
           };
         }}
         headerTitle="迁移任务"
-        columns={getColumns(actions)}
+        columns={getColumns(actions, RouteList.includes('jianxin'))}
         toolBarRender={() => [
           <Button
             size="small"
             type="primary"
             onClick={() => runAll()}
-          >批量执行</Button>
+          >批量执行</Button>,
+          !RouteList.includes('jianxin') && <Button
+            size="small"
+            type="primary"
+            onClick={() => actions.createTask()}
+          >新建CC迁移任务</Button>
         ]}
         tableAlertOptionRender={() => {
         return (
