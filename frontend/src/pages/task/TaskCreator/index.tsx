@@ -1,5 +1,6 @@
 import React from 'react';
 import { useMount } from 'react-use';
+import {useModel} from 'umi';
 import {toJS} from 'mobx';
 import { observer } from 'mobx-react';
 import { useToggle } from 'react-use';
@@ -124,7 +125,7 @@ const formFieldsGenerator = (fields: any) => {
       }
     }
     return false
-  
+
   }
 
   return fields.map((nodes: any) => {
@@ -134,7 +135,7 @@ const formFieldsGenerator = (fields: any) => {
       node.component ? renderFieldComponent(node) : node,
     );
     // console.log(leftNode);
-    
+
     return (
       <div className={styles.col} key={key}>
         <div className={classnames(styles.row, styles.left, isRequired(leftNode) ? styles.must : '')}>{leftNode}</div>
@@ -159,12 +160,15 @@ const FieldAutoComplete = props => {
 }
 
 const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
+  const { initialState } = useModel('@@initialState');
   const { onSuccess, actionRef } = props;
   const [branchFieldNum, setBranchFieldNum] = React.useState(1);
   const [form] = Form.useForm<IFormFields>();
   const { dispatch: optionDispatch, valueEnum } = useClearCaseSelectEnum();
   const [visible, toggleVisible] = useToggle(false);
   const modalRef = React.useRef<{ taskId: string }>({ taskId: '' });
+
+  const { RouteList = [] } = initialState;
 
   /** 更新模式
    * 1. 回填表单数据
@@ -206,7 +210,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       if (isUpdateMode()) {
         await taskService.updateTask(modalRef.current.taskId, values);
       } else {
-        await taskService.createTask(values);
+        await taskService.createTask({...values, modelType: 'ClearCase'});
       }
       message.success(`迁移任务${actionText}成功`);
       onSuccess?.();
@@ -262,7 +266,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       title={`${actionText}迁移任务`}
       onValuesChange={onFormValuesChange}
       onVisibleChange={(vis) => toggleVisible(vis)}
-      modalProps={{ okText: actionText, className: styles.modalForm }}
+      modalProps={{ okText: actionText, className: styles.modalForm, centered: true }}
       initialValues={{ keep: '.gitkeep' }}
     >
       <div className={styles.gutter}>
@@ -309,12 +313,12 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               required: true,
               rules: [
                 {
-                  pattern: /^[^@]+@ccbft.com$/,
-                  message: '请输入 Git Email，格式：云桌面账号@ccbft.com',
+                  pattern: RouteList.includes('jianxin') ? /^[^@]+@ccbft.com$/ : /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/,
+                  message: RouteList.includes('jianxin') ? '请输入 Git Email，格式：云桌面账号@ccbft.com' : '请输入 Git Email',
                 },
               ],
               component: ProFormText,
-              placeholder: '请输入 Git Email，格式：云桌面账号@ccbft.com',
+              placeholder: RouteList.includes('jianxin') ? '请输入 Git Email，格式：云桌面账号@ccbft.com' : '请输入 Git Email',
             },
           ],
           [
