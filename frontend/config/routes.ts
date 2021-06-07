@@ -10,7 +10,7 @@
         path: '/task/plan',
         component: './task/Plan',
         exact: true,
-        // access: 'jianxin'
+        access: 'jianxin'
       },
       {
         name: '迁移任务',
