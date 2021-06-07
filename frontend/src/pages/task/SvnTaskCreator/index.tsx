@@ -201,6 +201,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       } else {
         await taskService.createTask({
           svnUrl: preFormValue?.svn_url,
+          modelType: 'svn',
           ...preFormValue,
           ...values
         });
