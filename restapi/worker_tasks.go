@@ -19,28 +19,38 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func infoServerTaskCompleted(task *Task, server string, cmds []*exec.Cmd, tmpCmdOutFile string, endSignal chan struct{}) {
+func startTaskAndInfoServer(task *Task, server string, cmds []*exec.Cmd, tmpCmdOutFile string, endSignal chan struct{}) {
 	data := payload{
 		Logid:  strconv.FormatInt(task.TaskLogId, 10),
 		Status: "completed",
 	}
 	start := time.Now()
-	for _, cmd := range cmds {
+	RunningTask <- struct{}{}
+	func() {
+		defer func() {
+			err := recover()
+			log.Errorln("Recover from err: ", err)
+		}()
 		data.Starttime = start.Format("2006-01-02 15:04:05")
-		log.Debug("start cmd:", cmd.String())
-		err := sendCommandOut(server, cmd, task, tmpCmdOutFile)
-		if err != nil {
-			log.Error("cmd err:", err)
-			data.Status = "failed"
-			break
+		for _, cmd := range cmds {
+			log.Debug("start cmd:", cmd.String())
+			err := sendCommandOut(server, cmd, task, tmpCmdOutFile)
+			if err != nil {
+				log.Error("cmd err:", err)
+				data.Status = "failed"
+				break
+			}
 		}
-	}
-	endSignal <- struct{}{}
-	end := time.Now()
-	data.Endtime = end.Format("2006-01-02 15:04:05")
-	duration := end.Sub(start).Seconds()
-	d := strconv.FormatInt(int64(duration), 10)
-	data.Duration = d
+		end := time.Now()
+		data.Endtime = end.Format("2006-01-02 15:04:05")
+		duration := end.Sub(start).Seconds()
+		d := strconv.FormatInt(int64(duration), 10)
+		data.Duration = d
+	}()
+	<-RunningTask
+	go func() {
+		endSignal <- struct{}{}
+	}()
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
 		log.Error(err)
@@ -353,7 +363,11 @@ func cc2Git(workerTaskModel Task, gitUrl string) {
 		cmd := exec.Command("/bin/bash", "-c", cmdStr)
 		cmds = append(cmds, cmd)
 	}
-	go infoServerTaskCompleted(&workerTaskModel, ServerFlag, cmds, tmpCmdOutFile, endSignal)
+	go startTaskAndInfoServer(&workerTaskModel, ServerFlag, cmds, tmpCmdOutFile, endSignal)
+	go func() {
+		<-endSignal
+		// do post thing
+	}()
 }
 
 func geneUsersFile(workerTaskModel Task) string {
@@ -382,7 +396,7 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	log.Infoln(cmdStr)
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	cmds = append(cmds, cmd)
-	go infoServerTaskCompleted(&workerTaskModel, ServerFlag, cmds, tmpCmdOutFile, endSignal)
+	go startTaskAndInfoServer(&workerTaskModel, ServerFlag, cmds, tmpCmdOutFile, endSignal)
 	go func() {
 		<-endSignal
 		os.RemoveAll(userFile)

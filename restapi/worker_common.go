@@ -4,6 +4,9 @@ const adminJwtToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6ImFk
 
 var ServerFlag string
 
+//RunningTask 限制同时运行的任务数量
+var RunningTask = make(chan struct{}, 5)
+
 type commandOut struct {
 	Logid   int64  `json:"log_id"`
 	Content string `json:"content"`
