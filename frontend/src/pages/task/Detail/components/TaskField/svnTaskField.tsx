@@ -110,8 +110,8 @@ const TaskDetail: React.FC<{ data?: Task.Detail['taskModel'] }> = ({ data }) => 
     <div className={styles.gutter}>
       {descriptionsGenerator(
         [
-          'gitURL',
           'svn_url',
+          'gitURL',
           'ccUser',
           'gitUser',
           'ccPassword',

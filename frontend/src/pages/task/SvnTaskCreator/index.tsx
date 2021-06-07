@@ -1,7 +1,7 @@
 import React, {useCallback, useState} from 'react';
 import { observer } from 'mobx-react';
 import { useToggle } from 'react-use';
-import {throttle, map} from 'lodash';
+import {throttle, map, groupBy} from 'lodash';
 import classnames from 'classnames';
 import { guid } from '@/utils/utils';
 import type { FormInstance } from 'antd/es/form';
@@ -225,8 +225,17 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       });
       setSvnList(list || []);
       const preNamesPair = form.getFieldValue('namePair');
-      if (!preNamesPair) {
-        formUser.setFieldsValue({'namePair': preNamesPair});
+      if (preNamesPair) {
+        let nameGroupBy = groupBy(preNamesPair, 'svnUserName');
+        let newNamePair = list.map(item => {
+          const namePairItem = nameGroupBy[item];
+          if (nameGroupBy[item]) {
+            return namePairItem[0];
+          } else {
+            return {'svnUserName': item, 'gitUserName': item, 'gitEmail': `${item}@example.com`};
+          }
+        })
+        formUser.setFieldsValue({'namePair': newNamePair});
       } else {
         formUser.setFieldsValue({'namePair': list.map(item => {return {'svnUserName': item, 'gitUserName': item, 'gitEmail': `${item}@example.com`}})})
       }
@@ -291,6 +300,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             <Modal
               title={`${actionText}迁移任务`}
               width={850}
+              centered
+              wrapClassName={styles.svnModal}
               onCancel={closeModal}
               visible={visible}
               footer={submitter}
