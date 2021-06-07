@@ -70,7 +70,7 @@ func startTask(taskId int64) {
 	worker := &database.WorkerModel{}
 	newAssigned := false
 	log.Info(task.WorkerId)
-	if task.WorkerId != 0 {
+	if task.WorkerId.Int64 != 0 {
 		log.Debug("got worker id")
 		err = database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1 and status = 'running'", task.WorkerId)
 	} else {
@@ -94,7 +94,7 @@ func startTask(taskId int64) {
 			" VALUES($1, 'running', $2, $3, 0)", taskId, startTime, "",
 	)
 	taskLogId, err := r.LastInsertId()
-	component := task.Component + task.Dir
+	component := task.Component.String + task.Dir.String
 	if err == nil {
 		type InnerMatchInfo struct {
 			Branch string
@@ -123,19 +123,19 @@ func startTask(taskId int64) {
 		workerTaskModel := InnerTask{
 			TaskId:       taskId,
 			TaskLogId:    taskLogId,
-			CcPassword:   task.CcPassword,
-			CcUser:       task.CcUser,
+			CcPassword:   task.CcPassword.String,
+			CcUser:       task.CcUser.String,
 			Component:    component,
-			GitPassword:  task.GitPassword,
-			GitURL:       task.GitURL,
-			GitUser:      task.GitUser,
-			GitEmail:     task.GitEmail,
-			Pvob:         task.Pvob,
-			IncludeEmpty: task.IncludeEmpty,
-			Keep:         task.Keep,
-			SvnUrl:       task.SvnURL,
-			ModelType:    task.ModelType,
-			Gitignore:    task.Gitignore,
+			GitPassword:  task.GitPassword.String,
+			GitURL:       task.GitURL.String,
+			GitUser:      task.GitUser.String,
+			GitEmail:     task.GitEmail.String,
+			Pvob:         task.Pvob.String,
+			IncludeEmpty: task.IncludeEmpty.Bool,
+			Keep:         task.Keep.String,
+			SvnUrl:       task.SvnURL.String,
+			ModelType:    task.ModelType.String,
+			Gitignore:    task.Gitignore.String,
 		}
 		for _, match := range matchInfo {
 			workerTaskModel.Matches =
@@ -396,7 +396,7 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		utils.RecordLog(utils.Info, utils.UpdateTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
 		log.Debug("task update commit:", tx.Commit())
 	} else {
-		if task.Status == "running" {
+		if task.Status.String == "running" {
 			log.Error(err)
 			return middleware.Error(400, models.ErrorModel{Message: "执行中的任务不可以修改"})
 		}
@@ -442,7 +442,7 @@ func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responde
 	for _, taskId := range params.RestartTrigger.ID {
 		task := &database.TaskModel{}
 		database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
-		if task.Status != "running" {
+		if task.Status.String != "running" {
 			database.DB.MustExec("UPDATE task SET status = 'running' WHERE id = $1", taskId)
 			go startTask(taskId)
 		}

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"ctgb/models"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -17,58 +18,58 @@ var DB *sqlx.DB
 
 type TaskModel struct {
 	// id
-	Id int64 `db:"id"`
+	Id models.JsonNullInt64 `db:"id"`
 
 	// cc password
-	CcPassword string `db:"cc_password"`
+	CcPassword models.JsonNullString `db:"cc_password"`
 
 	// cc user
-	CcUser string `db:"cc_user"`
+	CcUser models.JsonNullString `db:"cc_user"`
 
 	// component
-	Component string
+	Component models.JsonNullString
 
 	// dir
-	Dir string
+	Dir models.JsonNullString
 
 	// keep
-	Keep string
+	Keep models.JsonNullString
 
 	// git password
-	GitPassword string `db:"git_password"`
+	GitPassword models.JsonNullString `db:"git_password"`
 
 	// git URL
-	GitURL string `db:"git_url"`
+	GitURL models.JsonNullString `db:"git_url"`
 
 	// git user
-	GitUser string `db:"git_user"`
+	GitUser models.JsonNullString `db:"git_user"`
 
 	// status
-	Status string
+	Status models.JsonNullString
 
 	//last completed date time
-	LastCompletedDateTime string `db:"last_completed_date_time"`
+	LastCompletedDateTime models.JsonNullString `db:"last_completed_date_time"`
 
 	//worker id
-	WorkerId int64 `db:"worker_id"`
+	WorkerId models.JsonNullInt64 `db:"worker_id"`
 
 	// pvob
-	Pvob string
+	Pvob models.JsonNullString
 
 	// include empty dir
-	IncludeEmpty bool `db:"include_empty"`
+	IncludeEmpty models.JsonNullBool `db:"include_empty"`
 
 	// git email
-	GitEmail string `db:"git_email"`
+	GitEmail models.JsonNullString `db:"git_email"`
 
 	// svn url
-	SvnURL string `db:"svn_url"`
+	SvnURL models.JsonNullString `db:"svn_url"`
 
 	// model type
-	ModelType string `db:"model_type"`
+	ModelType models.JsonNullString `db:"model_type"`
 
 	// gitignore
-	Gitignore string `json:"gitignore,omitempty"`
+	Gitignore models.JsonNullString `json:"gitignore,omitempty"`
 }
 
 type WorkerModel struct {
