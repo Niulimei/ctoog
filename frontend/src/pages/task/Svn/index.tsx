@@ -9,8 +9,9 @@ import { task as taskService } from '@/services';
 import TaskCreator from '../SvnTaskCreator';
 import { useCacheRequestParams } from '@/utils/hooks';
 /** Upload */
-import { Button, message, Dropdown, Menu } from 'antd';
+import { Button, message, Dropdown, Menu, Tooltip } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
+import styles from './index.less';
 
 type Actions = Record<
   'startTask' | 'gotoDetail' | 'updateTask' | 'createTask',
@@ -33,10 +34,15 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
     },
     {
       title: 'Git Repo',
-      dataIndex: 'gitRepo',
-      ellipsis: true,
       width: 180,
       hideInSearch: true,
+      render({gitRepo}: Task.Item) {
+        return (
+          <Tooltip placement="topLeft" title={gitRepo}>
+            <span className={styles.svnRepoTitle}>{gitRepo ? gitRepo : '-'}</span>
+          </Tooltip>
+        )
+      }
     },
     {
       title: '当前状态',
