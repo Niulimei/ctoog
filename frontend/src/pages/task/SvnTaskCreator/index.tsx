@@ -316,6 +316,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       <StepsForm.StepForm
           name="base"
           form={form}
+          style={{overflow: 'hidden'}}
           title="SVN基础设置"
           onFinish={getSvnUserList}
         >
@@ -430,6 +431,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
         </StepsForm.StepForm>
       <StepsForm.StepForm
           name="user"
+          style={{overflow: 'hidden'}}
           form={formUser}
           title="用户设置"
           onFinish={finishHandler}
@@ -438,6 +440,13 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
            <div className={styles.svnTitle}>
              <p className={styles.firstNode}>SVN</p>
              <p className={styles.secondNode}>Git</p>
+           </div>
+           <div className={styles.svnTitle}>
+             <div className={styles.firstNode}></div>
+             <div className={styles.secondNodes}>
+               <span className={styles.gitTitle}>Git用户名</span>
+               <span className={styles.gitTitle}>Git邮箱</span>
+             </div>
            </div>
             <div className={styles.svnTitle}>
              <div className={styles.firstNode}>
