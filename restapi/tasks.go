@@ -231,7 +231,7 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		}
 		tx, _ := database.DB.Begin()
 		for _, namePair := range taskInfo.NamePair {
-			tx.Exec("INSERT INTO name_pair (task_id, git_username, git_email, svn_username) VALUES (?,?,?)",
+			tx.Exec("INSERT INTO svn_name_pair (task_id, git_username, git_email, svn_username) VALUES (?,?,?,?)",
 				taskId, namePair.GitUserName, namePair.GitEmail, namePair.SvnUserName)
 		}
 		tx.Commit()
