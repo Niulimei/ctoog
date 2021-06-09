@@ -277,7 +277,24 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	return operations.NewGetTaskOK().WithPayload(taskDetail)
 }
 
-var taskColumns = []string{"pvob", "component", "git_url", "id", "last_completed_date_time", "status", "include_empty", "git_email", "dir", "keep"}
+var taskColumns = []string{"pvob", "component", "git_url", "id", "last_completed_date_time", "status", "include_empty", "git_email", "dir", "keep", "svn_url", "model_type"}
+
+func buildTaskParams(params operations.ListTaskParams) map[string]string {
+	ret := map[string]string{}
+	if params.ModelType != nil && *params.ModelType != "" {
+		ret["model_type"] = *params.ModelType
+	}
+	if params.Pvob != nil && *params.Pvob != "" {
+		ret["pvob"] = *params.Pvob
+	}
+	if params.Component != nil && *params.Component != "" {
+		ret["component"] = *params.Component
+	}
+	if params.Status != nil && *params.Status != "" {
+		ret["status"] = *params.Status
+	}
+	return ret
+}
 
 func buildTaskWhereSQL(queryParams map[string]string) (string, []interface{}, error) {
 	l := len(queryParams)
@@ -288,7 +305,7 @@ func buildTaskWhereSQL(queryParams map[string]string) (string, []interface{}, er
 		placeholderIndex := int32(1)
 		for k, v := range queryParams {
 			switch k {
-			case "pvob", "component", "status":
+			case "pvob", "component", "status", "model_type":
 				sqlKeys, sqlValues, placeholderIndex = utils.GeneWhereLike(k, v, placeholderIndex, sqlKeys, sqlValues)
 			}
 		}
@@ -299,45 +316,25 @@ func buildTaskWhereSQL(queryParams map[string]string) (string, []interface{}, er
 
 func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 	username := params.HTTPRequest.Header.Get("username")
-	var query, queryCount string
+	whereSQL, _, sqlErr := buildTaskWhereSQL(buildTaskParams(params))
+	if nil != sqlErr {
+		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: ""})
+	}
+
 	user := getUserInfo(username)
+	if user.RoleID != int64(AdminRole) {
+		whereSQL += fmt.Sprintf(" and creator=%s", username)
+	}
+	prepSQL := utils.PreparingQurySQL(taskColumns, "task", int(params.Offset), int(params.Limit), "last_completed_date_time DESC", whereSQL)
 	var tasks []*models.TaskInfoModel
 	var count int64
-	var err error
-	if *params.ModelType == "clearcase" || *params.ModelType == "" {
-		if user.RoleID == int64(AdminRole) {
-			query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-				" status, include_empty, git_email, dir, keep" +
-				" FROM task WHERE model_type = 'clearcase' ORDER BY id DESC LIMIT $1 OFFSET $2;"
-			queryCount = "SELECT count(id) FROM task WHERE model_type = 'clearcase';"
-			err = database.DB.Select(&tasks, query, params.Limit, params.Offset)
-		} else {
-			query = "SELECT pvob, component, git_url, id, last_completed_date_time," +
-				" status, include_empty, git_email, dir, keep" +
-				" FROM task WHERE creator = $1 and model_type = 'clearcase' ORDER BY id DESC LIMIT $2 OFFSET $3;"
-			queryCount = "SELECT count(id) FROM task WHERE creator = $1 and model_type = 'clearcase';"
-			err = database.DB.Select(&tasks, query, username, params.Limit, params.Offset)
-		}
-	} else if *params.ModelType == "svn" {
-		if user.RoleID == int64(AdminRole) {
-			query = "SELECT git_url, id, last_completed_date_time," +
-				" status, include_empty, git_email, keep, svn_url" +
-				" FROM task WHERE model_type = 'svn' ORDER BY id DESC LIMIT $1 OFFSET $2;"
-			queryCount = "SELECT count(id) FROM task WHERE model_type = 'svn';"
-			err = database.DB.Select(&tasks, query, params.Limit, params.Offset)
-		} else {
-			query = "SELECT git_url, id, last_completed_date_time," +
-				" status, include_empty, git_email, keep, svn_url" +
-				" FROM task WHERE creator = $1 and model_type = 'svn' ORDER BY id DESC LIMIT $2 OFFSET $3;"
-			queryCount = "SELECT count(id) FROM task WHERE creator = $1 and model_type = 'svn';"
-			err = database.DB.Select(&tasks, query, username, params.Limit, params.Offset)
-		}
-	}
+	err := database.DB.Select(&tasks, prepSQL, params.Limit, params.Offset)
 	if err != nil {
 		log.Error(err)
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: "Sql Error"})
 	}
-	err = database.DB.Get(&count, queryCount, username)
+	queryCount := "select count(id) from task where 1=1 " + whereSQL
+	err = database.DB.Get(&count, queryCount)
 	if err != nil {
 		log.Error(err)
 		return middleware.Error(http.StatusInternalServerError, models.ErrorModel{Message: "Sql Error"})
