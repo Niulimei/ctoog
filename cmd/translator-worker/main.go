@@ -107,8 +107,10 @@ func main() {
 	yaml.Unmarshal(content, tmp)
 	restapi.ServerFlag = tmp.ServerAddr
 	go restapi.DumpLogFile(logFile)
+	go restapi.CleanOldTmpCmdOutFile()
 	go restapi.PingServer(tmp.Host, tmp.Port)
 	http.HandleFunc("/new_task", restapi.WorkerTaskHandler) //	设置访问路由
 	http.HandleFunc("/delete_task", restapi.DeleteWorkerTaskCacheHandler)
+	http.HandleFunc("/command_out", restapi.GetCommandOut)
 	log.Fatal(http.ListenAndServe(tmp.Host+":"+strconv.Itoa(tmp.Port), nil))
 }
