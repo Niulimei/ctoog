@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import { Task } from '@/typings/model';
 import TaskCreator from '../TaskCreator';
 import { useLocation, useHistory, useModel } from 'umi';
+import {throttle} from 'lodash';
 import TaskField from './components/TaskField';
 import TaskLogger from './components/TaskLogger';
 import { task as taskService } from '@/services';
@@ -44,6 +45,25 @@ const TaskDetail = () => {
 
   const { RouteList = [] } = initialState;
 
+  const fetchData = useCallback(
+    () => {
+      taskService.getTaskDetail(taskId).then((data) => {
+        if (taskId) {
+          if (!data.taskModel.ccUser) {
+            Modal.warn({
+              width: 480,
+              title: '提示',
+              afterClose: () => taskCreatorRef.current.openModal('planUpdate', taskId),
+              content: '该迁移任务信息不完整，任务信息被补全后才能开始执行',
+            });
+          }
+          setTaskDetail(data);
+        }
+      })
+    },
+    [taskId]
+  );
+
   const actions = {
     /** 删除任务 */
     async deleteTask() {
@@ -77,6 +97,7 @@ const TaskDetail = () => {
       try {
         await taskService.startTask(+taskId);
         message.success('迁移任务启动成功');
+        fetchData();
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -110,7 +131,7 @@ const TaskDetail = () => {
         }}
         footer={[
           (taskDetail?.taskModel as any)?.status !== Task.Status.RUNNING ? (
-            <Button key="startTask" onClick={actions.startTask} type="primary">
+            <Button key="startTask" onClick={throttle(actions.startTask, 1000)} type="primary">
               启动任务
             </Button>
           ) : null,

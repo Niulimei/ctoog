@@ -10,8 +10,10 @@ import { task as taskService } from '@/services';
 import TaskCreator from '../TaskCreator';
 import { useCacheRequestParams } from '@/utils/hooks';
 /** Upload */
-import { Button, message, Table, Space, Dropdown, Menu } from 'antd';
+import { Button, message, Table, Space, Dropdown, Menu, Tooltip } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
+import classnames from "classnames";
+import styles from './style.less';
 
 const StatusOptions = [
   "init",
@@ -43,9 +45,15 @@ const getColumns = (actions: Actions, isJianxin): ProColumns<Task.Item>[] => {
     {
       title: 'CC Component',
       dataIndex: 'component',
-      ellipsis: true,
       hideInSearch: true,
       width: 120,
+      render(component: Task.Item) {
+        return (
+          <Tooltip placement="topLeft" title={component}>
+            <span className={classnames(styles.exlipis)}>{component ? component : '-'}</span>
+          </Tooltip>
+        )
+      }
     },
     {
       title: 'Git Repo',
@@ -144,6 +152,7 @@ const TaskList: React.FC = () => {
       try {
         await taskService.startTask(id);
         message.success('迁移任务启动成功');
+        tableRef?.current?.reload();
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -207,7 +216,6 @@ const TaskList: React.FC = () => {
       } else {
         await actions.startTask(selectedRowKeys);
         setPageSelectRow({});
-        tableRef.current.reload();
       }
   }
 

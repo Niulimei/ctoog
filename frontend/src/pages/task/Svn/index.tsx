@@ -94,7 +94,9 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
 
                   {item.status !== Task.Status.RUNNING && (
                     <Menu.Item>
-                      <Button size="small" type="link" onClick={() => actions.startTask(item.id)}>
+                      <Button size="small" type="link" onClick={() => {
+                        actions.startTask(item.id);
+                      }}>
                         启动任务
                       </Button>
                     </Menu.Item>
@@ -132,6 +134,7 @@ const TaskList: React.FC = () => {
       try {
         await taskService.startTask(id);
         message.success('迁移任务启动成功');
+        tableRef?.current?.reload();
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
