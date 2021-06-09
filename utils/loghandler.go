@@ -2,7 +2,6 @@ package utils
 
 import (
 	"ctgb/database"
-	"time"
 )
 
 const (
@@ -59,17 +58,18 @@ func LogHandle() {
 }
 
 func RecordLog(level LogLevel, action Action, position, message string, errCode ErrorCode) {
-	logContent := &Log{
-		Time:     time.Now().Unix(),
-		Level:    level,
-		User:     "admin",
-		Action:   action,
-		Position: position,
-		Message:  message,
-		ErrCode:  errCode,
-	}
-	//LogChannel <- in
-	sqlStr := "INSERT INTO log (time, level, user, action, position, message, errcode) VALUES(?,?,?,?,?,?,?)"
-	database.DB.MustExec(sqlStr, logContent.Time, logContent.Level, logContent.User,
-		logContent.Action, logContent.Position, logContent.Message, logContent.ErrCode)
+	//logContent := &Log{
+	//	Time:     time.Now().Unix(),
+	//	Level:    level,
+	//	User:     "admin",
+	//	Action:   action,
+	//	Position: position,
+	//	Message:  message,
+	//	ErrCode:  errCode,
+	//}
+	////LogChannel <- in
+	//sqlStr := "INSERT INTO log (time, level, user, action, position, message, errcode) VALUES(?,?,?,?,?,?,?)"
+	//database.DB.MustExec(sqlStr, logContent.Time, logContent.Level, logContent.User,
+	//	logContent.Action, logContent.Position, logContent.Message, logContent.ErrCode)
+	return
 }
