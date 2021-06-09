@@ -37,6 +37,9 @@ pullCCAndPush(){
   containEmptyDir=$4
   username=$5
   email=$6
+  if [[ -z ${email} ]];then
+    email="default@empty.com"
+  fi
   emptyFileName=$7
   userFile=$8
   gitignoreContent=$9
@@ -71,11 +74,11 @@ pullCCAndPush(){
       git push origin --mirror
       set -e
     else
-#      git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')" >/dev/null
+      git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')" >/dev/null
       git push origin --mirror
     fi
   else
-#    git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')" >/dev/null
+    git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')" >/dev/null
     git push origin --mirror
   fi
 }
