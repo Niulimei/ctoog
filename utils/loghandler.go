@@ -59,7 +59,7 @@ func LogHandle() {
 }
 
 func RecordLog(level LogLevel, action Action, position, message string, errCode ErrorCode) {
-	in := &Log{
+	logContent := &Log{
 		Time:     time.Now().Unix(),
 		Level:    level,
 		User:     "admin",
@@ -68,5 +68,8 @@ func RecordLog(level LogLevel, action Action, position, message string, errCode 
 		Message:  message,
 		ErrCode:  errCode,
 	}
-	LogChannel <- in
+	//LogChannel <- in
+	sqlStr := "INSERT INTO log (time, level, user, action, position, message, errcode) VALUES(?,?,?,?,?,?,?)"
+	database.DB.MustExec(sqlStr, logContent.Time, logContent.Level, logContent.User,
+		logContent.Action, logContent.Position, logContent.Message, logContent.ErrCode)
 }
