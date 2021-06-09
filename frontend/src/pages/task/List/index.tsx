@@ -13,6 +13,13 @@ import { useCacheRequestParams } from '@/utils/hooks';
 import { Button, message, Table, Space, Dropdown, Menu } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
 
+const StatusOptions = [
+  "init",
+  "failed",
+  "completed",
+  "running",
+];
+
 type Actions = Record<
   'startTask' | 'gotoDetail' | 'updateTask' | 'createTask',
   (id: number) => void
@@ -29,6 +36,7 @@ const getColumns = (actions: Actions, isJianxin): ProColumns<Task.Item>[] => {
       title: 'CC PVOB',
       dataIndex: 'pvob',
       ellipsis: true,
+      hideInSearch: true,
       width: 120,
       // search:
     },
@@ -36,6 +44,7 @@ const getColumns = (actions: Actions, isJianxin): ProColumns<Task.Item>[] => {
       title: 'CC Component',
       dataIndex: 'component',
       ellipsis: true,
+      hideInSearch: true,
       width: 120,
     },
     {
@@ -48,8 +57,11 @@ const getColumns = (actions: Actions, isJianxin): ProColumns<Task.Item>[] => {
     {
       title: '当前状态',
       width: 100,
-      renderText(item: Task.Item) {
-        return item.status;
+      dataIndex: 'status',
+      hideInSearch: false,
+      valueEnum: StatusOptions,
+      renderText(status: Task.Item) {
+        return status;
       },
     },
     {
@@ -213,6 +225,10 @@ const TaskList: React.FC = () => {
           onChange: setCurrentPageChoosen,
           selectedRowKeys
         }}
+        search={{
+          defaultCollapsed: false,
+          span: 6
+        }}
         pagination={{
           pageSize: params.pageSize,
           onChange(num, size = 10) {
@@ -222,17 +238,18 @@ const TaskList: React.FC = () => {
             });
           },
         }}
-        search={false}
-        request={async ({ pageSize = 10, current }) => {
+        request={async ({ pageSize = 10, current, status }) => {
           const { taskInfo, count } = await taskService.getTasks({
             offset: (current! - 1 || 0) * pageSize,
             limit: pageSize || 10,
+            status: StatusOptions[status],
           });
 
           return {
             data: taskInfo,
             success: true,
             total: count,
+            status: StatusOptions[status],
           };
         }}
         headerTitle="迁移任务"
