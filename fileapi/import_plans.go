@@ -3,6 +3,7 @@ package fileapi
 import (
 	"bytes"
 	"ctgb/database"
+	"ctgb/utils"
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize/v2"
 	log "github.com/sirupsen/logrus"
@@ -51,7 +52,7 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 	// Maximum upload of 10 MB files
 	r.ParseMultipartForm(10 << 20)
 
-	username := r.Header.Get("username")
+	username, _ := utils.Verify(r.Header.Get("Authorization"))
 
 	// Get handler for filename, size and headers
 	file, _, err := r.FormFile("uploadFile")
@@ -142,7 +143,7 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 			r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
 				"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id, model_type, gitignore)"+
 				" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase', $14)",
-				pvob, component, ccUser, ccPassword, gitUrl, gitUser, gitPassword, "init", "Admin",
+				pvob, component, ccUser, ccPassword, gitUrl, gitUser, gitPassword, "init", username,
 				includeEmpty, "default@cfbft.com", dir, keep, gitignore)
 			taskId, err = r.LastInsertId()
 			log.Info("Insert task:", taskId, " ", err)
