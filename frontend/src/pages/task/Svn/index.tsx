@@ -13,6 +13,13 @@ import { Button, message, Dropdown, Menu, Tooltip } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
 import styles from './index.less';
 
+const StatusOptions = [
+  "init",
+  "failed",
+  "completed",
+  "running",
+];
+
 type Actions = Record<
   'startTask' | 'gotoDetail' | 'updateTask' | 'createTask',
   (id: number) => void
@@ -29,6 +36,7 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
       title: 'SVN 仓库',
       dataIndex: 'svnUrl',
       ellipsis: true,
+      hideInSearch: true,
       width: 120,
       // search:
     },
@@ -47,8 +55,11 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
     {
       title: '当前状态',
       width: 100,
-      renderText(item: Task.Item) {
-        return item.status;
+      dataIndex: 'status',
+      hideInSearch: false,
+      valueEnum: StatusOptions,
+      renderText(status: Task.Item) {
+        return status;
       },
     },
     {
@@ -150,18 +161,23 @@ const TaskList: React.FC = () => {
             });
           },
         }}
-        search={false}
-        request={async ({ pageSize = 10, current }) => {
+        search={{
+          defaultCollapsed: false,
+          span: 6
+        }}
+        request={async ({ pageSize = 10, current, status }) => {
           const { taskInfo, count } = await taskService.getTasks({
             offset: (current! - 1 || 0) * pageSize,
             limit: pageSize || 10,
-            modelType: 'svn'
+            modelType: 'svn',
+            status: StatusOptions[status]
           });
 
           return {
             data: taskInfo,
             success: true,
             total: count,
+            status: StatusOptions[status]
           };
         }}
         headerTitle="迁移任务"
