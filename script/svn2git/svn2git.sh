@@ -74,11 +74,11 @@ pullCCAndPush(){
       git push origin --mirror
       set -e
     else
-      git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')" >/dev/null
+      git commit --allow-empty -m "sync from svn, update commit $(date '+%Y%m%d%H%M%S')" >/dev/null
       git push origin --mirror
     fi
   else
-    git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')" >/dev/null
+    git commit --allow-empty -m "sync from svn, first commit $(date '+%Y%m%d%H%M%S')" >/dev/null
     git push origin --mirror
   fi
 }
