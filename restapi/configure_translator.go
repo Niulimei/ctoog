@@ -71,7 +71,7 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 
 	api.ServerShutdown = func() {}
 
-	go utils.LogHandle()
+	//go utils.LogHandle()
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))
 }
