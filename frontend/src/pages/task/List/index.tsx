@@ -201,11 +201,13 @@ const TaskList: React.FC = () => {
       });
     }, [params, selectPageRow]);
 
-  const runAll = () => {
+  const runAll = async () => {
       if (selectedRowKeys.length === 0) {
         message.error('请选择任务');
       } else {
-        actions.startTask(selectedRowKeys);
+        await actions.startTask(selectedRowKeys);
+        setPageSelectRow({});
+        tableRef.current.reload();
       }
   }
 
