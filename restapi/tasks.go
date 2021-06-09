@@ -441,16 +441,29 @@ func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responde
 }
 
 func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middleware.Responder {
-	out := &models.TaskCommandOut{}
-	row := database.DB.QueryRow("select log_id, content from task_command_out where log_id = ?", params.LogID)
-	err := row.Scan(&out.LogID, &out.Content)
-	if err != nil && err != sql.ErrNoRows {
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8994/command_out?logID=%d", params.LogID), nil)
+	//req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil || resp == nil {
 		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
-			Message: "Sql Error",
+			Message: "request fail",
 		})
 	}
-	return operations.NewGetTaskCommandOutOK().WithPayload(out)
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	return operations.NewGetTaskCommandOutOK().WithPayload(&models.TaskCommandOut{LogID: params.LogID, Content: string(body)})
+
+	//out := &models.TaskCommandOut{}
+	//row := database.DB.QueryRow("select log_id, content from task_command_out where log_id = ?", params.LogID)
+	//err := row.Scan(&out.LogID, &out.Content)
+	//if err != nil && err != sql.ErrNoRows {
+	//	return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
+	//		Code:    http.StatusInternalServerError,
+	//		Message: "Sql Error",
+	//	})
+	//}
+	//return operations.NewGetTaskCommandOutOK().WithPayload(out)
 }
 
 func UpdateTaskCommandOutHandler(params operations.UpdateTaskCommandOutParams) middleware.Responder {
