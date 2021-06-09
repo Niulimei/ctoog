@@ -440,8 +440,31 @@ func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responde
 	})
 }
 
+func getWorkerURLFromLogID(logID int64) string {
+	var taskID int64
+	database.DB.Get(&taskID, "select task_id from task_log where log_id=?", logID)
+	if taskID == 0 {
+		return ""
+	}
+	var workerID int64
+	database.DB.Get(&workerID, "select worker_id from task where id=?", taskID)
+	if taskID == 0 {
+		return ""
+	}
+	var workerUrl string
+	database.DB.Get(&workerUrl, "select worker_url from worker where id=?", workerID)
+	return workerUrl
+}
+
 func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middleware.Responder {
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8994/command_out?logID=%d", params.LogID), nil)
+	workerUrl := getWorkerURLFromLogID(params.LogID)
+	if workerUrl == "" {
+		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "get worker url fail",
+		})
+	}
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/command_out?logID=%d", workerUrl, params.LogID), nil)
 	//req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil || resp == nil {
