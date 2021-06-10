@@ -450,17 +450,53 @@ func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responde
 	})
 }
 
+func getWorkerURLFromLogID(logID int64) string {
+	var taskID int64
+	database.DB.Get(&taskID, "select task_id from task_log where log_id=?", logID)
+	if taskID == 0 {
+		return ""
+	}
+	var workerID int64
+	database.DB.Get(&workerID, "select worker_id from task where id=?", taskID)
+	if taskID == 0 {
+		return ""
+	}
+	var workerUrl string
+	database.DB.Get(&workerUrl, "select worker_url from worker where id=?", workerID)
+	return workerUrl
+}
+
 func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middleware.Responder {
-	out := &models.TaskCommandOut{}
-	row := database.DB.QueryRow("select log_id, content from task_command_out where log_id = ?", params.LogID)
-	err := row.Scan(&out.LogID, &out.Content)
-	if err != nil && err != sql.ErrNoRows {
+	workerUrl := getWorkerURLFromLogID(params.LogID)
+	if workerUrl == "" {
 		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
-			Message: "Sql Error",
+			Message: "get worker url fail",
 		})
 	}
-	return operations.NewGetTaskCommandOutOK().WithPayload(out)
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/command_out?logID=%d", workerUrl, params.LogID), nil)
+	//req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil || resp == nil {
+		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "request fail",
+		})
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	return operations.NewGetTaskCommandOutOK().WithPayload(&models.TaskCommandOut{LogID: params.LogID, Content: string(body)})
+
+	//out := &models.TaskCommandOut{}
+	//row := database.DB.QueryRow("select log_id, content from task_command_out where log_id = ?", params.LogID)
+	//err := row.Scan(&out.LogID, &out.Content)
+	//if err != nil && err != sql.ErrNoRows {
+	//	return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
+	//		Code:    http.StatusInternalServerError,
+	//		Message: "Sql Error",
+	//	})
+	//}
+	//return operations.NewGetTaskCommandOutOK().WithPayload(out)
 }
 
 func UpdateTaskCommandOutHandler(params operations.UpdateTaskCommandOutParams) middleware.Responder {

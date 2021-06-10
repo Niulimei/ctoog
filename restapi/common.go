@@ -2,6 +2,7 @@ package restapi
 
 import (
 	"ctgb/utils"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -78,5 +79,31 @@ func DumpLogFile(logFile string) {
 			log.Debug(err)
 			continue
 		}
+	}
+}
+
+func CleanOldTmpCmdOutFile() {
+	for {
+		N := time.Now()
+		y, m, d := N.Date()
+		delay := time.Date(y, m, d+1, 0, 0, 0, 0, time.Local).Unix() - N.Unix()
+		//delay := time.Date(y, m, d, N.Hour(), N.Minute()+1, 0, 0, time.Local).Unix() - N.Unix()
+		cwd, _ := os.Getwd()
+		tmpCmdOutPath := fmt.Sprintf("%s/tmpCmdOut", cwd)
+		fs, err := ioutil.ReadDir(tmpCmdOutPath)
+		if err != nil {
+			log.Debug(err)
+		}
+		for _, f := range fs {
+			if time.Now().Unix()-f.ModTime().Unix() > 7*24*3600 {
+				//if time.Now().Minute()-f.ModTime().Minute() > 1 && filepath.Base(logFile) != f.Name() {
+				log.Debug("start clean")
+				err = os.RemoveAll(filepath.Join(tmpCmdOutPath, f.Name()))
+				if err != nil {
+					log.Debug(err)
+				}
+			}
+		}
+		time.Sleep(time.Second * time.Duration(delay))
 	}
 }

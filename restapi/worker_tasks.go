@@ -34,7 +34,8 @@ func startTaskAndInfoServer(task *Task, server string, cmds []*exec.Cmd, tmpCmdO
 		data.Starttime = start.Format("2006-01-02 15:04:05")
 		for _, cmd := range cmds {
 			log.Debug("start cmd:", cmd.String())
-			err := sendCommandOut(server, cmd, task, tmpCmdOutFile)
+			//err := sendCommandOut(server, cmd, task, tmpCmdOutFile)
+			_, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Error("cmd err:", err)
 				data.Status = "failed"
@@ -126,7 +127,7 @@ func sendCommandOut(server string, cmd *exec.Cmd, task *Task, tmpCmdOutFile stri
 			time.Sleep(time.Second)
 		}
 		stop <- struct{}{}
-		os.RemoveAll(tmpCmdOutFile)
+		//os.RemoveAll(tmpCmdOutFile)
 	}()
 	return err
 }
@@ -271,6 +272,14 @@ func delCache(w http.ResponseWriter, workerTaskModel WorkerTaskDelInfo) {
 		w.Write([]byte(strings.Join(tmp, "\n")))
 		return
 	}
+	//tmpCmdOutPath := fmt.Sprintf("%s/tmpCmdOut", cwd)
+	//fs, _ := ioutil.ReadDir(tmpCmdOutPath)
+	//for _, f := range fs {
+	//	if strings.HasPrefix(f.Name(), fmt.Sprintf("%d_", workerTaskModel.TaskId)) {
+	//		os.RemoveAll(filepath.Join(tmpCmdOutPath, f.Name()))
+	//	}
+	//}
+
 	w.WriteHeader(200)
 	w.Write([]byte("success"))
 }
@@ -415,4 +424,47 @@ func parseGitURL(user, passwd, gitUrl string) string {
 		gitUrl = "https://" + user + ":" + passwd + "@" + gitUrl
 	}
 	return gitUrl
+}
+
+func GetCommandOut(w http.ResponseWriter, r *http.Request) {
+	logID := r.URL.Query().Get("logID")
+	if logID == "" {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("param error"))
+		return
+	}
+	var tmpFile string
+	cwd, err := os.Getwd()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	tmpCmdOutPath := fmt.Sprintf("%s/tmpCmdOut", cwd)
+	fs, err := ioutil.ReadDir(tmpCmdOutPath)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	for _, f := range fs {
+		if strings.HasSuffix(f.Name(), fmt.Sprintf("_%s.log", logID)) {
+			tmpFile = f.Name()
+			break
+		}
+	}
+	if tmpFile == "" {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(""))
+		return
+	}
+	tmpCmdOutFile := filepath.Join(tmpCmdOutPath, tmpFile)
+	ret, err := ioutil.ReadFile(tmpCmdOutFile)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(ret)
 }
