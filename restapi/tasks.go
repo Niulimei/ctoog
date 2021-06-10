@@ -323,9 +323,9 @@ func ListTaskHandler(params operations.ListTaskParams) middleware.Responder {
 
 	user := getUserInfo(username)
 	if user.RoleID != int64(AdminRole) {
-		whereSQL += fmt.Sprintf(" and creator=%s", username)
+		whereSQL += fmt.Sprintf(" and creator='%s'", username)
 	}
-	prepSQL := utils.PreparingQurySQL(taskColumns, "task", int(params.Offset), int(params.Limit), "last_completed_date_time DESC", whereSQL)
+	prepSQL := utils.PreparingQurySQL(taskColumns, "task", int(params.Offset), int(params.Limit), "id DESC", whereSQL)
 	var tasks []*models.TaskInfoModel
 	var count int64
 	err := database.DB.Select(&tasks, prepSQL, params.Limit, params.Offset)
