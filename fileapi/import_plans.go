@@ -120,6 +120,7 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 		gitUser := row[15]
 		gitPassword := row[16]
 		gitignore := row[18]
+		gitEmail := gitUser + "@cfbft.com"
 		gitUrl := row[19]
 		planStartTime := row[20]
 		planSwitchTime := row[21]
@@ -144,7 +145,7 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 				"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id, model_type, gitignore)"+
 				" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase', $14)",
 				pvob, component, ccUser, ccPassword, gitUrl, gitUser, gitPassword, "init", username,
-				includeEmpty, username+"@cfbft.com", dir, keep, gitignore)
+				includeEmpty, gitEmail, dir, keep, gitignore)
 			taskId, err = r.LastInsertId()
 			log.Info("Insert task:", taskId, " ", err)
 			database.DB.Exec("INSERT INTO "+
