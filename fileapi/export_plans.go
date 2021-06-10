@@ -90,7 +90,7 @@ func PlansExportHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tasks := make([]*database.TaskModel, 0)
-	err = database.DB.Select(&tasks, "SELECT * FROM task")
+	err = database.DB.Select(&tasks, "SELECT id, status FROM task")
 	if err != nil {
 		log.Error("export error:", err)
 		w.WriteHeader(http.StatusInternalServerError)
