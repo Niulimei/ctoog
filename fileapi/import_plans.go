@@ -120,7 +120,7 @@ func PlansImportHandler(w http.ResponseWriter, r *http.Request) {
 		gitUser := row[15]
 		gitPassword := row[16]
 		gitignore := row[18]
-		gitEmail := gitUser + "@cfbft.com"
+		gitEmail := gitUser + "@ccbft.com"
 		gitUrl := row[19]
 		planStartTime := row[20]
 		planSwitchTime := row[21]
