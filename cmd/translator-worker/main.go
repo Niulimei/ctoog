@@ -54,6 +54,7 @@ func main() {
 				fmt.Println("translator-worker is not running.")
 			} else {
 				utils.Exec("kill " + string(pid))
+				os.RemoveAll("./translator-worker.pid")
 				fmt.Println("translator-worker has been stopped.")
 			}
 			if command == "stop" {
