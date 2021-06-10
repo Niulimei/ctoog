@@ -21,14 +21,14 @@ initGitRepo(){
   username=$4
   email=$5
   masterBranchName="origin/init_master"
-  mkdir -p ${tmpGitDir} -m 777
-  cd ${tmpGitDir}
+  mkdir -p "${tmpGitDir}" -m 777
+  cd "${tmpGitDir}"
   git init
   git config --local core.longpaths true
   git config user.name "${username}"
   git config user.email "${email}"
   git config push.default simple
-  git remote add origin ${repoUrl}
+  git remote add origin "${repoUrl}"
   git remote update
   git fetch --all
   git fetch -p origin
@@ -36,15 +36,15 @@ initGitRepo(){
   branchExist=false
   branchMasterExist=false
   for br in ${remoteBrList}; do
-    if [[ $(basename ${br}) == "${branchName}" ]]; then
+    if [[ "$(basename "${br}")" == "${branchName}" ]]; then
       branchExist=true
     fi
-    if [[ ${br} == "${masterBranchName}" ]]; then
+    if [[ "${br}" == "${masterBranchName}" ]]; then
       branchMasterExist=true
     fi
   done
   if $branchExist; then
-    git checkout -b ${branchName} origin/${branchName}
+    git checkout -b "${branchName}" origin/"${branchName}"
     git pull
     return
   fi
@@ -60,7 +60,7 @@ initGitRepo(){
     git commit --allow-empty -m "delete master init file"
     git push origin init_master
   fi
-  git checkout -b ${branchName}
+  git checkout -b "${branchName}"
 }
 
 pullCCAndPush(){
@@ -75,34 +75,34 @@ pullCCAndPush(){
   email=$9
   emptyFileName=${10}
   gitignoreContent=${11}
-  combainNameAdapt=$(echo -n ${pvobName}_${streamName}_${componentName} | sed 's/\//_/g')
-  local tmpGitDir="${gitTmpRootPath}/${combainNameAdapt}_${taskID}"
-  local tmpCCDir="${ccTmpRootPath}/${combainNameAdapt}_${taskID}"
+  combineNameAdapt=$(echo -n "${pvobName}"_"${streamName}"_"${componentName}" | sed 's/\//_/g')
+  local tmpGitDir="${gitTmpRootPath}/${combineNameAdapt}_${taskID}"
+  local tmpCCDir="${ccTmpRootPath}/${combineNameAdapt}_${taskID}"
   local tmpCCDirExist=false
   local tmpGitDirExist=false
   echo "Cloning code..."
-  if [[ -d ${tmpCCDir} ]]; then
+  if [[ -d "${tmpCCDir}" ]]; then
     tmpCCDirExist=true
-    cd ${tmpCCDir}
+    cd "${tmpCCDir}"
     cleartool update . >/dev/null
   else
-    cleartool mkview -snapshot -tag ${combainNameAdapt}_${taskID} -stgloc -auto -stream ${streamName}@${pvobName} ${tmpCCDir} >/dev/null
-    cd ${tmpCCDir}
-    cleartool update -add_loadrules .${componentName} >/dev/null
+    cleartool mkview -snapshot -tag "${combineNameAdapt}"_"${taskID}" -stgloc -auto -stream "${streamName}"@"${pvobName}" "${tmpCCDir}" >/dev/null
+    cd "${tmpCCDir}"
+    cleartool update -add_loadrules ."${componentName}" >/dev/null
   fi
-  if [[ -d ${tmpGitDir} ]]; then
-    rm -rf ${tmpGitDir}
+  if [[ -d "${tmpGitDir}" ]]; then
+    rm -rf "${tmpGitDir}"
     tmpGitDirExist=true
   fi
-  initGitRepo ${gitRepoUrl} ${gitBranchName} ${tmpGitDir} ${username} ${email}
-  rm -rf ${tmpGitDir:?}/*
-  cd ${tmpGitDir}
+  initGitRepo "${gitRepoUrl}" "${gitBranchName}" "${tmpGitDir}" "${username}" "${email}"
+  rm -rf "${tmpGitDir:?}"/*
+  cd "${tmpGitDir}"
   echo "Copying files..."
-  cp -rf ${tmpCCDir}${componentName}/* ${tmpGitDir}/
+  cp -rf "${tmpCCDir}""${componentName}"/* "${tmpGitDir}"/
   if [[ ${containEmptyDir} == "true" ]]; then
-    find ${tmpGitDir} -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
+    find "${tmpGitDir}" -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
   fi
-  bash ${workdir}/changeCharSet.sh ${tmpGitDir}
+  bash "${workdir}"/changeCharSet.sh "${tmpGitDir}"
   if [[ -n "${gitignoreContent}" ]]; then
     echo -e "${gitignoreContent}" >./.gitignore
   else
@@ -116,21 +116,21 @@ pullCCAndPush(){
     noCommit='nothing to commit'
     if [[ $lastMessage =~ $noCommit ]]; then
       set +e
-      git push origin ${gitBranchName}
+      git push origin "${gitBranchName}"
       set -e
     else
       git commit --allow-empty -m "sync from cc, update commit $(date '+%Y%m%d%H%M%S')" >/dev/null
-      git push origin ${gitBranchName}
+      git push origin "${gitBranchName}"
     fi
   else
     git commit --allow-empty -m "sync from cc, first commit $(date '+%Y%m%d%H%M%S')" >/dev/null
-    git push origin ${gitBranchName}
+    git push origin "${gitBranchName}"
   fi
 }
 
 main(){
-  mkdir -p ${ccTmpRootPath} -m 777
-  mkdir -p ${gitTmpRootPath} -m 777
+  mkdir -p "${ccTmpRootPath}" -m 777
+  mkdir -p "${gitTmpRootPath}" -m 777
   pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}"
 }
 

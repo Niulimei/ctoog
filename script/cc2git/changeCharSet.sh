@@ -2,40 +2,40 @@
 
 export LANG=en_US.UTF-8
 
-depth_foler() {
-    this_dir=`pwd`
+depth_folder() {
+    this_dir=$(pwd)
     source_folder="$1"
-    source_folder=`echo $source_folder |sed 's#/$##g'`
+    source_folder="$(echo "$source_folder" |sed 's#/$##g')"
     test_folder="$2"
-    cd $test_folder
+    cd "$test_folder" || exit 1
     count=0
-    while [ ! `pwd` = $source_folder ]
+    while [[ ! "$(pwd)" = "$source_folder" ]]
     do
-        count=`expr $count + 1`
+        count=$((count + 1))
         cd ..
     done
-    cd $this_dir
+    cd "$this_dir" || exit 1
     return $count
 }
 
 function getDirMaxDepth() {
     folder_name="$1"
-    if [ ! -d "$folder_name" ];then
+    if [[ ! -d "$folder_name" ]];then
         echo "The dir(\"${folder_name}\") does not exist!"
         exit 3
     fi
-    this_dir_tmp=`pwd`
-    folder_name=`echo "$folder_name"|sed "s#^./#$this_dir_tmp/#g"`
-    folder_name=`echo "$folder_name"|sed "s#^\([a-zA-Z]\+.*\)#$this_dir_tmp/\1#g"`
+    this_dir_tmp=$(pwd)
+    folder_name=$(echo "$folder_name"|sed "s#^./#$this_dir_tmp/#g")
+    folder_name=$(echo "$folder_name"|sed "s#^\([a-zA-Z]\+.*\)#$this_dir_tmp/\1#g")
     target_folder="$folder_name"
     depth_max=1
-    for i in `du "$target_folder"` ;do
-        if [ -d $i -a ! $i = $target_folder ];then
-            depth_foler "$target_folder" "$i"
-            retval=$?
-            #echo "$i : $retval"
-            if [ $depth_max -lt $retval ];then
-                    depth_max=$retval
+    for i in $(du "$target_folder") ;do
+        if [[ -d "$i" ]] && [[ ! "$i" = "$target_folder" ]];then
+            depth_folder "$target_folder" "$i"
+            ret_val=$?
+            #echo "$i : $ret_val"
+            if [[ $depth_max -lt $ret_val ]];then
+                    depth_max=$ret_val
             fi
         fi
     done
@@ -46,15 +46,15 @@ changeDirCharSet() {
   targetDir=$1
   maxDepth=$2
   for ((i=maxDepth; i>=1; i--)); do
-    for dir in $(find "${targetDir}" -maxdepth ${i} -mindepth ${i} -type d); do
+    for dir in $(find "${targetDir}" -maxdepth "${i}" -mindepth "${i}" -type d); do
       dirName=$(dirname "$dir")
       baseName=$(basename "$dir")
       afterChange=$(echo -n "${baseName}" | iconv -f gbk -t utf8)
       if [[ ! "${afterChange}" == "${baseName}" ]]; then
-        pushd "${dirName}" &>/dev/null
+        pushd "${dirName}" &>/dev/null || exit 1
         mv "${baseName}" "${afterChange}"
         echo change "${dir}" to "${dirName}"/"${afterChange}"
-        popd &>/dev/null
+        popd &>/dev/null || exit 1
       fi
     done
   done
@@ -64,15 +64,15 @@ changeFileCharSet() {
   targetDir=$1
   maxDepth=$2
   for ((i=$((maxDepth+1)); i>=1; i--)); do
-    for dir in $(find "${targetDir}" -maxdepth ${i} -mindepth ${i} -type f); do
+    for dir in $(find "${targetDir}" -maxdepth "${i}" -mindepth "${i}" -type f); do
       dirName=$(dirname "$dir")
       baseName=$(basename "$dir")
       afterChange=$(echo -n "${baseName}" | iconv -f gbk -t utf8)
       if [[ ! "${afterChange}" == "${baseName}" ]]; then
-        pushd "${dirName}" &>/dev/null
+        pushd "${dirName}" &>/dev/null || exit 1
         mv "${baseName}" "${afterChange}"
         echo change "${dir}" to "${dirName}"/"${afterChange}"
-        popd &>/dev/null
+        popd &>/dev/null || exit 1
       fi
     done
   done

@@ -1,12 +1,12 @@
 #!/bin/bash
 
-workdir=$(cd $(dirname $0); pwd)
+workdir=$(cd "$(dirname "$0")"; pwd)
 source "${workdir}"/common.sh
 
 check() {
   taskID=$1
   local gitDirNotExist=false
-  if [[ ! -d ${gitTmpRootPath} ]] || [[ $(ls ${gitTmpRootPath}/*_${taskID}) == "" ]]; then
+  if [[ ! -d ${gitTmpRootPath} ]] || [[ $(ls "${gitTmpRootPath}"/*_"${taskID}") == "" ]]; then
     gitDirNotExist=true
   fi
   if ${gitDirNotExist} ; then
@@ -15,4 +15,4 @@ check() {
   exit 0
 }
 
-check $1
+check "$1"
