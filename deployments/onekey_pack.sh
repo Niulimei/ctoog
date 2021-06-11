@@ -16,7 +16,7 @@ main() {
   ${cp} ../script ./version
   ${cp} ../sql ./version
   cd version || exit 1
-  tar zcf version_"$(date '+%Y%m%d%H%M%S')".tar.gz * --remove-files
+  tar zcf version_"$(git rev-parse --short HEAD)"_"$(date '+%Y%m%d%H%M%S')".tar.gz * --remove-files
 }
 
 main
