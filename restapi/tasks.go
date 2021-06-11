@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func init() {
+func InitTask() {
 	go func() {
 		t := time.NewTicker(time.Second * 5)
 		for {

@@ -29,7 +29,7 @@ func CleanDeadWorker() {
 	}
 }
 
-func init() {
+func CleanWorker() {
 	go func() {
 		for {
 			CleanDeadWorker()

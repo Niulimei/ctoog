@@ -135,7 +135,7 @@ type PlanModel struct {
 	Extra3           string
 }
 
-func init() {
+func InitializeDataBase() {
 	initDB()
 	upgradeDB()
 	go func() {

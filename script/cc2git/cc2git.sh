@@ -98,7 +98,7 @@ pullCCAndPush(){
   rm -rf "${tmpGitDir:?}"/*
   cd "${tmpGitDir}"
   echo "Copying files..."
-  cp -rf "${tmpCCDir}""${componentName}"/* "${tmpGitDir}"/
+  cp -rf "${tmpCCDir}""${componentName}"/* "${tmpGitDir}"/ >/dev/null
   if [[ ${containEmptyDir} == "true" ]]; then
     find "${tmpGitDir}" -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
   fi

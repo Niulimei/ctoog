@@ -16,7 +16,7 @@ import (
 
 var pvobs []string
 
-func init() {
+func InitPvob() {
 	go func() {
 		GetAllPvob()
 		t := time.NewTicker(time.Second * 600)
