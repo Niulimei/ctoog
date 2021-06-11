@@ -454,6 +454,19 @@ func getWorkerURLFromLogID(logID int64) string {
 }
 
 func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middleware.Responder {
+	out := &models.TaskCommandOut{}
+	row := database.DB.QueryRow("select log_id, content from task_command_out where log_id = ?", params.LogID)
+	err := row.Scan(&out.LogID, &out.Content)
+	if err != nil && err != sql.ErrNoRows {
+		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Sql Error",
+		})
+	}
+	if err != sql.ErrNoRows {
+		return operations.NewGetTaskCommandOutOK().WithPayload(out)
+	}
+
 	workerUrl := getWorkerURLFromLogID(params.LogID)
 	if workerUrl == "" {
 		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
@@ -474,16 +487,6 @@ func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middlew
 	body, _ := ioutil.ReadAll(resp.Body)
 	return operations.NewGetTaskCommandOutOK().WithPayload(&models.TaskCommandOut{LogID: params.LogID, Content: string(body)})
 
-	//out := &models.TaskCommandOut{}
-	//row := database.DB.QueryRow("select log_id, content from task_command_out where log_id = ?", params.LogID)
-	//err := row.Scan(&out.LogID, &out.Content)
-	//if err != nil && err != sql.ErrNoRows {
-	//	return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
-	//		Code:    http.StatusInternalServerError,
-	//		Message: "Sql Error",
-	//	})
-	//}
-	//return operations.NewGetTaskCommandOutOK().WithPayload(out)
 }
 
 func UpdateTaskCommandOutHandler(params operations.UpdateTaskCommandOutParams) middleware.Responder {
