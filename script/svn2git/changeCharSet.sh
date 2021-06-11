@@ -7,14 +7,14 @@ depth_folder() {
     source_folder="$1"
     source_folder="$(echo "$source_folder" |sed 's#/$##g')"
     test_folder="$2"
-    cd "$test_folder" || exit 1
+    cd "$test_folder"
     count=0
     while [[ ! "$(pwd)" = "$source_folder" ]]
     do
         count=$((count + 1))
         cd ..
     done
-    cd "$this_dir" || exit 1
+    cd "$this_dir"
     return $count
 }
 
@@ -51,10 +51,10 @@ changeDirCharSet() {
       baseName=$(basename "$dir")
       afterChange=$(echo -n "${baseName}" | iconv -f gbk -t utf8)
       if [[ ! "${afterChange}" == "${baseName}" ]]; then
-        pushd "${dirName}" &>/dev/null || exit 1
+        pushd "${dirName}" &>/dev/null
         mv "${baseName}" "${afterChange}"
-        echo change "${dir}" to "${dirName}"/"${afterChange}"
-        popd &>/dev/null || exit 1
+#        echo change "${dir}" to "${dirName}"/"${afterChange}"
+        popd &>/dev/null
       fi
     done
   done
@@ -69,10 +69,10 @@ changeFileCharSet() {
       baseName=$(basename "$dir")
       afterChange=$(echo -n "${baseName}" | iconv -f gbk -t utf8)
       if [[ ! "${afterChange}" == "${baseName}" ]]; then
-        pushd "${dirName}" &>/dev/null || exit 1
+        pushd "${dirName}" &>/dev/null
         mv "${baseName}" "${afterChange}"
-        echo change "${dir}" to "${dirName}"/"${afterChange}"
-        popd &>/dev/null || exit 1
+#        echo change "${dir}" to "${dirName}"/"${afterChange}"
+        popd &>/dev/null
       fi
     done
   done

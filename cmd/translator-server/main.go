@@ -3,6 +3,7 @@
 package main
 
 import (
+	"ctgb/database"
 	"ctgb/utils"
 	"fmt"
 	"io/ioutil"
@@ -109,6 +110,12 @@ func main() {
 
 	log.Print("- - - - - - - - - - - - - - -")
 	log.Print("daemon started")
+
+	database.InitializeDataBase()
+	restapi.InitPvob()
+	restapi.CleanWorker()
+	restapi.InitTask()
+
 	type conf struct {
 		Host string `yaml:"host"`
 		Port int    `yaml:"port"`
