@@ -28,8 +28,9 @@ func startTaskAndInfoServer(task *Task, server string, cmds []*exec.Cmd, tmpCmdO
 	RunningTask <- struct{}{}
 	func() {
 		defer func() {
-			err := recover()
-			log.Errorln("Recover from err: ", err)
+			if err := recover(); err != nil {
+				log.Errorln("Recover from err: ", err)
+			}
 		}()
 		data.Starttime = start.Format("2006-01-02 15:04:05")
 		for _, cmd := range cmds {

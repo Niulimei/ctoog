@@ -57,7 +57,7 @@ pullCCAndPush(){
   if [[ ${containEmptyDir} == "true" ]]; then
     find "${tmpGitDir}" -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
   fi
-#  bash "${workdir}"/changeCharSet.sh "${tmpGitDir}"
+#  bash "${workdir}"/changeCharSet.sh "${tmpGitDir}" &>/dev/null
   if [[ -n "${gitignoreContent}" ]]; then
     echo -e "${gitignoreContent}" >./.gitignore
   else

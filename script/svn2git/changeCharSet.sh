@@ -52,7 +52,7 @@ changeDirCharSet() {
       afterChange=$(echo -n "${baseName}" | iconv -f gbk -t utf8)
       if [[ ! "${afterChange}" == "${baseName}" ]]; then
         pushd "${dirName}" &>/dev/null
-        mv "${baseName}" "${afterChange}"
+        mv "${baseName}" "${afterChange}" &>/dev/null
 #        echo change "${dir}" to "${dirName}"/"${afterChange}"
         popd &>/dev/null
       fi
@@ -70,7 +70,7 @@ changeFileCharSet() {
       afterChange=$(echo -n "${baseName}" | iconv -f gbk -t utf8)
       if [[ ! "${afterChange}" == "${baseName}" ]]; then
         pushd "${dirName}" &>/dev/null
-        mv "${baseName}" "${afterChange}"
+        mv "${baseName}" "${afterChange}" &>/dev/null
 #        echo change "${dir}" to "${dirName}"/"${afterChange}"
         popd &>/dev/null
       fi
