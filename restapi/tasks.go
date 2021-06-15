@@ -91,7 +91,7 @@ func startTask(taskId int64) {
 		taskId)
 	r := database.DB.MustExec(
 		"INSERT INTO task_log (task_id, status, start_time, end_time, duration)"+
-			" VALUES($1, 'running', $2, $3, 0)", taskId, startTime, "",
+			" VALUES($1, 'waiting', $2, $3, 0)", taskId, "", "",
 	)
 	taskLogId, err := r.LastInsertId()
 	component := task.Component.String + task.Dir.String
@@ -385,12 +385,17 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 	}
 	if params.TaskLog.LogID != "" {
 		tx := database.DB.MustBegin()
-		tx.MustExec("UPDATE task_log SET status = $1, end_time = $2, duration = $3 WHERE log_id = $4",
-			taskLogInfo.Status, taskLogInfo.EndTime, taskLogInfo.Duration, params.TaskLog.LogID)
-		tx.MustExec("UPDATE task SET status = $1, last_completed_date_time = $2 WHERE id = $3",
-			taskLogInfo.Status, taskLogInfo.EndTime, taskId)
-		//tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
-		utils.RecordLog(utils.Info, utils.UpdateTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
+		if params.TaskLog.EndTime == "" {
+			tx.MustExec("UPDATE task_log SET status = ?, start_time = ? WHERE log_id = ?",
+				taskLogInfo.Status, taskLogInfo.StartTime, params.TaskLog.LogID)
+		} else {
+			tx.MustExec("UPDATE task_log SET status = $1, end_time = $2, duration = $3 WHERE log_id = $4",
+				taskLogInfo.Status, taskLogInfo.EndTime, taskLogInfo.Duration, params.TaskLog.LogID)
+			tx.MustExec("UPDATE task SET status = $1, last_completed_date_time = $2 WHERE id = $3",
+				taskLogInfo.Status, taskLogInfo.EndTime, taskId)
+			//tx.MustExec("UPDATE worker SET task_count = task_count - 1 WHERE id = $1", task.WorkerId)
+			//utils.RecordLog(utils.Info, utils.UpdateTask, "", fmt.Sprintf("TaskId: %s", taskId), 0)
+		}
 		log.Debug("task update commit:", tx.Commit())
 	} else {
 		if task.Status.String == "running" {
