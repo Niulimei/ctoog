@@ -21,10 +21,8 @@ import (
 
 func startTaskAndInfoServer(task *Task, server string, cmds []*exec.Cmd, tmpCmdOutFile string, endSignal chan struct{}) {
 	data := payload{
-		Logid:  strconv.FormatInt(task.TaskLogId, 10),
-		Status: "completed",
+		Logid: strconv.FormatInt(task.TaskLogId, 10),
 	}
-	start := time.Now()
 	RunningTask <- struct{}{}
 	func() {
 		defer func() {
@@ -32,7 +30,11 @@ func startTaskAndInfoServer(task *Task, server string, cmds []*exec.Cmd, tmpCmdO
 				log.Errorln("Recover from err: ", err)
 			}
 		}()
+		start := time.Now()
 		data.Starttime = start.Format("2006-01-02 15:04:05")
+		data.Status = "running"
+		sendData(task, server, data)
+		data.Status = "completed"
 		for _, cmd := range cmds {
 			log.Debug("start cmd:", cmd.String())
 			//err := sendCommandOut(server, cmd, task, tmpCmdOutFile)
@@ -53,6 +55,10 @@ func startTaskAndInfoServer(task *Task, server string, cmds []*exec.Cmd, tmpCmdO
 	go func() {
 		endSignal <- struct{}{}
 	}()
+	sendData(task, server, data)
+}
+
+func sendData(task *Task, server string, data payload) {
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
 		log.Error(err)
