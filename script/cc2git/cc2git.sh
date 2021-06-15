@@ -80,6 +80,13 @@ pullCCAndPush(){
   local tmpCCDir="${ccTmpRootPath}/${combineNameAdapt}_${taskID}"
   local tmpCCDirExist=false
   local tmpGitDirExist=false
+
+  if [[ -d "${tmpGitDir}" ]]; then
+    rm -rf "${tmpGitDir}"
+    tmpGitDirExist=true
+  fi
+  initGitRepo "${gitRepoUrl}" "${gitBranchName}" "${tmpGitDir}" "${username}" "${email}"
+
   echo "Cloning code..."
   if [[ -d "${tmpCCDir}" ]]; then
     tmpCCDirExist=true
@@ -90,11 +97,7 @@ pullCCAndPush(){
     cd "${tmpCCDir}"
     cleartool update -add_loadrules ."${componentName}" >/dev/null
   fi
-  if [[ -d "${tmpGitDir}" ]]; then
-    rm -rf "${tmpGitDir}"
-    tmpGitDirExist=true
-  fi
-  initGitRepo "${gitRepoUrl}" "${gitBranchName}" "${tmpGitDir}" "${username}" "${email}"
+
   rm -rf "${tmpGitDir:?}"/*
   cd "${tmpGitDir}"
   echo "Copying files..."
