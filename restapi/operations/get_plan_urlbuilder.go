@@ -18,6 +18,8 @@ import (
 type GetPlanURL struct {
 	ID int64
 
+	IDType string
+
 	_basePath string
 	// avoid unkeyed usage
 	_ struct{}
@@ -56,6 +58,15 @@ func (o *GetPlanURL) Build() (*url.URL, error) {
 		_basePath = "/api"
 	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	iDTypeQ := o.IDType
+	if iDTypeQ != "" {
+		qs.Set("idType", iDTypeQ)
+	}
+
+	_result.RawQuery = qs.Encode()
 
 	return &_result, nil
 }
