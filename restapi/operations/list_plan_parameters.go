@@ -64,6 +64,14 @@ type ListPlanParams struct {
 	  Default: 0
 	*/
 	Offset int64
+	/*源仓库类型
+	  In: query
+	*/
+	OriginType *string
+	/*状态
+	  In: query
+	*/
+	Status *string
 	/*联系人
 	  In: query
 	*/
@@ -101,6 +109,16 @@ func (o *ListPlanParams) BindRequest(r *http.Request, route *middleware.MatchedR
 
 	qOffset, qhkOffset, _ := qs.GetOK("offset")
 	if err := o.bindOffset(qOffset, qhkOffset, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qOriginType, qhkOriginType, _ := qs.GetOK("originType")
+	if err := o.bindOriginType(qOriginType, qhkOriginType, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qStatus, qhkStatus, _ := qs.GetOK("status")
+	if err := o.bindStatus(qStatus, qhkStatus, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -205,6 +223,42 @@ func (o *ListPlanParams) bindOffset(rawData []string, hasKey bool, formats strfm
 		return errors.InvalidType("offset", "query", "int64", raw)
 	}
 	o.Offset = value
+
+	return nil
+}
+
+// bindOriginType binds and validates parameter OriginType from query.
+func (o *ListPlanParams) bindOriginType(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.OriginType = &raw
+
+	return nil
+}
+
+// bindStatus binds and validates parameter Status from query.
+func (o *ListPlanParams) bindStatus(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Status = &raw
 
 	return nil
 }

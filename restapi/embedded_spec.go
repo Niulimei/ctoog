@@ -189,6 +189,18 @@ func init() {
           },
           {
             "type": "string",
+            "description": "状态",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "源仓库类型",
+            "name": "originType",
+            "in": "query"
+          },
+          {
+            "type": "string",
             "name": "Authorization",
             "in": "header",
             "required": true
@@ -2233,6 +2245,18 @@ func init() {
             "type": "string",
             "description": "联系人",
             "name": "supporter",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "状态",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "源仓库类型",
+            "name": "originType",
             "in": "query"
           },
           {

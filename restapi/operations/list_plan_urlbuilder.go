@@ -15,11 +15,13 @@ import (
 
 // ListPlanURL generates an URL for the list plan operation
 type ListPlanURL struct {
-	Group     *string
-	Limit     int64
-	Offset    int64
-	Supporter *string
-	Team      *string
+	Group      *string
+	Limit      int64
+	Offset     int64
+	OriginType *string
+	Status     *string
+	Supporter  *string
+	Team       *string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -71,6 +73,22 @@ func (o *ListPlanURL) Build() (*url.URL, error) {
 	offsetQ := swag.FormatInt64(o.Offset)
 	if offsetQ != "" {
 		qs.Set("offset", offsetQ)
+	}
+
+	var originTypeQ string
+	if o.OriginType != nil {
+		originTypeQ = *o.OriginType
+	}
+	if originTypeQ != "" {
+		qs.Set("originType", originTypeQ)
+	}
+
+	var statusQ string
+	if o.Status != nil {
+		statusQ = *o.Status
+	}
+	if statusQ != "" {
+		qs.Set("status", statusQ)
 	}
 
 	var supporterQ string
