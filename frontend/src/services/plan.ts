@@ -13,8 +13,8 @@ export const getPlans = (params: API.PaginationRequestParams) => {
 };
 
 /** 获取创建迁移计划 */
-export const getPlanDetail = (id: string) => {
-  return request.get(`/plans/${id}`);
+export const getPlanDetail = (id: string, params: any) => {
+  return request.get(`/plans/${id}`, {params});
 };
 
 /** 修改创建计划 */

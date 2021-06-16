@@ -218,7 +218,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       setIsUpdateMode(mode === 'update');
       if (mode === 'update' && id) {
         modalRef.current.planId = id;
-        const fieldValues = await planServices.getPlanDetail(id);
+        const fieldValues = await planServices.getPlanDetail(id, {idType: 'plan'});
         let taskModels = {};
         if (fieldValues?.task_id) {
           const {taskModel: taskFields} = await taskService.getTaskDetail(fieldValues?.task_id);
