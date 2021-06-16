@@ -1,7 +1,8 @@
 import React, {useCallback} from 'react';
 import { Task } from '@/typings/model';
 import TaskCreator from '../SvnTaskCreator';
-import { useLocation, useHistory } from 'umi';
+import TaskWithPlanModal from "@/pages/task/customized/TaskWithPlanModal";
+import { useLocation, useHistory, useModel } from 'umi';
 import {throttle} from 'lodash';
 import TaskField from './components/TaskField/svnTaskField';
 import TaskLogger from './components/TaskLogger';
@@ -35,12 +36,16 @@ const tabList = [
 
 const TaskDetail = () => {
   const history = useHistory();
+  const { initialState } = useModel('@@initialState');
   const location = useLocation<any>();
   const [taskDetail, setTaskDetail] = React.useState<Task.Detail>();
   const { id: taskId } = (location as any).query;
   const taskLoggerRef = React.useRef<any>();
   const taskCreatorRef = React.useRef<any>();
+  const taskWithPLanRef = React.useRef<any>();
   const [isLoading, setisLoading] = React.useState(false);
+
+  const { RouteList = [] } = initialState;
 
   const fetchData = useCallback(
     () => {
@@ -127,6 +132,11 @@ const TaskDetail = () => {
           breadcrumb,
         }}
         footer={[
+           RouteList.includes('jianxin') ? (
+            <Button key="plan" onClick={() => taskWithPLanRef?.current?.open()} type="primary">
+              计划信息
+            </Button>
+          ) : null,
           (taskDetail?.taskModel as any)?.status !== Task.Status.RUNNING ? (
             <Button key="startTask" onClick={throttle(actions.startTask, 1000)} type="primary">
               启动任务
@@ -160,6 +170,10 @@ const TaskDetail = () => {
         onSuccess={() => window.location.reload()}
         key="TaskCreator"
         actionRef={taskCreatorRef}
+      />
+      <TaskWithPlanModal
+        key="TaskWithPlanModal"
+        actionRef={taskWithPLanRef}
       />
     </>
   );

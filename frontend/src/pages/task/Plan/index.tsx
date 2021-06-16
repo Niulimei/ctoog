@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import { useHistory } from 'umi';
+import React, {useState, useMemo} from 'react';
+import { useHistory, useModel } from 'umi';
 import type { Plan } from '@/typings/model';
 import ProTable from '@ant-design/pro-table';
 import { DownOutlined, SmileOutlined } from '@ant-design/icons';
@@ -16,6 +16,26 @@ type Actions = Record<
   'updatePlan' | 'deletePlan' | 'execTask' | 'execSvnTask' | 'toggleStatus' | 'gotoTaskDetail' | 'gotoSvnTaskDetail',
   (payload: Plan.Item) => void
 >;
+
+const StatusOptions = [
+  "未迁移",
+  "已迁移",
+  "已切换",
+  "迁移中",
+];
+
+const RepoSvnOptions = [
+  'ClearCase',
+  'ICDP(Gerrit)',
+  '私服',
+  'svn',
+];
+
+const NoRepoOptions = [
+  'ClearCase',
+  'ICDP(Gerrit)',
+  '私服',
+];
 
 const GroupOptions = [
   '北京事业群',
@@ -34,7 +54,7 @@ const GroupOptions = [
   '交付事业部',
 ];
 
-const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
+const getColumns = (actions: Actions, hasSvn: boolean): ProColumns<Plan.Item>[] => {
   const handleMenuClick = (item: any, key: any) => {
     actions[key]?.(item);
   };
@@ -44,7 +64,7 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       title: '源仓库类型',
       dataIndex: 'originType',
       ellipsis: true,
-      hideInSearch: true,
+      valueEnum: hasSvn ? RepoSvnOptions : NoRepoOptions,
     },
     {
       title: '物理子系统',
@@ -62,7 +82,7 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
       title: '迁移状态',
       dataIndex: 'status',
       ellipsis: true,
-      hideInSearch: true,
+      valueEnum: StatusOptions,
     },
     {
       title: '源仓库信息',
@@ -181,12 +201,16 @@ const getColumns = (actions: Actions): ProColumns<Plan.Item>[] => {
 };
 
 const PlanList: React.FC = () => {
+  const { initialState } = useModel('@@initialState');
   const [importLoading, setImportLoading] = useState<boolean>(false);
   const [visible, setVisible] = useState<boolean>(false);
   const tableRef = React.useRef<any>();
   const planCreatorRef = React.useRef<any>();
   const planStatusSwitcherRef = React.useRef<any>();
   const history = useHistory();
+
+  const { RouteList = [] } = initialState;
+  const hasSvn = useMemo(() => RouteList.includes('svnRoute'), [RouteList]);
 
   const beforeonChange = (props) => {
     const {file = {}} = props;
@@ -287,14 +311,16 @@ const PlanList: React.FC = () => {
         rowKey="id"
         scroll={{ x: 1500 }}
         actionRef={tableRef}
-        request={async ({ pageSize = 10, current, group: groupIndex, team, supporter}) => {
+        request={async ({ pageSize = 10, current, group: groupIndex, team, supporter, status, originType}) => {
           const group = GroupOptions[groupIndex];
           const { planInfo, count } = await planServices.getPlans({
             offset: (current! - 1 || 0) * pageSize,
             limit: pageSize || 10,
             team,
             supporter,
-            group
+            group,
+            status: StatusOptions[status],
+            originType: hasSvn ? RepoSvnOptions[originType] : NoRepoOptions[originType],
           });
           return {
             data: planInfo,
@@ -303,9 +329,11 @@ const PlanList: React.FC = () => {
             team,
             supporter,
             group,
+            status: StatusOptions[status],
+            originType: hasSvn ? RepoSvnOptions[originType] : NoRepoOptions[originType],
           };
         }}
-        columns={getColumns(actions)}
+        columns={getColumns(actions, hasSvn)}
         search={{
           defaultCollapsed: false,
           span: 6
