@@ -282,6 +282,13 @@ func init() {
           },
           {
             "type": "string",
+            "description": "ID类型（计划：plan或者任务：task）",
+            "name": "idType",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
             "name": "Authorization",
             "in": "header",
             "required": true
@@ -2341,6 +2348,13 @@ func init() {
             "type": "integer",
             "name": "id",
             "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "ID类型（计划：plan或者任务：task）",
+            "name": "idType",
+            "in": "query",
             "required": true
           },
           {

@@ -150,7 +150,18 @@ func CreatePlanHandler(params operations.CreatePlanParams) middleware.Responder 
 
 func GetPlanHandler(params operations.GetPlanParams) middleware.Responder {
 	var plan = &database.PlanModel{}
-	err := database.DB.Get(plan, "select * from plan where id=?", params.ID)
+	var err error
+	switch params.IDType {
+	case "task":
+		err = database.DB.Get(plan, "select * from plan where task_id=?", params.ID)
+	case "plan":
+		err = database.DB.Get(plan, "select * from plan where id=?", params.ID)
+	default:
+		return operations.NewGetPlanInternalServerError().WithPayload(&models.ErrorModel{
+			Code:    http.StatusInternalServerError,
+			Message: "Not Support Type",
+		})
+	}
 	if err != nil && err != sql.ErrNoRows {
 		return operations.NewGetPlanInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
