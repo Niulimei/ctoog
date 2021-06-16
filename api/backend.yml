@@ -846,6 +846,16 @@ paths:
           required: false
           type: string
           description: "联系人"
+        - name: status
+          in: query
+          required: false
+          type: string
+          description: "状态"
+        - name: originType
+          in: query
+          required: false
+          type: string
+          description: "源仓库类型"
         - name: Authorization
           in: header
           required: true

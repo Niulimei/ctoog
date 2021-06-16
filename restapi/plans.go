@@ -29,6 +29,12 @@ func buildPlanParams(params operations.ListPlanParams) map[string]string {
 	if params.Supporter != nil && *params.Supporter != "" {
 		ret["supporter"] = *params.Supporter
 	}
+	if params.Status != nil && *params.Status != "" {
+		ret["status"] = *params.Status
+	}
+	if params.OriginType != nil && *params.OriginType != "" {
+		ret["origin_type"] = *params.OriginType
+	}
 	return ret
 }
 func buildPlanWhereSQL(queryParams map[string]string) (string, []interface{}, error) {
@@ -40,7 +46,7 @@ func buildPlanWhereSQL(queryParams map[string]string) (string, []interface{}, er
 		placeholderIndex := int32(1)
 		for k, v := range queryParams {
 			switch k {
-			case "business_group", "team", "supporter":
+			case "business_group", "team", "supporter", "status", "origin_type":
 				sqlKeys, sqlValues, placeholderIndex = utils.GeneWhereLike(k, v, placeholderIndex, sqlKeys, sqlValues)
 			}
 		}
