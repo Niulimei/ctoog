@@ -37,10 +37,15 @@ const getColumns = (actions: Actions, isJianxin): ProColumns<Task.Item>[] => {
     {
       title: 'CC PVOB',
       dataIndex: 'pvob',
-      ellipsis: true,
       hideInSearch: true,
       width: 120,
-      // search:
+      render(pvob: Task.Item) {
+        return (
+          <Tooltip placement="topLeft" title={pvob}>
+            <span className={classnames(styles.exlipis)}>{pvob ? pvob : '-'}</span>
+          </Tooltip>
+        )
+      },
     },
     {
       title: 'CC Component',
@@ -58,9 +63,15 @@ const getColumns = (actions: Actions, isJianxin): ProColumns<Task.Item>[] => {
     {
       title: 'Git Repo',
       dataIndex: 'gitRepo',
-      ellipsis: true,
       width: 180,
       hideInSearch: true,
+      render(gitRepo: Task.Item) {
+        return (
+          <Tooltip placement="topLeft" title={gitRepo}>
+            <span className={classnames(styles.exlipis)}>{gitRepo ? gitRepo : '-'}</span>
+          </Tooltip>
+        )
+      },
     },
     {
       title: '当前状态',

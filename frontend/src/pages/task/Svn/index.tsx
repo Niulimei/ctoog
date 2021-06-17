@@ -35,10 +35,15 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
     {
       title: 'SVN 仓库',
       dataIndex: 'svnUrl',
-      ellipsis: true,
       hideInSearch: true,
       width: 120,
-      // search:
+      render(svnUrl: Task.Item) {
+        return (
+          <Tooltip placement="topLeft" title={svnUrl}>
+            <span className={styles.svnRepoTitle}>{svnUrl ? svnUrl : '-'}</span>
+          </Tooltip>
+        )
+      }
     },
     {
       title: 'Git Repo',
