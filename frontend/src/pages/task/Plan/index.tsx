@@ -6,7 +6,7 @@ import { DownOutlined, SmileOutlined } from '@ant-design/icons';
 import { plan as planServices } from '@/services';
 import {authTokenAction} from '@/utils/request';
 import PlanCreator from './components/PlanCreator';
-import { Button, Menu, Dropdown, message, notification, Upload, Modal } from 'antd';
+import { Button, Menu, Dropdown, message, notification, Upload, Modal, Tooltip } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
 import PlanStatusSwitcher from './components/PlanStatusSwitcher';
 import styles from './index.less';
@@ -75,8 +75,14 @@ const getColumns = (actions: Actions, hasSvn: boolean): ProColumns<Plan.Item>[] 
     {
       title: '配置库',
       dataIndex: 'configLib',
-      ellipsis: true,
       hideInSearch: true,
+      render(configLib: Plan.Item) {
+        return (
+          <Tooltip placement="topLeft" title={configLib}>
+            <span className={classnames(styles.exlipis)}>{configLib ? configLib : '-'}</span>
+          </Tooltip>
+        )
+      }
     },
     {
       title: '迁移状态',
@@ -104,8 +110,14 @@ const getColumns = (actions: Actions, hasSvn: boolean): ProColumns<Plan.Item>[] 
     {
       title: '项目组',
       dataIndex: 'team',
-      ellipsis: true,
       hideInSearch: false,
+      render(team: Plan.Item) {
+        return (
+          <Tooltip placement="topLeft" title={team}>
+            <span className={classnames(styles.exlipis)}>{team ? team : '-'}</span>
+          </Tooltip>
+        )
+      }
     },
     {
       title: '计划迁移时间',
@@ -134,9 +146,15 @@ const getColumns = (actions: Actions, hasSvn: boolean): ProColumns<Plan.Item>[] 
     {
       title: '任务编号',
       dataIndex: 'task_id',
-      ellipsis: true,
       hideInSearch: true,
       width: 80,
+      render(task_id: Plan.Item, item) {
+        return (
+          <Tooltip placement="topLeft" title={task_id}>
+            <span className={classnames(styles.exlipis)}>{task_id && ['svn', 'ClearCase'].includes(item.originType) ? task_id : '-'}</span>
+          </Tooltip>
+        )
+      },
     },
     {
       title: '对接人姓名',
