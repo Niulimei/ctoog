@@ -28,7 +28,7 @@ func InitTask() {
 				log.Debug("ticker begin")
 				var taskLogs []*database.TaskLog
 				now := time.Now()
-				start := now.Add(time.Hour * -1).Format("2006-01-02 15:04:05")
+				start := now.Add(time.Hour * -5).Format("2006-01-02 15:04:05")
 				log.Debug("start", start)
 				log.Debug(database.DB.Select(&taskLogs,
 					"SELECT * FROM task_log WHERE start_time < $1 AND status = 'running'", start))
