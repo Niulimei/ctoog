@@ -370,7 +370,7 @@ func cc2Git(workerTaskModel Task, gitUrl string) {
 	tmpCmdOutFile := fmt.Sprintf("%s/tmpCmdOut/%d_%d.log", cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)
 	exec.Command("/bin/bash", "-c", fmt.Sprintf("mkdir -p %s/tmpCmdOut;touch %s/tmpCmdOut/%d_%d.log", cwd, cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)).Output()
 	for _, match := range workerTaskModel.Matches {
-		cmdStr := fmt.Sprintf(`echo %s | su - %s -c '/usr/bin/bash %s/script/cc2git/cc2git.sh "%s" "%s" "%s" "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s"' &>>%s`,
+		cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;echo %s | su - %s -c '/usr/bin/bash %s/script/cc2git/cc2git.sh "%s" "%s" "%s" "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s"' &>>%s`,
 			workerTaskModel.CcPassword, workerTaskModel.CcUser, cwd, workerTaskModel.Pvob, workerTaskModel.Component,
 			match.Stream, gitUrl, match.Branch, workerTaskModel.TaskId,
 			workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail, workerTaskModel.Keep,
@@ -404,7 +404,7 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	tmpCmdOutFile := fmt.Sprintf("%s/tmpCmdOut/%d_%d.log", cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)
 	exec.Command("/bin/bash", "-c", fmt.Sprintf("mkdir -p %s/tmpCmdOut;touch %s/tmpCmdOut/%d_%d.log", cwd, cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)).Output()
 	userFile := geneUsersFile(workerTaskModel)
-	cmdStr := fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" &> %s`,
+	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" &> %s`,
 		cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
 		workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail,
 		workerTaskModel.Keep, userFile, strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""),

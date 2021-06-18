@@ -93,6 +93,9 @@ pullCCAndPush(){
     cd "${tmpCCDir}"
     cleartool update . >/dev/null
   else
+    set +e
+    cleartool rmtag -view "${combineNameAdapt}"_"${taskID}" &>/dev/null
+    set -e
     cleartool mkview -snapshot -tag "${combineNameAdapt}"_"${taskID}" -stgloc -auto -stream "${streamName}"@"${pvobName}" "${tmpCCDir}" >/dev/null
     cd "${tmpCCDir}"
     cleartool update -add_loadrules ."${componentName}" >/dev/null
