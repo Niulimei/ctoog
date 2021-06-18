@@ -638,3 +638,6 @@ func doDelReq(taskInfo *TaskDelInfo) (int, string) {
 	}
 	return http.StatusOK, "ok"
 }
+
+func checkCCInfo()  {}
+func checkGitInfo() {}

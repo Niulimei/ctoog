@@ -6,7 +6,7 @@ source "${workdir}"/common.sh
 check() {
   taskID=$1
   local gitDirNotExist=false
-  if [[ ! -d ${gitTmpRootPath} ]] || [[ $(ls "${gitTmpRootPath}"/*_"${taskID}") == "" ]]; then
+  if [[ $(ls -A ${gitTmpRootPath}) ]] || [[ $(ls "${gitTmpRootPath}"/*_"${taskID}") == "" ]]; then
     gitDirNotExist=true
   fi
   if ${gitDirNotExist} ; then
