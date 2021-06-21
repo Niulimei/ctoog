@@ -54,9 +54,9 @@ pullCCAndPush(){
     tmpGitDirExist=true
   fi
   if [[ -f ${userFile} ]]; then
-    echo "${svnUser}" | git svn clone --username "${svnPassword}" --authors-file="${userFile}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
+    echo "${svnPassword}" | git svn clone --username "${svnUser}" --authors-file="${userFile}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
   else
-    echo "${svnUser}" | git svn clone --username "${svnPassword}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
+    echo "${svnPassword}" | git svn clone --username "${svnUser}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
   fi
   rm -rf "${userFile}"
   configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"

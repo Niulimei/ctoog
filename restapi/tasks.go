@@ -387,6 +387,22 @@ func isCCInfoChange(params operations.UpdateTaskParams) (*models.TaskModel, bool
 	return oldTaskInfo, false
 }
 
+func isUserInfoChanged(params operations.UpdateTaskParams) bool {
+	oldTaskInfo := &models.TaskModel{}
+	database.DB.Get(oldTaskInfo, "SELECT cc_password,"+
+		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep, svn_url"+
+		" FROM task WHERE id = $1", params.ID)
+	if oldTaskInfo.CcUser.String != params.TaskLog.CcUser ||
+		oldTaskInfo.CcPassword.String != params.TaskLog.CcPassword ||
+		oldTaskInfo.GitURL.String != params.TaskLog.GitURL ||
+		oldTaskInfo.GitUser.String != params.TaskLog.GitUser ||
+		oldTaskInfo.GitPassword.String != params.TaskLog.GitPassword ||
+		oldTaskInfo.SvnURL.String != params.TaskLog.SvnURL {
+		return true
+	}
+	return false
+}
+
 func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder {
 	//username, verified := utils.Verify(params.Authorization)
 	taskId := params.ID
@@ -418,8 +434,27 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 			log.Error(err)
 			return middleware.Error(400, models.ErrorModel{Message: "执行中的任务不可以修改"})
 		}
+		if params.TaskLog.ModelType == "" {
+			params.TaskLog.ModelType = "clearcase"
+		}
+		if isUserInfoChanged(params) {
+			log.Infoln("Is checking user info...")
+
+			checkInfos := &utils.CheckTaskInfo{
+				CCUser:     params.TaskLog.CcUser,
+				CCPassword: params.TaskLog.CcPassword,
+				GitRepoURL: utils.ParseGitURL(params.TaskLog.GitUser, params.TaskLog.GitPassword, params.TaskLog.GitURL),
+				ModelType:  params.TaskLog.ModelType,
+				SvnURL:     params.TaskLog.SvnURL,
+			}
+			code, errRet := utils.DoCheckInfoReq(checkInfos)
+			if code != http.StatusOK {
+				ret, _ := json.Marshal(errRet)
+				return middleware.Error(403, models.ErrorModel{Message: string(ret)})
+			}
+		}
 		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
-		if params.TaskLog.ModelType == "clearcase" || params.TaskLog.ModelType == "" {
+		if params.TaskLog.ModelType == "clearcase" {
 			if oldTaskInfo, changed := isCCInfoChange(params); changed {
 				log.Infoln("Is cleaning cache...")
 				deleteCache(taskIdInt, oldTaskInfo)
