@@ -29,7 +29,7 @@
     }
 
     .ant-radio-button-wrapper {
-      padding: 0 9px;
+      padding: 0 8px;
     }
 
     .ant-form-item-label label {
@@ -102,4 +102,17 @@
   .deleteButton {
     margin-right: 8px;
   }
+}
+
+.formContainer {
+  @media screen and (min-width: 1400px) {
+    :global {
+      .ant-modal {
+        top: 50px !important;
+      }
+      .ant-modal-body {
+        max-height: calc(100vh - 200px) !important;
+      }
+    }
+}
 }

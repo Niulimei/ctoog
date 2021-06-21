@@ -264,7 +264,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 				if originType == "svn" {
 					modelType = "svn"
 				}
-				r, err := tx.Exec("INSERT OR REPLACE INTO task (pvob, component, git_url,"+
+				r, err := tx.Exec("INSERT INTO task (pvob, component, git_url,"+
 					"status, last_completed_date_time, creator, dir, worker_id, model_type)"+
 					" VALUES (?, ?, ?, 'init', '', ?, ?, 0, ?)",
 					plan.Pvob, plan.Component, plan.TargetURL, username, plan.Dir, modelType)
@@ -278,7 +278,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 				}
 			} else {
 				tx.Exec("UPDATE task SET pvob = $1, component = $2, git_url = $3, "+
-					"last_completed_date_time = '', creator = $4, dir = $5, worker_id = 0 WHERE id = $6", plan.Pvob, plan.Component,
+					"last_completed_date_time = '', creator = $4, dir = $5 WHERE id = $6", plan.Pvob, plan.Component,
 					plan.TargetURL, username, plan.Dir, plan.TaskID)
 			}
 			if taskID != 0 {
@@ -293,6 +293,7 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 		}
 		tx.Commit()
 	} else {
+		planStatus := plan.Status
 		err = copier.Copy(&plan, planParams)
 		if err != nil {
 			log.Error(err)
@@ -313,6 +314,12 @@ func UpdatePlanHandler(params operations.UpdatePlanParams) middleware.Responder 
 		)
 		if err != nil {
 			log.Error("update plan failed:", err)
+		}
+		if planParams.TaskID != 0 {
+			database.DB.Exec("UPDATE plan SET task_id = ? WHERE id = ?", planParams.TaskID, planId)
+			if planStatus == "未迁移" {
+				database.DB.Exec("UPDATE plan SET status = '迁移中' WHERE id = ?", planId)
+			}
 		}
 	}
 	if taskID == 0 {

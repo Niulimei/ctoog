@@ -1,7 +1,9 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import { Task } from '@/typings/model';
 import TaskCreator from '../SvnTaskCreator';
-import { useLocation, useHistory } from 'umi';
+import TaskWithPlanModal from "@/pages/task/customized/TaskWithPlanModal";
+import { useLocation, useHistory, useModel } from 'umi';
+import {throttle} from 'lodash';
 import TaskField from './components/TaskField/svnTaskField';
 import TaskLogger from './components/TaskLogger';
 import { task as taskService, svn as svnService } from '@/services';
@@ -34,12 +36,35 @@ const tabList = [
 
 const TaskDetail = () => {
   const history = useHistory();
+  const { initialState } = useModel('@@initialState');
   const location = useLocation<any>();
   const [taskDetail, setTaskDetail] = React.useState<Task.Detail>();
   const { id: taskId } = (location as any).query;
   const taskLoggerRef = React.useRef<any>();
   const taskCreatorRef = React.useRef<any>();
+  const taskWithPLanRef = React.useRef<any>();
   const [isLoading, setisLoading] = React.useState(false);
+
+  const { RouteList = [] } = initialState;
+
+  const fetchData = useCallback(
+    () => {
+      taskService.getTaskDetail(taskId, 'svn').then((data) => {
+        if (taskId) {
+          if (!data.taskModel.ccUser) {
+            Modal.warn({
+              width: 480,
+              title: '提示',
+              afterClose: () => taskCreatorRef.current.openModal('planUpdate', taskId),
+              content: '该迁移任务信息不完整，任务信息被补全后才能开始执行',
+            });
+          }
+          setTaskDetail(data);
+        }
+      })
+    },
+    [taskId]
+  );
 
   const actions = {
     /** 删除任务 */
@@ -74,6 +99,7 @@ const TaskDetail = () => {
       try {
         await taskService.startTask(+taskId);
         message.success('迁移任务启动成功');
+        fetchData();
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -106,8 +132,13 @@ const TaskDetail = () => {
           breadcrumb,
         }}
         footer={[
+           RouteList.includes('jianxin') ? (
+            <Button key="plan" onClick={() => taskWithPLanRef?.current?.open()} type="primary">
+              计划信息
+            </Button>
+          ) : null,
           (taskDetail?.taskModel as any)?.status !== Task.Status.RUNNING ? (
-            <Button key="startTask" onClick={actions.startTask} type="primary">
+            <Button key="startTask" onClick={throttle(actions.startTask, 1000)} type="primary">
               启动任务
             </Button>
           ) : null,
@@ -139,6 +170,10 @@ const TaskDetail = () => {
         onSuccess={() => window.location.reload()}
         key="TaskCreator"
         actionRef={taskCreatorRef}
+      />
+      <TaskWithPlanModal
+        key="TaskWithPlanModal"
+        actionRef={taskWithPLanRef}
       />
     </>
   );

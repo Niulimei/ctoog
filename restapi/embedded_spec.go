@@ -997,7 +997,7 @@ func init() {
           "200": {
             "description": "任务列表",
             "schema": {
-              "$ref": "#/definitions/TaskPageInfoModel"
+              "$ref": "#/definitions/OK"
             }
           },
           "500": {
@@ -1915,7 +1915,7 @@ func init() {
         "status": {
           "type": "string"
         },
-        "svnUrl": {
+        "svn_url": {
           "type": "string"
         },
         "workerUrl": {
@@ -1947,7 +1947,10 @@ func init() {
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer"
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
         }
       }
     },
@@ -3064,7 +3067,7 @@ func init() {
           "200": {
             "description": "任务列表",
             "schema": {
-              "$ref": "#/definitions/TaskPageInfoModel"
+              "$ref": "#/definitions/OK"
             }
           },
           "500": {
@@ -3982,7 +3985,7 @@ func init() {
         "status": {
           "type": "string"
         },
-        "svnUrl": {
+        "svn_url": {
           "type": "string"
         },
         "workerUrl": {
@@ -4014,7 +4017,10 @@ func init() {
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer"
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
         }
       }
     },

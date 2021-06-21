@@ -56,7 +56,7 @@
     "@umijs/openapi": "^1.1.14",
     "@umijs/plugin-openapi": "^1.2.0",
     "@umijs/route-utils": "^1.0.36",
-    "antd": "^4.14.0",
+    "antd": "^4.16.2",
     "classnames": "^2.2.6",
     "lodash": "^4.17.11",
     "md5": "^2.3.0",

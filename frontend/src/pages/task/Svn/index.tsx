@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { useHistory } from 'umi';
+import { useHistory, useModel } from 'umi';
 import { Task } from '@/typings/model';
 import Table from '@ant-design/pro-table';
 /** UploadOutlined */
@@ -9,8 +9,16 @@ import { task as taskService } from '@/services';
 import TaskCreator from '../SvnTaskCreator';
 import { useCacheRequestParams } from '@/utils/hooks';
 /** Upload */
-import { Button, message, Dropdown, Menu } from 'antd';
+import { Button, message, Dropdown, Menu, Tooltip } from 'antd';
 import type { ProColumns } from '@ant-design/pro-table';
+import styles from './index.less';
+
+const StatusOptions = [
+  "init",
+  "failed",
+  "completed",
+  "running",
+];
 
 type Actions = Record<
   'startTask' | 'gotoDetail' | 'updateTask' | 'createTask',
@@ -27,22 +35,36 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
     {
       title: 'SVN 仓库',
       dataIndex: 'svnUrl',
-      ellipsis: true,
+      hideInSearch: true,
       width: 120,
-      // search:
+      render(svnUrl: Task.Item) {
+        return (
+          <Tooltip placement="topLeft" title={svnUrl}>
+            <span className={styles.svnRepoTitle}>{svnUrl ? svnUrl : '-'}</span>
+          </Tooltip>
+        )
+      }
     },
     {
       title: 'Git Repo',
-      dataIndex: 'gitRepo',
-      ellipsis: true,
       width: 180,
       hideInSearch: true,
+      render({gitRepo}: Task.Item) {
+        return (
+          <Tooltip placement="topLeft" title={gitRepo}>
+            <span className={styles.svnRepoTitle}>{gitRepo ? gitRepo : '-'}</span>
+          </Tooltip>
+        )
+      }
     },
     {
       title: '当前状态',
       width: 100,
-      renderText(item: Task.Item) {
-        return item.status;
+      dataIndex: 'status',
+      hideInSearch: false,
+      valueEnum: StatusOptions,
+      renderText(status: Task.Item) {
+        return status;
       },
     },
     {
@@ -77,7 +99,9 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
 
                   {item.status !== Task.Status.RUNNING && (
                     <Menu.Item>
-                      <Button size="small" type="link" onClick={() => actions.startTask(item.id)}>
+                      <Button size="small" type="link" onClick={() => {
+                        actions.startTask(item.id);
+                      }}>
                         启动任务
                       </Button>
                     </Menu.Item>
@@ -98,10 +122,12 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
 };
 
 const TaskList: React.FC = () => {
+  const { initialState } = useModel('@@initialState');
   const tableRef = React.useRef<any>(null);
   const creatorModalRef = React.useRef<any>(null);
   const history = useHistory();
   const { params, setParams } = useCacheRequestParams('taskList');
+  const { RouteList = [] } = initialState;
 
   const actions: Actions = {
     /** 查看任务详情 */
@@ -113,6 +139,7 @@ const TaskList: React.FC = () => {
       try {
         await taskService.startTask(id);
         message.success('迁移任务启动成功');
+        tableRef?.current?.reload();
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -142,23 +169,33 @@ const TaskList: React.FC = () => {
             });
           },
         }}
-        search={false}
-        request={async ({ pageSize = 10, current }) => {
+        search={{
+          defaultCollapsed: false,
+          span: 6
+        }}
+        request={async ({ pageSize = 10, current, status }) => {
           const { taskInfo, count } = await taskService.getTasks({
             offset: (current! - 1 || 0) * pageSize,
             limit: pageSize || 10,
-            modelType: 'svn'
+            modelType: 'svn',
+            status: StatusOptions[status]
           });
 
           return {
             data: taskInfo,
             success: true,
             total: count,
+            status: StatusOptions[status]
           };
         }}
         headerTitle="迁移任务"
         columns={getColumns(actions)}
         toolBarRender={() => [
+          !RouteList.includes('jianxin') && <Button
+            size="small"
+            type="primary"
+            onClick={() => actions.createTask()}
+          >新建SVN迁移任务</Button>
         ]}
       />
       <TaskCreator

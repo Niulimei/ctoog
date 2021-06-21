@@ -1,6 +1,6 @@
 import { LockOutlined, UserOutlined, EditTwoTone, ProfileTwoTone } from '@ant-design/icons';
 import { message, Tabs, Form } from 'antd';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProForm, { ProFormText, ProFormSelect } from '@ant-design/pro-form';
 import { Link, history, useModel } from 'umi';
 import md5 from 'md5';
@@ -22,15 +22,18 @@ const goto = () => {
 
 const Login: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
+  const [permission, setPermission] = useState([]);
   const [type, setType] = useState<string>('account');
   const { initialState, setInitialState } = useModel('@@initialState');
 
   const fetchUserInfo = async () => {
     const userInfo = await initialState?.fetchUserInfo?.();
+    const routeInfo = await initialState?.fetchRouteInfo?.();
     if (userInfo) {
       setInitialState({
         ...initialState,
         currentUser: userInfo,
+        RouteList: routeInfo
       });
     }
   };
@@ -119,6 +122,13 @@ const Login: React.FC = () => {
 
   const [form] = Form.useForm();
 
+  useEffect(
+    async () => {
+      const RouteList = await UserService.getPermission();
+      setPermission(RouteList);
+    },
+    []
+  );
 
   return (
     <div className={styles.container}>
@@ -233,30 +243,36 @@ const Login: React.FC = () => {
 
                     ]}
                   />
-                  
-                  {/* 事业群 */}
-                  <ProFormSelect
-                    options={GroupOptions}
-                    showSearch
-                    placeholder="请选择事业群"
-                    name="bussinessgroup"
-                  />
-                  {/* 项目组 */}
-                  <ProFormText
-                    name="team"
-                    fieldProps={{
-                      size: 'large',
-                      prefix: <ProfileTwoTone className={styles.prefixIcon} />,
-                    }}
-                    placeholder="请输入项目组"
-                    rules={[
-                      {
-                        required: true,
-                        message: '请输入项目组!',
-                      },
 
-                    ]}
-                  />
+                  {
+                    permission.includes('jianxin') && (
+                      <>
+                        {/* 事业群 */}
+                        <ProFormSelect
+                          options={GroupOptions}
+                          showSearch
+                          placeholder="请选择事业群"
+                          name="bussinessgroup"
+                        />
+                        {/* 项目组 */}
+                        <ProFormText
+                          name="team"
+                          fieldProps={{
+                            size: 'large',
+                            prefix: <ProfileTwoTone className={styles.prefixIcon} />,
+                          }}
+                          placeholder="请输入项目组"
+                          rules={[
+                            {
+                              required: true,
+                              message: '请输入项目组!',
+                            },
+
+                          ]}
+                        />
+                      </>
+                    )
+                  }
                   {/* 密码 */}
                   <ProFormText.Password
                     name="password"

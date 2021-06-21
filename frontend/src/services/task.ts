@@ -1,4 +1,5 @@
 import request from '@/utils/request';
+import {isArray} from 'lodash';
 
 /** 获取迁移任务 */
 export const getTasks = (params: API.PaginationRequestParams) => {
@@ -29,10 +30,11 @@ export const updateTask = (id: string, data: any) => {
 };
 
 /** 启动迁移任务 */
-export const startTask = (id: number) => {
+export const startTask = (ids: [] | string) => {
+  const idList = isArray(ids) ? ids : [ids];
   return request.post('/tasks/restart', {
     data: {
-      id,
+      id: idList,
     },
   });
 };

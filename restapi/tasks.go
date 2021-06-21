@@ -28,7 +28,7 @@ func InitTask() {
 				log.Debug("ticker begin")
 				var taskLogs []*database.TaskLog
 				now := time.Now()
-				start := now.Add(time.Hour * -1).Format("2006-01-02 15:04:05")
+				start := now.Add(time.Hour * -5).Format("2006-01-02 15:04:05")
 				log.Debug("start", start)
 				log.Debug(database.DB.Select(&taskLogs,
 					"SELECT * FROM task_log WHERE start_time < $1 AND status = 'running'", start))
@@ -70,7 +70,7 @@ func startTask(taskId int64) {
 	worker := &database.WorkerModel{}
 	newAssigned := false
 	log.Info(task.WorkerId)
-	if task.WorkerId != 0 {
+	if task.WorkerId.Int64 != 0 {
 		log.Debug("got worker id")
 		err = database.DB.Get(worker, "SELECT * FROM worker WHERE id = $1 and status = 'running'", task.WorkerId)
 	} else {
@@ -94,7 +94,7 @@ func startTask(taskId int64) {
 			" VALUES($1, 'waiting', $2, $3, 0)", taskId, "", "",
 	)
 	taskLogId, err := r.LastInsertId()
-	component := task.Component + task.Dir
+	component := task.Component.String + task.Dir.String
 	if err == nil {
 		type InnerMatchInfo struct {
 			Branch string
@@ -123,19 +123,19 @@ func startTask(taskId int64) {
 		workerTaskModel := InnerTask{
 			TaskId:       taskId,
 			TaskLogId:    taskLogId,
-			CcPassword:   task.CcPassword,
-			CcUser:       task.CcUser,
+			CcPassword:   task.CcPassword.String,
+			CcUser:       task.CcUser.String,
 			Component:    component,
-			GitPassword:  task.GitPassword,
-			GitURL:       task.GitURL,
-			GitUser:      task.GitUser,
-			GitEmail:     task.GitEmail,
-			Pvob:         task.Pvob,
-			IncludeEmpty: task.IncludeEmpty,
-			Keep:         task.Keep,
-			SvnUrl:       task.SvnURL,
-			ModelType:    task.ModelType,
-			Gitignore:    task.Gitignore,
+			GitPassword:  task.GitPassword.String,
+			GitURL:       task.GitURL.String,
+			GitUser:      task.GitUser.String,
+			GitEmail:     task.GitEmail.String,
+			Pvob:         task.Pvob.String,
+			IncludeEmpty: task.IncludeEmpty.Bool,
+			Keep:         task.Keep.String,
+			SvnUrl:       task.SvnURL.String,
+			ModelType:    task.ModelType.String,
+			Gitignore:    task.Gitignore.String,
 		}
 		for _, match := range matchInfo {
 			workerTaskModel.Matches =
@@ -188,6 +188,18 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		if len(taskInfo.Dir.String) > 0 && !strings.HasPrefix(taskInfo.Dir.String, "/") {
 			taskInfo.Dir.String = "/" + taskInfo.Dir.String
 		}
+		if !taskInfo.IncludeEmpty.Valid {
+			taskInfo.IncludeEmpty.Scan(false)
+		}
+		if !taskInfo.Keep.Valid {
+			taskInfo.Keep.Scan("")
+		}
+		if !taskInfo.Dir.Valid {
+			taskInfo.Dir.Scan("")
+		}
+		if !taskInfo.Gitignore.Valid {
+			taskInfo.Gitignore.Scan("")
+		}
 		r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
 			"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id, model_type, gitignore)"+
 			" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase', $14)",
@@ -219,7 +231,7 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		}
 		tx, _ := database.DB.Begin()
 		for _, namePair := range taskInfo.NamePair {
-			tx.Exec("INSERT INTO name_pair (task_id, git_username, git_email, svn_username) VALUES (?,?,?)",
+			tx.Exec("INSERT INTO svn_name_pair (task_id, git_username, git_email, svn_username) VALUES (?,?,?,?)",
 				taskId, namePair.GitUserName, namePair.GitEmail, namePair.SvnUserName)
 		}
 		tx.Commit()
@@ -386,7 +398,7 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		}
 		log.Debug("task update commit:", tx.Commit())
 	} else {
-		if task.Status == "running" {
+		if task.Status.String == "running" {
 			log.Error(err)
 			return middleware.Error(400, models.ErrorModel{Message: "执行中的任务不可以修改"})
 		}
@@ -429,15 +441,16 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 }
 func RestartTaskHandler(params operations.RestartTaskParams) middleware.Responder {
 	//username, verified := utils.Verify(params.Authorization)
-	taskId := params.RestartTrigger.ID
-	task := &database.TaskModel{}
-	database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
-	if task.Status != "running" {
-		database.DB.MustExec("UPDATE task SET status = 'running' WHERE id = $1", taskId)
-		go startTask(taskId)
+	for _, taskId := range params.RestartTrigger.ID {
+		task := &database.TaskModel{}
+		database.DB.Get(task, "SELECT status, worker_id FROM task WHERE id = $1", taskId)
+		if task.Status.String != "running" {
+			database.DB.MustExec("UPDATE task SET status = 'running' WHERE id = $1", taskId)
+			go startTask(taskId)
+		}
 	}
-	utils.RecordLog(utils.Info, utils.RestartTask, "", "", 0)
-	return operations.NewUpdateTaskCreated().WithPayload(&models.OK{
+	utils.RecordLog(utils.Info, utils.RestartTask, "", fmt.Sprintf("task ID: %v", params.RestartTrigger.ID), 0)
+	return operations.NewRestartTaskOK().WithPayload(&models.OK{
 		Message: "ok",
 	})
 }

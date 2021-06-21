@@ -276,7 +276,7 @@ paths:
         '200':
           description: 任务列表
           schema:
-            $ref: '#/definitions/TaskPageInfoModel'
+            $ref: '#/definitions/OK'
         '500':
           description: 内部错误
           schema:
@@ -1217,7 +1217,9 @@ definitions:
     type: object
     properties:
       id:
-        type: integer
+        type: array
+        items:
+          type: integer
   TaskLogInfo:
     type: object
     properties:

@@ -165,10 +165,18 @@ const CustomChangeHandlers: Partial<
     dispatch({ type: 'forceUpdate' });
   },
   pvob(form, value, dispatch) {
+    dispatch({type: 'clearComponent', payload: {}});
+    dispatch({type: 'clearStream', payload: {}});
     dispatch({ type: 'getComponentValueEnum', payload: value });
-    form.setFieldsValue({ configLib: value });
+    const { matchInfo } = form.getFieldsValue(['matchInfo']);
+    form.setFieldsValue({
+      configLib: value,
+      component: null,
+      matchInfo: (matchInfo || []).map((info: any) => ({ ...info, stream: '' })),
+    });
   },
   component(form, value, dispatch) {
+    dispatch({type: 'clearStream', payload: {}});
     dispatch({type: 'stream', payload: { component: value, pvob: form.getFieldValue('pvob') }});
     const { matchInfo } = form.getFieldsValue(['matchInfo']);
     form.setFieldsValue({
@@ -210,19 +218,25 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       setIsUpdateMode(mode === 'update');
       if (mode === 'update' && id) {
         modalRef.current.planId = id;
-        const fieldValues = await planServices.getPlanDetail(id);
-        const { taskModel: taskFieldValues } = await taskService.getTaskDetail(fieldValues?.task_id);
-        modalRef.current.task_id = fieldValues?.task_id;
+        const fieldValues = await planServices.getPlanDetail(id, {idType: 'plan'});
+        let taskModels = {};
+        if (fieldValues?.task_id) {
+          const {taskModel: taskFields} = await taskService.getTaskDetail(fieldValues?.task_id);
+          taskModels = taskFields;
+          modalRef.current.task_id = fieldValues?.task_id;
+        } else {
+          modalRef.current.task_id = null;
+        }
         if (fieldValues.originType === 'ClearCase') {
           clearCaseEnumDispatch('pvob', {});
           clearCaseEnumDispatch('component', { pvob: fieldValues.pvob });
           clearCaseEnumDispatch('stream', { component: fieldValues.component, pvob: fieldValues.pvob });
-          form.setFieldsValue({...fieldValues, ...taskFieldValues});
+          form.setFieldsValue({...fieldValues, ...taskModels});
         } else {
-          form.setFieldsValue({...fieldValues, gitignore:taskFieldValues?.gitignore });
+          form.setFieldsValue({...fieldValues, gitignore:taskModels?.gitignore });
         }
 
-        if (taskFieldValues?.status === 'running') {
+        if (taskModels?.status === 'running') {
           toggleVisible(false);
           message.error('任务正在执行不可进行修改');
         } else {
@@ -240,19 +254,33 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
   const handleFinish = async (values: Plan.Base) => {
     try {
       if (isUpdateMode) {
-        await planServices.updatePlan(modalRef.current.planId, values);
         if (values?.originType === 'svn') {
+          await planServices.updatePlan(modalRef.current.planId, values);
           await taskService.updateTask(modalRef.current.task_id, {
-            svn_url: values?.originUrl,
+            svnUrl: values?.originUrl,
             modelType: values?.originType,
             gitURL: values?.targetUrl,
             ...values
           });
         } else if (values?.originType === 'ClearCase') {
-          await taskService.updateTask(modalRef.current.task_id, {
-            gitURL: values?.targetUrl,
-            ...values
-          });
+          let newTaskId = null;
+          if (modalRef?.current?.task_id) {
+            await taskService.updateTask(modalRef.current.task_id, {
+              gitURL: values?.targetUrl,
+              ...values
+            });
+            newTaskId = modalRef.current.task_id;
+          } else {
+            const {message: otherTaskId} = await taskService.createTask({
+               gitURL: values?.targetUrl,
+               ...values,
+             });
+            newTaskId = otherTaskId;
+          }
+
+          await planServices.updatePlan(modalRef.current.planId, {...values, task_id: Number(newTaskId)});
+        } else {
+          await planServices.updatePlan(modalRef.current.planId, values);
         }
       } else {
         let task_id = ''
@@ -260,7 +288,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
            const {message: taskId} = await taskService.createTask({
              ...values,
              gitURL: values?.targetUrl,
-             svn_url: values?.originUrl,
+             svnUrl: values?.originUrl,
              modelType: values?.originType,
            });
            task_id = taskId;
@@ -299,6 +327,11 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       case 'stream':
         clearCaseEnumDispatch('stream', { pvob: payload?.pvob, component: payload?.component });
         break;
+      case 'clearStream':
+        clearCaseEnumDispatch('clearStream', {});
+        break;
+      case 'clearComponent':
+        clearCaseEnumDispatch('clearComponent', {});
       default:
         break;
     }
@@ -342,11 +375,15 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       form={form}
       width="1000px"
       visible={visible}
+      className={classnames(styles.formContainer)}
       layout="horizontal"
       onFinish={handleFinish}
       initialValues={InitialValues}
       title={`${actionText}迁移计划`}
-      modalProps={{ okText: actionText, bodyStyle: {maxHeight: 'calc(100vh - 200px)', overflow: "scroll"}, style: {top: 50} }}
+      modalProps={{
+        okText: actionText,
+        bodyStyle: {maxHeight: 'calc(100vh - 108px)', overflowY: "scroll", overflowX: "hidden"}, style: {top: 0}
+      }}
       onValuesChange={handleFormValuesChange}
       onVisibleChange={(vis) => toggleVisible(vis)}
     >

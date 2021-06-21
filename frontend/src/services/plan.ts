@@ -13,8 +13,8 @@ export const getPlans = (params: API.PaginationRequestParams) => {
 };
 
 /** 获取创建迁移计划 */
-export const getPlanDetail = (id: string) => {
-  return request.get(`/plans/${id}`);
+export const getPlanDetail = (id: string, params: any) => {
+  return request.get(`/plans/${id}`, {params});
 };
 
 /** 修改创建计划 */
@@ -27,4 +27,9 @@ export const updatePlan = (id: string, data: any) => {
 /** 删除创建计划 */
 export const deletePlan = (id: string) => {
   return request.delete(`/plans/${id}`);
+};
+
+/** 批量导入计划 */
+export const importPlan = data => {
+  return request.post(`/import/plan`, data);
 };
