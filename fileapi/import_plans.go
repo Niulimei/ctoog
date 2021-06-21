@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"ctgb/database"
 	"ctgb/utils"
+	"encoding/json"
 	"fmt"
-	"github.com/360EntSecGroup-Skylar/excelize/v2"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/360EntSecGroup-Skylar/excelize/v2"
+	log "github.com/sirupsen/logrus"
 )
 
 func checkData(rows [][]string) (bool, string) {
@@ -43,6 +45,22 @@ func checkData(rows [][]string) (bool, string) {
 		keep := row[9]
 		if includeEmpty && keep == "" {
 			return false, fmt.Sprintf("第%d行第%d列数据不全", index+2, 10)
+		}
+		ccUser := row[10]
+		ccPassword := row[11]
+		gitUser := row[15]
+		gitPassword := row[16]
+		gitUrl := row[19]
+		checkInfos := &utils.CheckTaskInfo{
+			CCUser:     ccUser,
+			CCPassword: ccPassword,
+			GitRepoURL: utils.ParseGitURL(gitUser, gitPassword, gitUrl),
+			ModelType:  taskType,
+		}
+		code, errRet := utils.DoCheckInfoReq(checkInfos)
+		if code != http.StatusOK {
+			ret, _ := json.Marshal(errRet)
+			return false, fmt.Sprintf("第%d行 用户或仓库信息错误: %v", index+2, string(ret))
 		}
 	}
 	return checkColumn, ""
