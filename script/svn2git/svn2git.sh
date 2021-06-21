@@ -4,7 +4,7 @@
 #脚本名称：svn2git.sh
 #作用：完成SVN代码的拉取，git仓库的初始化，代码向git的推送
 #传参说明：共需8个参数，依次分别为：
-#svnRepoURL，gitRepoURL，任务ID，是否保留空目录(是：true，否：false)，用户名，邮箱, 空目录占位文件名称, 用户名称映射文件
+#svnRepoURL，gitRepoURL，任务ID，是否保留空目录(是：true，否：false)，用户名，邮箱, 空目录占位文件名称, 用户名称映射文件, svn用户名, svn密码
 ######
 
 set -x
@@ -43,6 +43,8 @@ pullCCAndPush(){
   emptyFileName=$7
   userFile=$8
   gitignoreContent=$9
+  svnUser="${10}"
+  svnPassword="${11}"
   combineNameAdapt=$(basename "${svnRepoUrl}")
   local tmpGitDir="${gitTmpRootPath}/${combineNameAdapt}_${taskID}"
   local tmpGitDirExist=false
@@ -51,7 +53,11 @@ pullCCAndPush(){
     rm -rf "${tmpGitDir}"
     tmpGitDirExist=true
   fi
-  git svn clone "${svnRepoUrl}" --authors-file="${userFile}" --no-metadata --prefix "" "${tmpGitDir}" >/dev/null
+  if [[ -f ${userFile} ]]; then
+    echo "${svnUser}" | git svn clone --username "${svnPassword}" --authors-file="${userFile}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
+  else
+    echo "${svnUser}" | git svn clone --username "${svnPassword}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
+  fi
   rm -rf "${userFile}"
   configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
   if [[ ${containEmptyDir} == "true" ]]; then
@@ -85,7 +91,7 @@ pullCCAndPush(){
 
 main(){
   mkdir -p "${gitTmpRootPath}" -m 777
-  pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+  pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}"
 }
 
-main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}"
