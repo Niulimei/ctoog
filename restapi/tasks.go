@@ -184,6 +184,21 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 	var taskId int64
 	var err error
 	modelType := strings.ToLower(taskInfo.ModelType.String)
+	if modelType == "" {
+		modelType = "clearcase"
+	}
+	checkInfos := &utils.CheckTaskInfo{
+		CCUser:     taskInfo.CcUser.String,
+		CCPassword: taskInfo.CcPassword.String,
+		GitRepoURL: utils.ParseGitURL(taskInfo.GitUser.String, taskInfo.GitPassword.String, taskInfo.GitURL.String),
+		ModelType:  modelType,
+	}
+	code, errRet := utils.DoCheckInfoReq(checkInfos)
+	if code != http.StatusOK {
+		ret, _ := json.Marshal(errRet)
+		return operations.NewCreateTaskInternalServerError().WithPayload(
+			&models.ErrorModel{Message: string(ret), Code: 500})
+	}
 	if modelType == "clearcase" || modelType == "" {
 		if len(taskInfo.Dir.String) > 0 && !strings.HasPrefix(taskInfo.Dir.String, "/") {
 			taskInfo.Dir.String = "/" + taskInfo.Dir.String
@@ -651,6 +666,3 @@ func doDelReq(taskInfo *TaskDelInfo) (int, string) {
 	}
 	return http.StatusOK, "ok"
 }
-
-func checkCCInfo()  {}
-func checkGitInfo() {}

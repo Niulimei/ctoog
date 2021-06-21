@@ -3,6 +3,7 @@ package restapi
 import (
 	"bufio"
 	"bytes"
+	"ctgb/utils"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,7 +16,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PuerkitoBio/urlesc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -234,6 +234,62 @@ func DeleteWorkerTaskCacheHandler(w http.ResponseWriter, r *http.Request) {
 	delCache(w, workerTaskModel)
 }
 
+func CheckInfoHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Error("read task error:", err)
+		return
+	}
+	if r.Body != nil {
+		defer r.Body.Close()
+	}
+	info := utils.CheckTaskInfo{}
+	err = json.Unmarshal(body, &info)
+	if err != nil {
+		log.Error(err)
+		w.WriteHeader(500)
+		w.Write([]byte("Json marshal fail"))
+		return
+	}
+	checkInfo(w, info)
+}
+
+func checkInfo(w http.ResponseWriter, info utils.CheckTaskInfo) {
+	cwd, _ := os.Getwd()
+	var checkInfoCmdStr string
+	switch info.ModelType {
+	case "clearcase":
+		checkInfoCmdStr = fmt.Sprintf(`/usr/bin/bash %s/script/cc2git/checkInfo.sh "%s" "%s" "%s"`, cwd,
+			info.CCUser, info.CCPassword, info.GitRepoURL)
+	case "svn":
+		checkInfoCmdStr = fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/checkInfo.sh "%s"`, cwd, info.GitRepoURL)
+	default:
+		w.WriteHeader(500)
+		w.Write([]byte("Not Support"))
+		return
+	}
+
+	log.Infoln(checkInfoCmdStr)
+	cmd := exec.Command("/bin/bash", "-c", checkInfoCmdStr)
+	stdout, _ := cmd.StdoutPipe()
+	stderr, _ := cmd.StderrPipe()
+
+	cmd.Start()
+	s := bufio.NewScanner(io.MultiReader(stdout, stderr))
+	var tmp []string
+	for s.Scan() {
+		tmp = append(tmp, s.Text())
+	}
+	err := cmd.Wait()
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(strings.Join(tmp, "\n")))
+		return
+	}
+	w.WriteHeader(200)
+	w.Write([]byte("success"))
+}
+
 func delCache(w http.ResponseWriter, workerTaskModel WorkerTaskDelInfo) {
 	cwd, _ := os.Getwd()
 	var checkCacheCmdStr, cleanCacheCmdStr string
@@ -308,7 +364,7 @@ func WorkerTaskHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Json marshal fail"))
 		return
 	}
-	gitUrl := parseGitURL(workerTaskModel.GitUser, workerTaskModel.GitPassword, workerTaskModel.GitURL)
+	gitUrl := utils.ParseGitURL(workerTaskModel.GitUser, workerTaskModel.GitPassword, workerTaskModel.GitURL)
 	switch workerTaskModel.ModelType {
 	case "clearcase":
 		cc2Git(workerTaskModel, gitUrl)
@@ -418,19 +474,6 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 		os.RemoveAll(userFile)
 	}()
 	return http.StatusOK
-}
-
-func parseGitURL(user, passwd, gitUrl string) string {
-	user = urlesc.QueryEscape(user)
-	passwd = urlesc.QueryEscape(passwd)
-	if strings.HasPrefix(gitUrl, "http://") {
-		gitUrl = strings.Replace(gitUrl, "http://", "", 1)
-		gitUrl = "http://" + user + ":" + passwd + "@" + gitUrl
-	} else if strings.HasPrefix(gitUrl, "https://") {
-		gitUrl = strings.Replace(gitUrl, "https://", "", 1)
-		gitUrl = "https://" + user + ":" + passwd + "@" + gitUrl
-	}
-	return gitUrl
 }
 
 func GetCommandOut(w http.ResponseWriter, r *http.Request) {

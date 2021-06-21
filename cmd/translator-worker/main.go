@@ -113,5 +113,6 @@ func main() {
 	http.HandleFunc("/new_task", restapi.WorkerTaskHandler) //	设置访问路由
 	http.HandleFunc("/delete_task", restapi.DeleteWorkerTaskCacheHandler)
 	http.HandleFunc("/command_out", restapi.GetCommandOut)
+	http.HandleFunc("/check_info", restapi.CheckInfoHandler)
 	log.Fatal(http.ListenAndServe(tmp.Host+":"+strconv.Itoa(tmp.Port), nil))
 }
