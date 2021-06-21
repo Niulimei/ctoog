@@ -4,14 +4,24 @@ import Table from '@ant-design/pro-table';
 import type { Task } from '@/typings/model';
 import { humanizeDuration } from '@/utils/utils';
 import type { ProColumns } from '@ant-design/pro-table';
+import { useLocation } from 'umi';
 
 interface IProps {
   data?: Task.Detail['logList'];
   onDisplayLog?: (task: Task.Log) => void;
 }
 
+
 const TaskLogTable: React.FC<IProps> = ({ data, onDisplayLog }) => {
+  const location = useLocation<any>();
+  const { id: taskId } = (location as any).query;
   const TableColumns: ProColumns<Task.Log>[] = [
+    {
+      title: '任务id',
+      renderText() {
+        return taskId;
+      },
+    },
     {
       title: '任务序号',
       dataIndex: 'logID',

@@ -80,3 +80,9 @@ export const getWorkList = (limit: number, offset: number) => {
     }
   });
 };
+
+/** 验证cc和git用户名密码是否正确 */
+export const checkCg = (ccInfo: any, gitInfo: any)=>{
+  console.log(ccInfo, gitInfo);
+  
+}
