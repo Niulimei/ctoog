@@ -45,6 +45,8 @@ function getDirMaxDepth() {
 changeDirCharSet() {
   targetDir=$1
   maxDepth=$2
+  oldIFS=$IFS
+  IFS=$'\n'
   for ((i=maxDepth; i>=1; i--)); do
     for dir in $(find "${targetDir}" -maxdepth "${i}" -mindepth "${i}" -type d); do
       dirName=$(dirname "$dir")
@@ -58,11 +60,14 @@ changeDirCharSet() {
       fi
     done
   done
+  IFS=$oldIFS
 }
 
 changeFileCharSet() {
   targetDir=$1
   maxDepth=$2
+  oldIFS=$IFS
+  IFS=$'\n'
   for ((i=$((maxDepth+1)); i>=1; i--)); do
     for dir in $(find "${targetDir}" -maxdepth "${i}" -mindepth "${i}" -type f); do
       dirName=$(dirname "$dir")
@@ -76,6 +81,7 @@ changeFileCharSet() {
       fi
     done
   done
+  IFS=$oldIFS
 }
 
 main() {
