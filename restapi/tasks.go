@@ -192,12 +192,13 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		CCPassword: taskInfo.CcPassword.String,
 		GitRepoURL: utils.ParseGitURL(taskInfo.GitUser.String, taskInfo.GitPassword.String, taskInfo.GitURL.String),
 		ModelType:  modelType,
+		SvnURL:     taskInfo.SvnURL.String,
 	}
 	code, errRet := utils.DoCheckInfoReq(checkInfos)
 	if code != http.StatusOK {
 		ret, _ := json.Marshal(errRet)
 		return operations.NewCreateTaskInternalServerError().WithPayload(
-			&models.ErrorModel{Message: string(ret), Code: 500})
+			&models.ErrorModel{Message: string(ret), Code: int64(code)})
 	}
 	if modelType == "clearcase" || modelType == "" {
 		if len(taskInfo.Dir.String) > 0 && !strings.HasPrefix(taskInfo.Dir.String, "/") {

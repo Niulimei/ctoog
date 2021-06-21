@@ -16,6 +16,7 @@ import (
 type CheckTaskInfo struct {
 	CCUser     string `json:"cc_user"`
 	CCPassword string `json:"cc_password"`
+	SvnURL     string `json:"svn_url"`
 	GitRepoURL string `json:"git_repo_url"`
 	ModelType  string `json:"model_type"`
 	WorkerURL  string `json:"worker_url,omitempty"`
@@ -40,6 +41,20 @@ func ParseGitURL(user, passwd, gitUrl string) string {
 		gitUrl = "https://" + user + ":" + passwd + "@" + gitUrl
 	}
 	return gitUrl
+}
+
+func ParseSvnURL(user, passwd, svnUrl string) string {
+	user = urlesc.QueryEscape(user)
+	passwd = urlesc.QueryEscape(passwd)
+	if strings.HasPrefix(svnUrl, "svn://") {
+		svnUrl = strings.Replace(svnUrl, "svn://", "", 1)
+		svnUrl = "svn://" + user + ":" + passwd + "@" + svnUrl
+	}
+	//} else if strings.HasPrefix(svnUrl, "https://") {
+	//	svnUrl = strings.Replace(svnUrl, "https://", "", 1)
+	//	svnUrl = "https://" + user + ":" + passwd + "@" + svnUrl
+	//}
+	return svnUrl
 }
 
 func DoCheckInfoReq(taskInfo *CheckTaskInfo) (int, map[string]string) {
@@ -70,6 +85,6 @@ func DoCheckInfoReq(taskInfo *CheckTaskInfo) (int, map[string]string) {
 	if len(errRet) == 0 {
 		return http.StatusOK, errRet
 	} else {
-		return http.StatusInternalServerError, errRet
+		return http.StatusForbidden, errRet
 	}
 }

@@ -262,7 +262,8 @@ func checkInfo(w http.ResponseWriter, info utils.CheckTaskInfo) {
 		checkInfoCmdStr = fmt.Sprintf(`/usr/bin/bash %s/script/cc2git/checkInfo.sh "%s" "%s" "%s"`, cwd,
 			info.CCUser, info.CCPassword, info.GitRepoURL)
 	case "svn":
-		checkInfoCmdStr = fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/checkInfo.sh "%s"`, cwd, info.GitRepoURL)
+		checkInfoCmdStr = fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/checkInfo.sh "%s" "%s" "%s" "%s"`,
+			cwd, info.CCUser, info.CCPassword, info.SvnURL, info.GitRepoURL)
 	default:
 		w.WriteHeader(500)
 		w.Write([]byte("Not Support"))
@@ -461,7 +462,7 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	exec.Command("/bin/bash", "-c", fmt.Sprintf("mkdir -p %s/tmpCmdOut;touch %s/tmpCmdOut/%d_%d.log", cwd, cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)).Output()
 	userFile := geneUsersFile(workerTaskModel)
 	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" &> %s`,
-		cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
+		cwd, utils.ParseSvnURL(workerTaskModel.CcUser, workerTaskModel.CcPassword, workerTaskModel.SvnURL), gitUrl, workerTaskModel.TaskId,
 		workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail,
 		workerTaskModel.Keep, userFile, strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""),
 		tmpCmdOutFile)
