@@ -453,9 +453,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
            </div>
             <div className={styles.svnTitle}>
              <div className={styles.firstNode}>
-               <Tooltip title="脚本执行main函数">
-                 <span>js脚本</span>
-               </Tooltip>
+               <div className={styles.leftTitles} style={{height: '100%'}}></div>
              </div>
              <div className={styles.secondNodes}>
                 <div className={classnames([styles.innerRun, styles.innerRunLeft])}>
