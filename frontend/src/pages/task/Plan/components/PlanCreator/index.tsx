@@ -274,18 +274,18 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
 
   /** 点击新建后的请求处理函数 */
   const handleFinish = async (values: Plan.Base) => {
-    
+
     try {
       // 更新任务
       if (isUpdateMode) {
         if (values?.originType === 'svn') {
-          await planServices.updatePlan(modalRef.current.planId, values);
           await taskService.updateTask(modalRef.current.task_id, {
             svnUrl: values?.originUrl,
             modelType: values?.originType,
             gitURL: values?.targetUrl,
             ...values
           });
+          await planServices.updatePlan(modalRef.current.planId, values);
         } else if (values?.originType === 'ClearCase') {
           let newTaskId = null;
           if (modalRef?.current?.task_id) {
@@ -476,7 +476,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                 </>
               )}
               {
-                form.getFieldValue('originType') === 'svn' ? 
+                form.getFieldValue('originType') === 'svn' &&
                 (<>
                   <ProFormText
                     name="svn_url"
@@ -496,19 +496,11 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                     placeholder="请输入 SVN 密码"
                     rules={[{ required: true, message: '请输入 SVN 密码' }]}
                   />
-                  <ProFormText
-                    name="gitUser"
-                    label="git 用户名"
-                    placeholder="请输入 git 用户名"
-                    rules={[{ required: true, message: '请输入 git 用户名' }]}
-                  />
-                  <ProFormText.Password
-                    name="gitPassword"
-                    label="git 密码"
-                    placeholder="请输入 git 密码"
-                    rules={[{ required: true, message: '请输入 git 密码' }]}
-                  />
-                </>) : (
+
+                </>)
+              }
+              {
+                form.getFieldValue('originType') !== 'svn' && form.getFieldValue('originType') !== 'ClearCase' && (
                   <ProFormText
                     name="originUrl"
                     label="仓库地址"
@@ -589,6 +581,25 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                       placeholder="请输入 git 密码"
                     />
                   </>
+                )
+              }
+              {
+                form.getFieldValue('originType') === 'svn' && (
+                  <>
+                    <ProFormText
+                      name="gitUser"
+                      label="git 用户名"
+                      placeholder="请输入 git 用户名"
+                      rules={[{ required: true, message: '请输入 git 用户名' }]}
+                    />
+                    <ProFormText.Password
+                      name="gitPassword"
+                      label="git 密码"
+                      placeholder="请输入 git 密码"
+                      rules={[{ required: true, message: '请输入 git 密码' }]}
+                    />
+                  </>
+
                 )
               }
             </>

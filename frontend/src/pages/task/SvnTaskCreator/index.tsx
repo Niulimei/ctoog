@@ -6,7 +6,7 @@ import classnames from 'classnames';
 import { guid } from '@/utils/utils';
 import type { FormInstance } from 'antd/es/form';
 import { task as taskService, svn as svnService } from '@/services';
-import { Button, message, Form, Modal, Checkbox, Input, Empty, Tooltip } from 'antd';
+import { Button, message, Form, Modal, Checkbox, Input, Empty, Tooltip, Divider } from 'antd';
 import { StepsForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 
 import styles from './style.less';
@@ -439,6 +439,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
          <div className={classnames([styles.gutter, styles.gutterEx])}>
            <div className={styles.svnTitle}>
              <p className={styles.firstNode}>SVN</p>
+             {/* <Divider type="vertical" orientation='left' style={{height: '100%'}}/> */}
              <p className={styles.secondNode}>Git</p>
            </div>
            <div className={styles.svnTitle}>
@@ -451,7 +452,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             <div className={styles.svnTitle}>
              <div className={styles.firstNode}>
                <Tooltip title="脚本执行main函数">
-                 <span>js脚本</span>
+                 {/* <span>js脚本</span> */}
                </Tooltip>
              </div>
              <div className={styles.secondNodes}>
