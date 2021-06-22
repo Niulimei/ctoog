@@ -1,9 +1,9 @@
-import React, {useCallback} from 'react';
+import React, { useCallback } from 'react';
 import { Task } from '@/typings/model';
 import TaskCreator from '../SvnTaskCreator';
 import TaskWithPlanModal from "@/pages/task/customized/TaskWithPlanModal";
 import { useLocation, useHistory, useModel } from 'umi';
-import {throttle} from 'lodash';
+import { throttle } from 'lodash';
 import TaskField from './components/TaskField/svnTaskField';
 import TaskLogger from './components/TaskLogger';
 import { task as taskService, svn as svnService } from '@/services';
@@ -51,7 +51,7 @@ const TaskDetail = () => {
     () => {
       taskService.getTaskDetail(taskId, 'svn').then((data) => {
         if (taskId) {
-          if (!data.taskModel.ccUser) {
+          if (!Array.isArray(data.taskModel.namePair)) {
             Modal.warn({
               width: 480,
               title: '提示',
@@ -108,8 +108,10 @@ const TaskDetail = () => {
   };
   React.useEffect(() => {
     taskService.getTaskDetail(taskId, 'svn').then((data) => {
+      console.log(data);
+      
       if (taskId) {
-        if (!data.taskModel.ccUser) {
+        if (!Array.isArray(data.taskModel.namePair)) {
           Modal.warn({
             width: 480,
             title: '提示',
@@ -132,7 +134,7 @@ const TaskDetail = () => {
           breadcrumb,
         }}
         footer={[
-           RouteList.includes('jianxin') ? (
+          RouteList.includes('jianxin') ? (
             <Button key="plan" onClick={() => taskWithPLanRef?.current?.open()} type="primary">
               计划信息
             </Button>

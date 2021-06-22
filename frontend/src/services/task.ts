@@ -30,7 +30,7 @@ export const updateTask = (id: string, data: any) => {
 };
 
 /** 启动迁移任务 */
-export const startTask = (ids: [] | string) => {
+export const startTask = (ids: [] | string | number) => {
   const idList = isArray(ids) ? ids : [ids];
   return request.post('/tasks/restart', {
     data: {

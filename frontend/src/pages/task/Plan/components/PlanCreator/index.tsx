@@ -21,6 +21,8 @@ import { plan as planServices, task as taskService } from '@/services';
 import { useClearCaseSelectEnum } from '@/utils/hooks';
 import { useToggle, useMount, useUpdate } from 'react-use';
 
+
+
 import styles from './style.less';
 
 interface FormSectionProps {
@@ -206,6 +208,8 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
   const forceUpdate = useUpdate();
   const modalRef = React.useRef<{ planId: string }>({ planId: '' });
   const { RouteList = [] } = initialState;
+  // 0.0
+  const taskCreatorRef = React.useRef<any>();
   /** 更新模式
    * 1. 回填表单数据
    * 2. pvob component matchInfo 为可修改配置，其他表单项只读
@@ -251,25 +255,28 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
 
   const actionText = isUpdateMode ? '更新' : '新建';
 
-  /** aaaaaaaaaaaaaa */
-    const [isModalVisible, setIsModalVisible] = useState(false);
-  
-    const showModal = () => {
-      setIsModalVisible(true);
-    };
-  
-    const handleOk = () => {
-      setIsModalVisible(false);
-    };
-  
-    const handleCancel = () => {
-      setIsModalVisible(false);
-    };
-    const [errObj, setErrObj] = useState({})
-    
+  /** 弹窗 */
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+  const [errObj, setErrObj] = useState({})
+
+
+  /** 点击新建后的请求处理函数 */
   const handleFinish = async (values: Plan.Base) => {
+    
     try {
+      // 更新任务
       if (isUpdateMode) {
         if (values?.originType === 'svn') {
           await planServices.updatePlan(modalRef.current.planId, values);
@@ -310,6 +317,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
             modelType: values?.originType,
           });
           task_id = taskId;
+
         } else if (values?.originType === 'ClearCase') {
 
           const { message: otherTaskId } = await taskService.createTask({
@@ -317,7 +325,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
             ...values,
           });
           task_id = otherTaskId;
-          
+
         }
         await planServices.createPlan({ ...values, task_id: Number(task_id) });
       }
@@ -325,13 +333,12 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
       onSuccess?.();
       return true;
     } catch (err) {
-      // message.error(`迁移任务${actionText}出现异常`);
+      // 捕获错误（大左方案没看懂）
       const errBody = await err.response.clone().json()
-      console.log(errBody.message);
-      
+      // 展示错误
       showModal()
       setErrObj(JSON.parse(errBody.message))
-      
+
       return false;
     }
   };
@@ -356,6 +363,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
         break;
       case 'clearComponent':
         clearCaseEnumDispatch('clearComponent', {});
+        break;
       default:
         break;
     }
@@ -424,7 +432,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                 rules={[{ required: true, message: '请选择迁移任务类型' }]}
               />
 
-              {form.getFieldValue('originType') === 'ClearCase' ? (
+              {form.getFieldValue('originType') === 'ClearCase' && (
                 <>
                   <ProFormSelect
                     name="pvob"
@@ -466,14 +474,49 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                     placeholder="请输入 CC 密码"
                   />
                 </>
-              ) : (
-                <ProFormText
-                  name="originUrl"
-                  label="仓库地址"
-                  placeholder="请输入仓库地址"
-                  rules={[{ required: true, message: '请输入仓库地址' }]}
-                />
               )}
+              {
+                form.getFieldValue('originType') === 'svn' ? 
+                (<>
+                  <ProFormText
+                    name="svn_url"
+                    label="仓库地址"
+                    placeholder="请输入仓库地址"
+                    rules={[{ required: true, message: '请输入仓库地址' }]}
+                  />
+                  <ProFormText
+                    name="ccUser"
+                    label="SVN 用户名"
+                    placeholder="请输入 SVN 用户名"
+                    rules={[{ required: true, message: '请输入 SVN 用户名' }]}
+                  />
+                  <ProFormText.Password
+                    name="ccPassword"
+                    label="SVN 密码"
+                    placeholder="请输入 SVN 密码"
+                    rules={[{ required: true, message: '请输入 SVN 密码' }]}
+                  />
+                  <ProFormText
+                    name="gitUser"
+                    label="git 用户名"
+                    placeholder="请输入 git 用户名"
+                    rules={[{ required: true, message: '请输入 git 用户名' }]}
+                  />
+                  <ProFormText.Password
+                    name="gitPassword"
+                    label="git 密码"
+                    placeholder="请输入 git 密码"
+                    rules={[{ required: true, message: '请输入 git 密码' }]}
+                  />
+                </>) : (
+                  <ProFormText
+                    name="originUrl"
+                    label="仓库地址"
+                    placeholder="请输入仓库地址"
+                    rules={[{ required: true, message: '请输入仓库地址' }]}
+                  />
+                )
+              }
             </>
           }
           right={
@@ -731,7 +774,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
 
       <Modal title="错误信息" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
         {
-          Object.keys(errObj).map((item: any, index: number)=>(
+          Object.keys(errObj).map((item: any, index: number) => (
             <li key={index}>{item}上发生错误，错误信息是 {errObj[item]}</li>
           ))
         }
