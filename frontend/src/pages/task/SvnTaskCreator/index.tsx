@@ -150,6 +150,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   const [form] = Form.useForm<IFormFields>();
   const [formUser] = Form.useForm<IFormFields>();
   const [svnList, setSvnList] = useState([]);
+  const [preSvnLIst, setPreSvnLIst] = useState([]);
   const [currentNum, setCurrentNum] = useState(0);
   const [visible, toggleVisible] = useToggle(false);
   const modalRef = React.useRef<{ taskId: string }>({ taskId: '' });
@@ -237,8 +238,10 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
           }
         })
         formUser.setFieldsValue({'namePair': newNamePair});
+        setPreSvnLIst(newNamePair);
       } else {
         formUser.setFieldsValue({'namePair': list.map(item => {return {'svnUserName': item, 'gitUserName': item, 'gitEmail': `${item}@example.com`}})})
+        setPreSvnLIst(list.map(item => {return {'svnUserName': item, 'gitUserName': item, 'gitEmail': `${item}@example.com`}}));
       }
       setCurrentNum(1);
       return true;
@@ -259,7 +262,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       const { namePair } = formUser.getFieldsValue(['namePair']);
       try {
         if (type === 'git') {
-          const gitOutPut = map(namePair, item => {
+          const gitOutPut = map(preSvnLIst, item => {
             return {
               gitEmail: item?.gitEmail,
               gitUserName: eval(gitScript + 'main("'+item?.gitUserName+'")'),
@@ -280,7 +283,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       } catch (e) {
         message.error(e);
       }
-    }, [gitScript, gitEmailScript]
+    }, [gitScript, gitEmailScript, preSvnLIst]
   );
 
   return (
