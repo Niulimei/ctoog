@@ -208,8 +208,6 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
   const forceUpdate = useUpdate();
   const modalRef = React.useRef<{ planId: string }>({ planId: '' });
   const { RouteList = [] } = initialState;
-  // 0.0
-  const taskCreatorRef = React.useRef<any>();
   /** 更新模式
    * 1. 回填表单数据
    * 2. pvob component matchInfo 为可修改配置，其他表单项只读
@@ -219,13 +217,18 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
   React.useImperativeHandle(actionRef, () => ({
     async openModal(mode = 'create', id) {
       form.resetFields();
+      // 修改计划时
       setIsUpdateMode(mode === 'update');
       if (mode === 'update' && id) {
         modalRef.current.planId = id;
+        // 获取计划详情
         const fieldValues = await planServices.getPlanDetail(id, { idType: 'plan' });
+
         let taskModels = {};
         if (fieldValues?.task_id) {
+          // 根据获取的计划详情的id获取任务信息
           const { taskModel: taskFields } = await taskService.getTaskDetail(fieldValues?.task_id);
+
           taskModels = taskFields;
           modalRef.current.task_id = fieldValues?.task_id;
         } else {
@@ -237,7 +240,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
           clearCaseEnumDispatch('stream', { component: fieldValues.component, pvob: fieldValues.pvob });
           form.setFieldsValue({ ...fieldValues, ...taskModels });
         } else {
-          form.setFieldsValue({ ...fieldValues, gitignore: taskModels?.gitignore });
+          form.setFieldsValue({ ...fieldValues, ...taskModels, gitignore: taskModels?.gitignore });
         }
 
         if (taskModels?.status === 'running') {
@@ -272,20 +275,23 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
   const [errObj, setErrObj] = useState({})
 
 
-  /** 点击新建后的请求处理函数 */
+  /** 点击新建或更新后的请求处理函数 */
   const handleFinish = async (values: Plan.Base) => {
 
     try {
       // 更新任务
       if (isUpdateMode) {
         if (values?.originType === 'svn') {
+
           await taskService.updateTask(modalRef.current.task_id, {
-            svnUrl: values?.originUrl,
+            svnUrl: values?.svn_url,
             modelType: values?.originType,
             gitURL: values?.targetUrl,
             ...values
           });
           await planServices.updatePlan(modalRef.current.planId, values);
+
+
         } else if (values?.originType === 'ClearCase') {
           let newTaskId = null;
           if (modalRef?.current?.task_id) {

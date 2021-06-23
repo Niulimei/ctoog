@@ -81,6 +81,7 @@ export namespace Plan {
     effect: string;
     plan_start_time: string;
     plan_switch_time: string;
+    svn_url?: string;
   };
   export type Item = Base & {
     id: string;
