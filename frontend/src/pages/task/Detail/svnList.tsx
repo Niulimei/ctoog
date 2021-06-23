@@ -108,7 +108,7 @@ const TaskDetail = () => {
   };
   React.useEffect(() => {
     taskService.getTaskDetail(taskId, 'svn').then((data) => {
-      console.log(data);
+      // console.log(data);
       
       if (taskId) {
         if (!Array.isArray(data.taskModel.namePair)) {
@@ -139,7 +139,7 @@ const TaskDetail = () => {
               计划信息
             </Button>
           ) : null,
-          (taskDetail?.taskModel as any)?.status !== Task.Status.RUNNING ? (
+          (taskDetail?.taskModel as any)?.status !== Task.Status.RUNNING && Array.isArray(taskDetail?.taskModel.namePair)  ? (
             <Button key="startTask" onClick={throttle(actions.startTask, 1000)} type="primary">
               启动任务
             </Button>
