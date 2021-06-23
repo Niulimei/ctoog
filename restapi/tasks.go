@@ -256,7 +256,7 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		return operations.NewCreateTaskInternalServerError().WithPayload(
 			&models.ErrorModel{Message: fmt.Sprintf("Not support type error: %+v", taskInfo.ModelType.String), Code: 500})
 	}
-	go startTask(taskId)
+	//go startTask(taskId)
 	utils.RecordLog(utils.Info, utils.AddTask, "", fmt.Sprintf("TaskId: %d", taskId), 0)
 	return operations.NewCreateTaskCreated().WithPayload(&models.OK{Message: strconv.Itoa(int(taskId))})
 }
