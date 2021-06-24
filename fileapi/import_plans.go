@@ -55,7 +55,7 @@ func checkData(rows [][]string) (bool, string) {
 			CCUser:     ccUser,
 			CCPassword: ccPassword,
 			GitRepoURL: utils.ParseGitURL(gitUser, gitPassword, gitUrl),
-			ModelType:  taskType,
+			ModelType:  strings.ToLower(taskType),
 			SvnURL:     "",
 		}
 		code, errRet := utils.DoCheckInfoReq(checkInfos)
