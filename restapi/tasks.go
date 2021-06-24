@@ -437,22 +437,22 @@ func UpdateTaskHandler(params operations.UpdateTaskParams) middleware.Responder 
 		if params.TaskLog.ModelType == "" {
 			params.TaskLog.ModelType = "clearcase"
 		}
-		if isUserInfoChanged(params) {
-			log.Infoln("Is checking user info...")
+		//if isUserInfoChanged(params) {
+		log.Infoln("Is checking user info...")
 
-			checkInfos := &utils.CheckTaskInfo{
-				CCUser:     params.TaskLog.CcUser,
-				CCPassword: params.TaskLog.CcPassword,
-				GitRepoURL: utils.ParseGitURL(params.TaskLog.GitUser, params.TaskLog.GitPassword, params.TaskLog.GitURL),
-				ModelType:  params.TaskLog.ModelType,
-				SvnURL:     params.TaskLog.SvnURL,
-			}
-			code, errRet := utils.DoCheckInfoReq(checkInfos)
-			if code != http.StatusOK {
-				ret, _ := json.Marshal(errRet)
-				return middleware.Error(403, models.ErrorModel{Message: string(ret)})
-			}
+		checkInfos := &utils.CheckTaskInfo{
+			CCUser:     params.TaskLog.CcUser,
+			CCPassword: params.TaskLog.CcPassword,
+			GitRepoURL: utils.ParseGitURL(params.TaskLog.GitUser, params.TaskLog.GitPassword, params.TaskLog.GitURL),
+			ModelType:  params.TaskLog.ModelType,
+			SvnURL:     params.TaskLog.SvnURL,
 		}
+		code, errRet := utils.DoCheckInfoReq(checkInfos)
+		if code != http.StatusOK {
+			ret, _ := json.Marshal(errRet)
+			return middleware.Error(403, models.ErrorModel{Message: string(ret)})
+		}
+		//}
 		taskIdInt, _ := strconv.ParseInt(taskId, 10, 64)
 		if params.TaskLog.ModelType == "clearcase" {
 			if oldTaskInfo, changed := isCCInfoChange(params); changed {
