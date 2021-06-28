@@ -13,10 +13,11 @@
         access: 'jianxin'
       },
       {
-        name: '迁移任务',
+        name: 'CC迁移任务',
         path: '/task/list',
         component: './task/List',
         exact: true,
+        access: 'ccRoute'
       },
       {
         name: 'SVN迁移任务',

@@ -9,6 +9,7 @@ export default function access(initialState: { currentUser?: User.Base | undefin
   return {
     isLogin: currentUser,
     svnRoute: () => RouteList.includes('svnRoute'),
+    ccRoute: () => RouteList.includes('ccRoute'),
     jianxin: () => RouteList.includes('jianxin'),
     isAdmin: currentUser && currentUser.role_id === User.Role.ADMIN,
   };
