@@ -11,12 +11,23 @@ import type { User } from '@/typings/model';
 import styles from './index.less';
 
 /** 此方法会跳转到 redirect 参数所在的位置 */
-const goto = () => {
+const goto = (routeInfo) => {
   if (!history) return;
   setTimeout(() => {
     const { query } = history.location;
     const { redirect } = query as { redirect: string };
-    history.push(redirect || '/');
+    let redirectionRoute = '/';
+    // 做一个特殊判断，因为不同权限用户跳转的首页可能不同，所以动态设置
+    if (routeInfo.includes('jianxin')) {
+      redirectionRoute = '/';
+    } else if (routeInfo.includes('ccRoute')) {
+      redirectionRoute = '/task/List'
+    } else if (routeInfo.includes('svnRoute')) {
+      redirectionRoute = '/task/svn';
+    } else {
+      redirectionRoute = '/task/node';
+    }
+    history.push(redirect || redirectionRoute);
   }, 10);
 };
 
@@ -93,7 +104,7 @@ const Login: React.FC = () => {
         if (msg.token) {
           message.success('登录成功！');
           await fetchUserInfo();
-          goto();
+          goto(permission);
         }
       } catch (err) {
         // eslint-disable-next-line no-console
@@ -107,7 +118,18 @@ const Login: React.FC = () => {
           username, password: md5(password), team, group, nickname, bussinessgroup
         })
         message.success('注册成功！');
-        history.replace('/')
+        let redirectionRoute = '/';
+         // 做一个特殊判断，因为不同权限用户跳转的首页可能不同，所以动态设置
+        if (permission.includes('jianxin')) {
+          redirectionRoute = '/';
+        } else if (permission.includes('ccRoute')) {
+          redirectionRoute = '/task/List'
+        } else if (permission.includes('svnRoute')) {
+          redirectionRoute = '/task/svn';
+        } else {
+          redirectionRoute = '/task/node';
+        }
+        history.replace(redirectionRoute);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log(error);
