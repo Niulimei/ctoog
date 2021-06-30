@@ -37,21 +37,34 @@ install() {
   local sport="$8"
   local wip="$9"
   local wport="${10}"
+  local svn_support="${11}"
+  local cc_support="${12}"
+  local jianxin_support="${13}"
   local cmd0 cmd1 cmd2 cmd3
   cmd0="ps -ef|grep translator|grep -v grep|awk '{print $2}'|xargs -n1 kill -9 &>/dev/null"
   cmd1="cd ${workDir};mkdir -p ${flag};rm -rf ./${flag}/*;tar zxf $(basename "${versionFile}") -C ${flag}"
   if [[ ${flag} == "translator-server" ]]; then
     cmd2="cd ${flag};rm -rf script *-worker*;sed -i 's#SERVER_PORT#${sport}#' ${flag}.yaml;sed -i 's#SERVER_IP#${sip}#' ${flag}.yaml"
+    if [[ -n "${svn_support}" ]]; then
+      local flag_svn="export SVN_SUPPORT=true;"
+    fi
+    if [[ -n "${cc_support}" ]]; then
+      local flag_cc="export CC_SUPPORT=true;"
+    fi
+    if [[ -n "${jianxin_support}" ]]; then
+      local flag_jx="export JIANXIN_SUPPORT=true;"
+    fi
+    cmd3="${flag_svn}${flag_cc}${flag_jx}./${flag} start;./${flag} status"
   elif [[ ${flag} == "translator-worker" ]]; then
     cmd2="cd ${flag};rm -rf frontend sql *-server*;sed -i 's#SERVER_PORT#${sport}#' ${flag}.yaml;sed -i 's#SERVER_IP#${sip}#' ${flag}.yaml;sed -i 's#WORKER_PORT#${wport}#' ${flag}.yaml;sed -i 's#WORKER_IP#${wip}#' ${flag}.yaml"
+    cmd3="./${flag} start;./${flag} status"
   fi
-  cmd3="./${flag} start;./${flag} status"
   sshpass -p "${password}" ${ssh} "${user}"@"${ip}" "${cmd0};${cmd1};${cmd2};${cmd3}"
 }
 
 main() {
   copyFile "$1" "$2" "$3" "$4" "$5"
-  install "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}"
+  install "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" "${12}" "${13}"
 }
 
-main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}"
+main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" "${12}" "${13}"
