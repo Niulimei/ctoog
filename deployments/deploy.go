@@ -37,9 +37,21 @@ func main() {
 	}
 	versionFile := os.Args[1]
 	//versionFile := "version_20210611154031.tar.gz"
-	installServer := fmt.Sprintf(`bash -x ./deploy.sh "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%d"`,
+	var svn, cc, jianxin string
+	if _, exist := os.LookupEnv("SVN_SUPPORT"); exist {
+		svn = "1"
+	}
+	if _, exist := os.LookupEnv("CC_SUPPORT"); exist {
+		cc = "1"
+	}
+	if _, exist := os.LookupEnv("JIANXIN_SUPPORT"); exist {
+		jianxin = "1"
+	}
+	installServer := fmt.Sprintf(`bash -x ./deploy.sh "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%d" "%s" "%d" "%s" "%s" "%s"`,
 		info.Server.IP, info.Server.User, info.Server.Password, versionFile,
-		info.Server.WorkDir, "translator-server", info.Server.ListenIP, info.Server.ListenPort)
+		info.Server.WorkDir, "translator-server", info.Server.ListenIP, info.Server.ListenPort,
+		"", 0, svn, cc, jianxin)
+	//fmt.Println(installServer)
 	ret, err = exec.Command("/bin/bash", "-c", installServer).Output()
 	if err != nil {
 		fmt.Println("Install Server Error: ", err.Error())

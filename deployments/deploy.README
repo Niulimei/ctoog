@@ -1,0 +1,38 @@
+1.  完成配置文件的配置。
+    conf.json是部署时的环境配置信息:
+    {
+      "SERVER": {
+        "IP": "localhost",
+        "USER": "root",
+        "PASSWORD": "111222",
+        "WORKDIR": "/home",
+        "LISTEN_IP": "192.168.48.254",
+        "LISTEN_PORT": 8993
+      },
+      "WORKERS": [
+        {
+          "IP": "localhost",
+          "USER": "root",
+          "PASSWORD": "111222",
+          "WORKDIR": "/home",
+          "LISTEN_IP": "192.168.48.254",
+          "LISTEN_PORT": 8994
+        }
+      ]
+    }
+    其中，SERVER块里填写server的信息，只支持一个server，各字段含义如下：
+    IP：节点的IP地址；
+    USER：节点登录用户名；
+    PASSWORD：节点登录密码；
+    WORKDIR：服务安装与工作目录；
+    LISTEN_IP：服务的监听IP地址；
+    LISTEN_PORT：服务的监听端口。
+    WORKER块里填写worker的信息，支持多个worker，各字段含义同SERVER。
+
+2.  完成配置文件的配置后，在本目录执行：
+    如果要启用svn to git支持，设置环境变量：export SVN_SUPPORT=true;
+    如果要启用clearcase to git支持，设置环境变量：export CC_SUPPORT=true;
+    (建信项目请设置:export JIANXIN_SUPPORT=true)
+    然后执行：
+    ./deploy version/<版本文件的名称>
+    即可。
