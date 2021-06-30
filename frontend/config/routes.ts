@@ -80,7 +80,7 @@
   },
   {
     path: '/',
-    redirect: '/task/plan',
+    component: './home',
   },
   {
     component: './404',
