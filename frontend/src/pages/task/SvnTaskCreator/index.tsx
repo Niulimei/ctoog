@@ -253,6 +253,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   };
 
   const closeModal = () => {
+    
     toggleVisible(false);
     setCurrentNum(0);
   }
@@ -302,6 +303,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       stepsFormRender={(dom, submitter) => {
           return (
             <Modal
+              maskClosable={false}
               title={`${actionText}迁移任务`}
               width={850}
               centered
