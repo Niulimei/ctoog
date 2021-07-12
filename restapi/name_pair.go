@@ -1,6 +1,7 @@
 package restapi
 
 import (
+	"ctgb/database"
 	"ctgb/restapi/operations"
 	"fmt"
 	"os/exec"
@@ -9,7 +10,9 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 )
 
-func GetALlSvnName(svnUrl, svnUser, svnPassword string) []string {
+var SvnUserName map[string][]string
+
+func ProcessSvnUserName(svnUrl, svnUser, svnPassword string, taskId int64) {
 	var names []string
 	var checkedNames []string
 	svn := fmt.Sprintf(`svn log --quiet --non-interactive --username "%s" --password "%s" "%s"`, svnUser, svnPassword, svnUrl)
@@ -17,7 +20,7 @@ func GetALlSvnName(svnUrl, svnUser, svnPassword string) []string {
 	cmd := exec.Command("/bin/bash", "-c", svnCmd)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil
+		return
 	}
 	result := string(out)
 	//log.Debug("cmd", cmd.String(), "result:", result)
@@ -26,6 +29,22 @@ func GetALlSvnName(svnUrl, svnUser, svnPassword string) []string {
 		if len(name) > 0 {
 			checkedNames = append(checkedNames, name)
 		}
+
+	}
+	if len(checkedNames) > 0 {
+		SvnUserName[svnUrl + svnUser + svnPassword] = checkedNames
+		if taskId != 0 {
+			database.DB.Exec("UPDATE task SET status = 'init' WHERE id = ? and status = 'pending'", taskId)
+		}
+	}
+}
+
+func GetALlSvnName(svnUrl, svnUser, svnPassword string) []string {
+	var checkedNames []string
+	key := svnUrl + svnUser + svnPassword
+	go ProcessSvnUserName(svnUrl, svnUser, svnPassword, 0)
+	if storeNames, ok := SvnUserName[key]; ok {
+		return storeNames
 	}
 	return checkedNames
 }

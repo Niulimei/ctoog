@@ -238,19 +238,20 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 	} else if modelType == "svn" {
 		r := database.DB.MustExec("INSERT INTO task (cc_user, cc_password, git_url,"+
 			"git_user, git_password, status, last_completed_date_time, creator, worker_id, model_type, include_empty, keep, svn_url, gitignore)"+
-			" VALUES ($1, $2, $3, $4, $5, 'init', '', $6, 0, 'svn', $7, $8, $9, $10)",
+			" VALUES ($1, $2, $3, $4, $5, 'pending', '', $6, 0, 'svn', $7, $8, $9, $10)",
 			taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL, taskInfo.GitUser, taskInfo.GitPassword, username, taskInfo.IncludeEmpty, taskInfo.Keep, taskInfo.SvnURL, taskInfo.Gitignore)
 		taskId, err = r.LastInsertId()
 		if err != nil {
 			return operations.NewCreateTaskInternalServerError().WithPayload(
 				&models.ErrorModel{Message: fmt.Sprintf("Insert into db error: %+v", err), Code: 500})
 		}
-		tx, _ := database.DB.Begin()
-		for _, namePair := range taskInfo.NamePair {
-			tx.Exec("INSERT INTO svn_name_pair (task_id, git_username, git_email, svn_username) VALUES (?,?,?,?)",
-				taskId, namePair.GitUserName, namePair.GitEmail, namePair.SvnUserName)
-		}
-		tx.Commit()
+		//tx, _ := database.DB.Begin()
+		//for _, namePair := range taskInfo.NamePair {
+		//	tx.Exec("INSERT INTO svn_name_pair (task_id, git_username, git_email, svn_username) VALUES (?,?,?,?)",
+		//		taskId, namePair.GitUserName, namePair.GitEmail, namePair.SvnUserName)
+		//}
+		//tx.Commit()
+		go ProcessSvnUserName(taskInfo.SvnURL.String, taskInfo.CcUser.String, taskInfo.CcPassword.String, taskId)
 	} else {
 		log.Error("not supporrt type:", taskInfo.ModelType.String)
 		return operations.NewCreateTaskInternalServerError().WithPayload(
