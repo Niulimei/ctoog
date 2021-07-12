@@ -43,6 +43,7 @@ export namespace Task {
 
   export enum Status {
     RUNNING = 'running',
+    PENDDING = 'pending',
   }
 
   export type Detail = {

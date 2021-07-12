@@ -218,6 +218,10 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   };
 
   const getSvnUserList = async (values: any) => {
+    if (!isUpdateMode()) {
+      finishHandler(values);
+      return;
+    }
     try {
       const {ccPassword, svn_url, ccUser} = values;
       const list = await svnService.getSvn({
@@ -301,30 +305,49 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       onCurrentChange={num => setCurrentNum(num)}
       title={`${actionText}迁移任务`}
       stepsFormRender={(dom, submitter) => {
-          return (
-            <Modal
-              maskClosable={false}
-              title={`${actionText}迁移任务`}
-              width={850}
-              centered
-              wrapClassName={styles.svnModal}
-              onCancel={closeModal}
-              visible={visible}
-              footer={submitter}
-              destroyOnClose
-            >
-              {dom}
-            </Modal>
+        return (
+          <Modal
+            title={`${actionText}迁移任务`}
+            width={850}
+            centered
+            wrapClassName={styles.svnModal}
+            onCancel={closeModal}
+            visible={visible}
+            footer={submitter}
+            destroyOnClose
+          >
+            {dom}
+          </Modal>
           );
-        }}
+        }
+      }
+      submitter={{
+        render: (props) => {
+          if (props.step === 0) {
+            return (
+              <Button type="primary" onClick={() => props.onSubmit?.()}>
+                {isUpdateMode() ? '下一步' : '提交'}
+              </Button>
+            );
+          }
+          return [
+            <Button key="gotoTwo" onClick={() => () => props.onPre?.()}>
+              上一步
+            </Button>,
+            <Button type="primary" key="submit" onClick={() => props.onSubmit?.()}>
+              提交
+            </Button>,
+          ];
+        },
+      }}
     >
       <StepsForm.StepForm
-          name="base"
-          form={form}
-          style={{overflow: 'hidden'}}
-          title="SVN基础设置"
-          onFinish={getSvnUserList}
-        >
+        name="base"
+        form={form}
+        style={{overflow: 'hidden'}}
+        title="SVN基础设置"
+        onFinish={getSvnUserList}
+      >
       <div className={styles.gutter}>
         {formFieldsGenerator([
           [renderCardTitle('SVN'), renderCardTitle('Git')],
@@ -433,8 +456,9 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
           </span>
         </div>
       </div>
-        </StepsForm.StepForm>
-      <StepsForm.StepForm
+      </StepsForm.StepForm>
+      {isUpdateMode() && (
+        <StepsForm.StepForm
           name="user"
           style={{overflow: 'hidden'}}
           form={formUser}
@@ -515,7 +539,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
              )
            }
            </div>
-      </StepsForm.StepForm>
+        </StepsForm.StepForm>
+      )}
     </StepsForm>
   );
 };
