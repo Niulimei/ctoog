@@ -12,6 +12,10 @@ import (
 
 var SvnUserName map[string][]string
 
+func init() {
+	SvnUserName = make(map[string][]string)
+}
+
 func ProcessSvnUserName(svnUrl, svnUser, svnPassword string, taskId int64) {
 	var names []string
 	var checkedNames []string
