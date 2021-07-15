@@ -124,6 +124,8 @@ const TaskDetail = () => {
     });
   }, [taskId]);
 
+  const taskStatus = (taskDetail?.taskModel as any)?.status;
+  
   return (
     <>
       <PageContainer
@@ -139,14 +141,16 @@ const TaskDetail = () => {
               计划信息
             </Button>
           ) : null,
-          (taskDetail?.taskModel as any)?.status !== Task.Status.RUNNING && Array.isArray(taskDetail?.taskModel.namePair)  ? (
+          taskStatus !== Task.Status.RUNNING && taskStatus !== Task.Status.PENDDING && Array.isArray(taskDetail?.taskModel.namePair)  ? (
             <Button key="startTask" onClick={throttle(actions.startTask, 1000)} type="primary">
               启动任务
             </Button>
           ) : null,
-          <Button key="updateTask" onClick={actions.updateTask}>
-            修改任务
-          </Button>,
+          taskStatus !== Task.Status.PENDDING && (
+            <Button key="updateTask" onClick={actions.updateTask}>
+              修改任务
+            </Button>
+          ),
           <Button key="clearCache" loading={isLoading} onClick={actions.clearCache}>
             删除缓存
           </Button>,

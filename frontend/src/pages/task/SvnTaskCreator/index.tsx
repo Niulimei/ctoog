@@ -331,7 +331,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             );
           }
           return [
-            <Button key="gotoTwo" onClick={() => () => props.onPre?.()}>
+            <Button key="gotoTwo" onClick={() => setCurrentNum(0)}>
               上一步
             </Button>,
             <Button type="primary" key="submit" onClick={() => props.onSubmit?.()}>
