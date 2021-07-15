@@ -89,25 +89,21 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
               详情
             </Button>
             <Dropdown
+              disabled={item.status === Task.Status.PENDDING}
               overlay={
                 <Menu>
-                  {item.status !== Task.Status.PENDDING && (
-                    <Menu.Item>
-                      <Button size="small" type="link" onClick={() => actions.updateTask(item.id)}>
-                        修改任务
-                      </Button>
-                    </Menu.Item>
-                  )}
-
-                  {item.status !== Task.Status.RUNNING && (
-                    <Menu.Item>
-                      <Button size="small" type="link" onClick={() => {
-                        actions.startTask(item.id);
-                      }}>
-                        启动任务
-                      </Button>
-                    </Menu.Item>
-                  )}
+                  <Menu.Item>
+                    <Button  size="small" type="link" onClick={() => actions.updateTask(item.id)}>
+                      修改任务
+                    </Button>
+                  </Menu.Item>
+                  <Menu.Item>
+                    <Button disabled={item.status === Task.Status.RUNNING} size="small" type="link" onClick={() => {
+                      actions.startTask(item.id);
+                    }}>
+                      启动任务
+                    </Button>
+                  </Menu.Item>
                 </Menu>
               }
             >

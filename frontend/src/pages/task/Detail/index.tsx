@@ -126,7 +126,7 @@ const TaskDetail = () => {
     });
   }, [taskId]);
   
-  
+  const taskStatus = (taskDetail?.taskModel as any)?.status;
 
   return (
     <>
@@ -143,13 +143,15 @@ const TaskDetail = () => {
               计划信息
             </Button>
           ) : null,
-          (taskDetail?.taskModel as any)?.status !== Task.Status.RUNNING ? (
+          taskStatus !== Task.Status.RUNNING && taskStatus !== Task.Status.PENDDING && (
             <Button key="startTask" onClick={throttle(actions.startTask, 1000)} type="primary">
               启动任务
             </Button>
-          ) : null,
+          ),
           (
-            !RouteList.includes('jianxin') &&  <Button key="updateTask" onClick={actions.updateTask}>修改任务</Button>
+            !RouteList.includes('jianxin') && taskStatus !== Task.Status.PENDDING && (
+              <Button key="updateTask" onClick={actions.updateTask}>修改任务</Button>
+            )
           ),
           <Button key="clearCache" loading={isLoading} onClick={actions.clearCache}>
             删除缓存
