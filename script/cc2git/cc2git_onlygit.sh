@@ -3,15 +3,13 @@
 ######
 #脚本名称：cc2git_onlygit.sh
 #作用：完成git仓库的初始化，代码向git的推送
-#传参说明：共需9个参数，依次分别为：
-#gitRepoURL，git目标分支代码，任务ID，是否保留空目录(是：true，否：false)，用户名，邮箱, 空目录占位文件名称, gitignore文件内容, cc source dir, component名称
+#传参说明：共需11个参数，依次分别为：
+#gitRepoURL，git目标分支代码，任务ID，是否保留空目录(是：true，否：false)，用户名，邮箱, 空目录占位文件名称, gitignore文件内容, cc source dir, component名称, git tmp dir
 ######
 
 set -x
 export LANG="zh_CN.UTF-8"
 set -e
-workdir=$(cd "$(dirname "$0")"; pwd)
-source "${workdir}"/common.sh
 
 initGitRepo(){
   echo "Initializing git repository..."
@@ -64,9 +62,6 @@ initGitRepo(){
 }
 
 pullCCAndPush(){
-#  pvobName=$1
-#  componentName=$2
-#  streamName=$3
   gitRepoUrl=$1
   gitBranchName=$2
   taskID=$3
@@ -75,11 +70,11 @@ pullCCAndPush(){
   email=$6
   emptyFileName=$7
   gitignoreContent=$8
-#  combineNameAdapt=$(echo -n "${pvobName}"_"${streamName}"_"${componentName}" | sed 's/\//_/g')
-  combineNameAdapt="$9"
+  ccDirName="$9"
+  combineNameAdapt=$(echo -n "${ccDirName}" | sed 's/\//_/g')
   componentName="${10}"
   local tmpGitDir="${gitTmpRootPath}/${combineNameAdapt}_${taskID}"
-  local tmpCCDir="${combineNameAdapt}"
+  local tmpCCDir="${ccDirName}"
   local tmpCCDirExist=false
   local tmpGitDirExist=false
 
@@ -88,31 +83,15 @@ pullCCAndPush(){
     tmpGitDirExist=true
   fi
   initGitRepo "${gitRepoUrl}" "${gitBranchName}" "${tmpGitDir}" "${username}" "${email}"
-
   tmpCCDirExist=true
-
-#  echo "Cloning code..."
-#  if [[ -d "${tmpCCDir}" ]]; then
-#    tmpCCDirExist=true
-#    cd "${tmpCCDir}"
-#    cleartool update . >/dev/null
-#  else
-#    set +e
-#    cleartool rmtag -view "${combineNameAdapt}"_"${taskID}" &>/dev/null
-#    set -e
-#    cleartool mkview -snapshot -tag "${combineNameAdapt}"_"${taskID}" -stgloc -auto -stream "${streamName}"@"${pvobName}" "${tmpCCDir}" >/dev/null
-#    cd "${tmpCCDir}"
-#    cleartool update -add_loadrules ."${componentName}" >/dev/null
-#  fi
-
   rm -rf "${tmpGitDir:?}"/*
   cd "${tmpGitDir}"
   echo "Copying files..."
-  cp -rf "${tmpCCDir}""${componentName}"/. "${tmpGitDir}"/ >/dev/null
+  cp -rf "${tmpCCDir}"/"${componentName}"/. "${tmpGitDir}"/ >/dev/null
   if [[ ${containEmptyDir} == "true" ]]; then
     find "${tmpGitDir}" -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
   fi
-  bash "${workdir}"/changeCharSet.sh "${tmpGitDir}" &>/dev/null
+#  bash "${workdir}"/changeCharSet.sh "${tmpGitDir}" &>/dev/null
   if [[ -n "${gitignoreContent}" ]]; then
     echo -e "${gitignoreContent}" >./.gitignore
   else
@@ -122,7 +101,6 @@ pullCCAndPush(){
   echo "Pushing code..."
   if $tmpCCDirExist && $tmpGitDirExist; then
     lastMessage=$(git status | tail -n 2)
-    #nothing to commit, working tree clean
     noCommit='nothing to commit'
     if [[ $lastMessage =~ $noCommit ]]; then
       set +e
@@ -139,9 +117,13 @@ pullCCAndPush(){
 }
 
 main(){
-#  mkdir -p "${ccTmpRootPath}" -m 777
+  if [[ -n "${11}" ]]; then
+    gitTmpRootPath="${11}"
+  else
+    gitTmpRootPath="/home/tmp/git"
+  fi
   mkdir -p "${gitTmpRootPath}" -m 777
-  pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}"
+  pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}"
 }
 
-main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}"
+main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}"
