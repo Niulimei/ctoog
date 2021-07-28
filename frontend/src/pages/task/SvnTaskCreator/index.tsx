@@ -196,6 +196,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       if (isUpdateMode()) {
         await taskService.updateTask(modalRef.current.taskId, {
           svnUrl: preFormValue?.svn_url,
+          modelType: 'svn',
           ...preFormValue,
           ...values
         });

@@ -108,8 +108,6 @@ const TaskDetail = () => {
   };
   React.useEffect(() => {
     taskService.getTaskDetail(taskId, 'svn').then((data) => {
-      // console.log(data);
-      
       if (taskId) {
         if (!Array.isArray(data.taskModel.namePair)) {
           Modal.warn({
