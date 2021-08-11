@@ -63,6 +63,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		DeleteTaskCacheHandler: DeleteTaskCacheHandlerFunc(func(params DeleteTaskCacheParams) middleware.Responder {
 			return middleware.NotImplemented("operation DeleteTaskCache has not yet been implemented")
 		}),
+		GetCCHistoryHandler: GetCCHistoryHandlerFunc(func(params GetCCHistoryParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetCCHistory has not yet been implemented")
+		}),
 		GetFrontConfigHandler: GetFrontConfigHandlerFunc(func(params GetFrontConfigParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetFrontConfig has not yet been implemented")
 		}),
@@ -188,6 +191,8 @@ type TranslatorAPI struct {
 	DeleteTaskHandler DeleteTaskHandler
 	// DeleteTaskCacheHandler sets the operation handler for the delete task cache operation
 	DeleteTaskCacheHandler DeleteTaskCacheHandler
+	// GetCCHistoryHandler sets the operation handler for the get c c history operation
+	GetCCHistoryHandler GetCCHistoryHandler
 	// GetFrontConfigHandler sets the operation handler for the get front config operation
 	GetFrontConfigHandler GetFrontConfigHandler
 	// GetPlanHandler sets the operation handler for the get plan operation
@@ -335,6 +340,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.DeleteTaskCacheHandler == nil {
 		unregistered = append(unregistered, "DeleteTaskCacheHandler")
+	}
+	if o.GetCCHistoryHandler == nil {
+		unregistered = append(unregistered, "GetCCHistoryHandler")
 	}
 	if o.GetFrontConfigHandler == nil {
 		unregistered = append(unregistered, "GetFrontConfigHandler")
@@ -527,6 +535,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/tasks/cache/{id}"] = NewDeleteTaskCache(o.context, o.DeleteTaskCacheHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/cc_history"] = NewGetCCHistory(o.context, o.GetCCHistoryHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

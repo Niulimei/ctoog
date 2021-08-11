@@ -36,6 +36,57 @@ func init() {
   },
   "basePath": "/api",
   "paths": {
+    "/cc_history": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "cc历史信息",
+        "operationId": "GetCCHistory",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "offset",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "git_name",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "cc历史信息",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CCHistoryInfoModel"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/frontend_configs": {
       "get": {
         "consumes": [
@@ -1423,6 +1474,41 @@ func init() {
       "type": "object",
       "properties": {
         "token": {
+          "type": "string"
+        }
+      }
+    },
+    "CCHistoryInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "createTime": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "historyType": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "key": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "owner": {
           "type": "string"
         }
       }
@@ -2106,6 +2192,57 @@ func init() {
   },
   "basePath": "/api",
   "paths": {
+    "/cc_history": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "cc历史信息",
+        "operationId": "GetCCHistory",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "offset",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "git_name",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "cc历史信息",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CCHistoryInfoModel"
+              }
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
     "/frontend_configs": {
       "get": {
         "consumes": [
@@ -3493,6 +3630,41 @@ func init() {
       "type": "object",
       "properties": {
         "token": {
+          "type": "string"
+        }
+      }
+    },
+    "CCHistoryInfoModel": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "createTime": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "historyType": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "key": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "owner": {
           "type": "string"
         }
       }

@@ -66,6 +66,7 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 	api.ListSvnUsernameHandler = operations.ListSvnUsernameHandlerFunc(ListSvnUsernameHandler)
 	api.UpdateSvnNamePairHandler = operations.UpdateSvnNamePairHandlerFunc(UpdateSvnNamePairHandler)
 	api.GetFrontConfigHandler = operations.GetFrontConfigHandlerFunc(GetFrontendConfig)
+	api.GetCCHistoryHandler = operations.GetCCHistoryHandlerFunc(GetCCHistory)
 
 	api.PreServerShutdown = func() {}
 
