@@ -1,3 +1,0 @@
-host: WORKER_IP
-port: WORKER_PORT
-server_addr: SERVER_IP:SERVER_PORT

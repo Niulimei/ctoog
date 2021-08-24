@@ -42,104 +42,11 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
-		CreatePlanHandler: CreatePlanHandlerFunc(func(params CreatePlanParams) middleware.Responder {
-			return middleware.NotImplemented("operation CreatePlan has not yet been implemented")
-		}),
-		CreateScheduleHandler: CreateScheduleHandlerFunc(func(params CreateScheduleParams) middleware.Responder {
-			return middleware.NotImplemented("operation CreateSchedule has not yet been implemented")
-		}),
-		CreateTaskHandler: CreateTaskHandlerFunc(func(params CreateTaskParams) middleware.Responder {
-			return middleware.NotImplemented("operation CreateTask has not yet been implemented")
-		}),
-		CreateUserHandler: CreateUserHandlerFunc(func(params CreateUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation CreateUser has not yet been implemented")
-		}),
-		DeletePlanHandler: DeletePlanHandlerFunc(func(params DeletePlanParams) middleware.Responder {
-			return middleware.NotImplemented("operation DeletePlan has not yet been implemented")
-		}),
-		DeleteTaskHandler: DeleteTaskHandlerFunc(func(params DeleteTaskParams) middleware.Responder {
-			return middleware.NotImplemented("operation DeleteTask has not yet been implemented")
-		}),
-		DeleteTaskCacheHandler: DeleteTaskCacheHandlerFunc(func(params DeleteTaskCacheParams) middleware.Responder {
-			return middleware.NotImplemented("operation DeleteTaskCache has not yet been implemented")
+		CreateCCHistoryHandler: CreateCCHistoryHandlerFunc(func(params CreateCCHistoryParams) middleware.Responder {
+			return middleware.NotImplemented("operation CreateCCHistory has not yet been implemented")
 		}),
 		GetCCHistoryHandler: GetCCHistoryHandlerFunc(func(params GetCCHistoryParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetCCHistory has not yet been implemented")
-		}),
-		GetFrontConfigHandler: GetFrontConfigHandlerFunc(func(params GetFrontConfigParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetFrontConfig has not yet been implemented")
-		}),
-		GetPlanHandler: GetPlanHandlerFunc(func(params GetPlanParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetPlan has not yet been implemented")
-		}),
-		GetTaskHandler: GetTaskHandlerFunc(func(params GetTaskParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetTask has not yet been implemented")
-		}),
-		GetTaskCommandOutHandler: GetTaskCommandOutHandlerFunc(func(params GetTaskCommandOutParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetTaskCommandOut has not yet been implemented")
-		}),
-		GetUserHandler: GetUserHandlerFunc(func(params GetUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetUser has not yet been implemented")
-		}),
-		GetWorkerHandler: GetWorkerHandlerFunc(func(params GetWorkerParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetWorker has not yet been implemented")
-		}),
-		ListLogsHandler: ListLogsHandlerFunc(func(params ListLogsParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListLogs has not yet been implemented")
-		}),
-		ListPlanHandler: ListPlanHandlerFunc(func(params ListPlanParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListPlan has not yet been implemented")
-		}),
-		ListPvobHandler: ListPvobHandlerFunc(func(params ListPvobParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListPvob has not yet been implemented")
-		}),
-		ListPvobComponentHandler: ListPvobComponentHandlerFunc(func(params ListPvobComponentParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListPvobComponent has not yet been implemented")
-		}),
-		ListPvobComponentStreamHandler: ListPvobComponentStreamHandlerFunc(func(params ListPvobComponentStreamParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListPvobComponentStream has not yet been implemented")
-		}),
-		ListScheduleHandler: ListScheduleHandlerFunc(func(params ListScheduleParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListSchedule has not yet been implemented")
-		}),
-		ListSvnUsernameHandler: ListSvnUsernameHandlerFunc(func(params ListSvnUsernameParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListSvnUsername has not yet been implemented")
-		}),
-		ListTaskHandler: ListTaskHandlerFunc(func(params ListTaskParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListTask has not yet been implemented")
-		}),
-		ListUserHandler: ListUserHandlerFunc(func(params ListUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListUser has not yet been implemented")
-		}),
-		ListWorkersHandler: ListWorkersHandlerFunc(func(params ListWorkersParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListWorkers has not yet been implemented")
-		}),
-		LoginHandler: LoginHandlerFunc(func(params LoginParams) middleware.Responder {
-			return middleware.NotImplemented("operation Login has not yet been implemented")
-		}),
-		PingWorkerHandler: PingWorkerHandlerFunc(func(params PingWorkerParams) middleware.Responder {
-			return middleware.NotImplemented("operation PingWorker has not yet been implemented")
-		}),
-		RegisterUserHandler: RegisterUserHandlerFunc(func(params RegisterUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation RegisterUser has not yet been implemented")
-		}),
-		RestartTaskHandler: RestartTaskHandlerFunc(func(params RestartTaskParams) middleware.Responder {
-			return middleware.NotImplemented("operation RestartTask has not yet been implemented")
-		}),
-		UpdatePlanHandler: UpdatePlanHandlerFunc(func(params UpdatePlanParams) middleware.Responder {
-			return middleware.NotImplemented("operation UpdatePlan has not yet been implemented")
-		}),
-		UpdateScheduleHandler: UpdateScheduleHandlerFunc(func(params UpdateScheduleParams) middleware.Responder {
-			return middleware.NotImplemented("operation UpdateSchedule has not yet been implemented")
-		}),
-		UpdateSvnNamePairHandler: UpdateSvnNamePairHandlerFunc(func(params UpdateSvnNamePairParams) middleware.Responder {
-			return middleware.NotImplemented("operation UpdateSvnNamePair has not yet been implemented")
-		}),
-		UpdateTaskHandler: UpdateTaskHandlerFunc(func(params UpdateTaskParams) middleware.Responder {
-			return middleware.NotImplemented("operation UpdateTask has not yet been implemented")
-		}),
-		UpdateTaskCommandOutHandler: UpdateTaskCommandOutHandlerFunc(func(params UpdateTaskCommandOutParams) middleware.Responder {
-			return middleware.NotImplemented("operation UpdateTaskCommandOut has not yet been implemented")
 		}),
 	}
 }
@@ -177,72 +84,10 @@ type TranslatorAPI struct {
 	//   - application/json
 	JSONProducer runtime.Producer
 
-	// CreatePlanHandler sets the operation handler for the create plan operation
-	CreatePlanHandler CreatePlanHandler
-	// CreateScheduleHandler sets the operation handler for the create schedule operation
-	CreateScheduleHandler CreateScheduleHandler
-	// CreateTaskHandler sets the operation handler for the create task operation
-	CreateTaskHandler CreateTaskHandler
-	// CreateUserHandler sets the operation handler for the create user operation
-	CreateUserHandler CreateUserHandler
-	// DeletePlanHandler sets the operation handler for the delete plan operation
-	DeletePlanHandler DeletePlanHandler
-	// DeleteTaskHandler sets the operation handler for the delete task operation
-	DeleteTaskHandler DeleteTaskHandler
-	// DeleteTaskCacheHandler sets the operation handler for the delete task cache operation
-	DeleteTaskCacheHandler DeleteTaskCacheHandler
+	// CreateCCHistoryHandler sets the operation handler for the create c c history operation
+	CreateCCHistoryHandler CreateCCHistoryHandler
 	// GetCCHistoryHandler sets the operation handler for the get c c history operation
 	GetCCHistoryHandler GetCCHistoryHandler
-	// GetFrontConfigHandler sets the operation handler for the get front config operation
-	GetFrontConfigHandler GetFrontConfigHandler
-	// GetPlanHandler sets the operation handler for the get plan operation
-	GetPlanHandler GetPlanHandler
-	// GetTaskHandler sets the operation handler for the get task operation
-	GetTaskHandler GetTaskHandler
-	// GetTaskCommandOutHandler sets the operation handler for the get task command out operation
-	GetTaskCommandOutHandler GetTaskCommandOutHandler
-	// GetUserHandler sets the operation handler for the get user operation
-	GetUserHandler GetUserHandler
-	// GetWorkerHandler sets the operation handler for the get worker operation
-	GetWorkerHandler GetWorkerHandler
-	// ListLogsHandler sets the operation handler for the list logs operation
-	ListLogsHandler ListLogsHandler
-	// ListPlanHandler sets the operation handler for the list plan operation
-	ListPlanHandler ListPlanHandler
-	// ListPvobHandler sets the operation handler for the list pvob operation
-	ListPvobHandler ListPvobHandler
-	// ListPvobComponentHandler sets the operation handler for the list pvob component operation
-	ListPvobComponentHandler ListPvobComponentHandler
-	// ListPvobComponentStreamHandler sets the operation handler for the list pvob component stream operation
-	ListPvobComponentStreamHandler ListPvobComponentStreamHandler
-	// ListScheduleHandler sets the operation handler for the list schedule operation
-	ListScheduleHandler ListScheduleHandler
-	// ListSvnUsernameHandler sets the operation handler for the list svn username operation
-	ListSvnUsernameHandler ListSvnUsernameHandler
-	// ListTaskHandler sets the operation handler for the list task operation
-	ListTaskHandler ListTaskHandler
-	// ListUserHandler sets the operation handler for the list user operation
-	ListUserHandler ListUserHandler
-	// ListWorkersHandler sets the operation handler for the list workers operation
-	ListWorkersHandler ListWorkersHandler
-	// LoginHandler sets the operation handler for the login operation
-	LoginHandler LoginHandler
-	// PingWorkerHandler sets the operation handler for the ping worker operation
-	PingWorkerHandler PingWorkerHandler
-	// RegisterUserHandler sets the operation handler for the register user operation
-	RegisterUserHandler RegisterUserHandler
-	// RestartTaskHandler sets the operation handler for the restart task operation
-	RestartTaskHandler RestartTaskHandler
-	// UpdatePlanHandler sets the operation handler for the update plan operation
-	UpdatePlanHandler UpdatePlanHandler
-	// UpdateScheduleHandler sets the operation handler for the update schedule operation
-	UpdateScheduleHandler UpdateScheduleHandler
-	// UpdateSvnNamePairHandler sets the operation handler for the update svn name pair operation
-	UpdateSvnNamePairHandler UpdateSvnNamePairHandler
-	// UpdateTaskHandler sets the operation handler for the update task operation
-	UpdateTaskHandler UpdateTaskHandler
-	// UpdateTaskCommandOutHandler sets the operation handler for the update task command out operation
-	UpdateTaskCommandOutHandler UpdateTaskCommandOutHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -320,104 +165,11 @@ func (o *TranslatorAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
-	if o.CreatePlanHandler == nil {
-		unregistered = append(unregistered, "CreatePlanHandler")
-	}
-	if o.CreateScheduleHandler == nil {
-		unregistered = append(unregistered, "CreateScheduleHandler")
-	}
-	if o.CreateTaskHandler == nil {
-		unregistered = append(unregistered, "CreateTaskHandler")
-	}
-	if o.CreateUserHandler == nil {
-		unregistered = append(unregistered, "CreateUserHandler")
-	}
-	if o.DeletePlanHandler == nil {
-		unregistered = append(unregistered, "DeletePlanHandler")
-	}
-	if o.DeleteTaskHandler == nil {
-		unregistered = append(unregistered, "DeleteTaskHandler")
-	}
-	if o.DeleteTaskCacheHandler == nil {
-		unregistered = append(unregistered, "DeleteTaskCacheHandler")
+	if o.CreateCCHistoryHandler == nil {
+		unregistered = append(unregistered, "CreateCCHistoryHandler")
 	}
 	if o.GetCCHistoryHandler == nil {
 		unregistered = append(unregistered, "GetCCHistoryHandler")
-	}
-	if o.GetFrontConfigHandler == nil {
-		unregistered = append(unregistered, "GetFrontConfigHandler")
-	}
-	if o.GetPlanHandler == nil {
-		unregistered = append(unregistered, "GetPlanHandler")
-	}
-	if o.GetTaskHandler == nil {
-		unregistered = append(unregistered, "GetTaskHandler")
-	}
-	if o.GetTaskCommandOutHandler == nil {
-		unregistered = append(unregistered, "GetTaskCommandOutHandler")
-	}
-	if o.GetUserHandler == nil {
-		unregistered = append(unregistered, "GetUserHandler")
-	}
-	if o.GetWorkerHandler == nil {
-		unregistered = append(unregistered, "GetWorkerHandler")
-	}
-	if o.ListLogsHandler == nil {
-		unregistered = append(unregistered, "ListLogsHandler")
-	}
-	if o.ListPlanHandler == nil {
-		unregistered = append(unregistered, "ListPlanHandler")
-	}
-	if o.ListPvobHandler == nil {
-		unregistered = append(unregistered, "ListPvobHandler")
-	}
-	if o.ListPvobComponentHandler == nil {
-		unregistered = append(unregistered, "ListPvobComponentHandler")
-	}
-	if o.ListPvobComponentStreamHandler == nil {
-		unregistered = append(unregistered, "ListPvobComponentStreamHandler")
-	}
-	if o.ListScheduleHandler == nil {
-		unregistered = append(unregistered, "ListScheduleHandler")
-	}
-	if o.ListSvnUsernameHandler == nil {
-		unregistered = append(unregistered, "ListSvnUsernameHandler")
-	}
-	if o.ListTaskHandler == nil {
-		unregistered = append(unregistered, "ListTaskHandler")
-	}
-	if o.ListUserHandler == nil {
-		unregistered = append(unregistered, "ListUserHandler")
-	}
-	if o.ListWorkersHandler == nil {
-		unregistered = append(unregistered, "ListWorkersHandler")
-	}
-	if o.LoginHandler == nil {
-		unregistered = append(unregistered, "LoginHandler")
-	}
-	if o.PingWorkerHandler == nil {
-		unregistered = append(unregistered, "PingWorkerHandler")
-	}
-	if o.RegisterUserHandler == nil {
-		unregistered = append(unregistered, "RegisterUserHandler")
-	}
-	if o.RestartTaskHandler == nil {
-		unregistered = append(unregistered, "RestartTaskHandler")
-	}
-	if o.UpdatePlanHandler == nil {
-		unregistered = append(unregistered, "UpdatePlanHandler")
-	}
-	if o.UpdateScheduleHandler == nil {
-		unregistered = append(unregistered, "UpdateScheduleHandler")
-	}
-	if o.UpdateSvnNamePairHandler == nil {
-		unregistered = append(unregistered, "UpdateSvnNamePairHandler")
-	}
-	if o.UpdateTaskHandler == nil {
-		unregistered = append(unregistered, "UpdateTaskHandler")
-	}
-	if o.UpdateTaskCommandOutHandler == nil {
-		unregistered = append(unregistered, "UpdateTaskCommandOutHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -510,135 +262,11 @@ func (o *TranslatorAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/plans"] = NewCreatePlan(o.context, o.CreatePlanHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/schedules"] = NewCreateSchedule(o.context, o.CreateScheduleHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/tasks"] = NewCreateTask(o.context, o.CreateTaskHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/users"] = NewCreateUser(o.context, o.CreateUserHandler)
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/plans/{id}"] = NewDeletePlan(o.context, o.DeletePlanHandler)
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/tasks/{id}"] = NewDeleteTask(o.context, o.DeleteTaskHandler)
-	if o.handlers["DELETE"] == nil {
-		o.handlers["DELETE"] = make(map[string]http.Handler)
-	}
-	o.handlers["DELETE"]["/tasks/cache/{id}"] = NewDeleteTaskCache(o.context, o.DeleteTaskCacheHandler)
+	o.handlers["POST"]["/cc_history"] = NewCreateCCHistory(o.context, o.CreateCCHistoryHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/cc_history"] = NewGetCCHistory(o.context, o.GetCCHistoryHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/frontend_configs"] = NewGetFrontConfig(o.context, o.GetFrontConfigHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/plans/{id}"] = NewGetPlan(o.context, o.GetPlanHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/tasks/{id}"] = NewGetTask(o.context, o.GetTaskHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/tasks/cmdout/{log_id}"] = NewGetTaskCommandOut(o.context, o.GetTaskCommandOutHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/users/self"] = NewGetUser(o.context, o.GetUserHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/workers/{id}"] = NewGetWorker(o.context, o.GetWorkerHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/logs"] = NewListLogs(o.context, o.ListLogsHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/plans"] = NewListPlan(o.context, o.ListPlanHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/pvobs"] = NewListPvob(o.context, o.ListPvobHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/pvobs/{id}/components"] = NewListPvobComponent(o.context, o.ListPvobComponentHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/pvobs/{pvob_id}/components/{component_id}/streams"] = NewListPvobComponentStream(o.context, o.ListPvobComponentStreamHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/schedules"] = NewListSchedule(o.context, o.ListScheduleHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/svn_username_pairs"] = NewListSvnUsername(o.context, o.ListSvnUsernameHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/tasks"] = NewListTask(o.context, o.ListTaskHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/users"] = NewListUser(o.context, o.ListUserHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/workers"] = NewListWorkers(o.context, o.ListWorkersHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/login"] = NewLogin(o.context, o.LoginHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/workers"] = NewPingWorker(o.context, o.PingWorkerHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/users/register"] = NewRegisterUser(o.context, o.RegisterUserHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/tasks/restart"] = NewRestartTask(o.context, o.RestartTaskHandler)
-	if o.handlers["PUT"] == nil {
-		o.handlers["PUT"] = make(map[string]http.Handler)
-	}
-	o.handlers["PUT"]["/plans/{id}"] = NewUpdatePlan(o.context, o.UpdatePlanHandler)
-	if o.handlers["PUT"] == nil {
-		o.handlers["PUT"] = make(map[string]http.Handler)
-	}
-	o.handlers["PUT"]["/schedules/{id}"] = NewUpdateSchedule(o.context, o.UpdateScheduleHandler)
-	if o.handlers["PUT"] == nil {
-		o.handlers["PUT"] = make(map[string]http.Handler)
-	}
-	o.handlers["PUT"]["/svn_username_pairs"] = NewUpdateSvnNamePair(o.context, o.UpdateSvnNamePairHandler)
-	if o.handlers["PUT"] == nil {
-		o.handlers["PUT"] = make(map[string]http.Handler)
-	}
-	o.handlers["PUT"]["/tasks/{id}"] = NewUpdateTask(o.context, o.UpdateTaskHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/tasks/cmdout/{log_id}"] = NewUpdateTaskCommandOut(o.context, o.UpdateTaskCommandOutHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

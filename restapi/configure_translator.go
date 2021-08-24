@@ -4,11 +4,9 @@ package restapi
 
 import (
 	"crypto/tls"
-	"ctgb/restapi/operations"
-	"ctgb/utils"
-	"fmt"
 	"net/http"
 
+	"ctgb/restapi/operations"
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 )
@@ -37,42 +35,12 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
-	api.CreateUserHandler = operations.CreateUserHandlerFunc(CreateUserHandler)
-	api.ListUserHandler = operations.ListUserHandlerFunc(ListUsersHandler)
-	api.LoginHandler = operations.LoginHandlerFunc(LoginHandler)
-	api.CreateTaskHandler = operations.CreateTaskHandlerFunc(CreateTaskHandler)
-	api.GetTaskHandler = operations.GetTaskHandlerFunc(GetTaskHandler)
-	api.ListTaskHandler = operations.ListTaskHandlerFunc(ListTaskHandler)
-	api.UpdateTaskHandler = operations.UpdateTaskHandlerFunc(UpdateTaskHandler)
-	api.RestartTaskHandler = operations.RestartTaskHandlerFunc(RestartTaskHandler)
-	api.PingWorkerHandler = operations.PingWorkerHandlerFunc(PingWorkerHandler)
-	api.ListPvobHandler = operations.ListPvobHandlerFunc(ListPvobHandler)
-	api.ListPvobComponentHandler = operations.ListPvobComponentHandlerFunc(ListPvobComponentHandler)
-	api.ListPvobComponentStreamHandler = operations.ListPvobComponentStreamHandlerFunc(ListPvobComponentStreamHandler)
-	api.GetUserHandler = operations.GetUserHandlerFunc(GetUserHandler)
-	api.ListLogsHandler = operations.ListLogsHandlerFunc(ListLogsHandler)
-	api.GetTaskCommandOutHandler = operations.GetTaskCommandOutHandlerFunc(GetTaskCommandOutHandler)
-	api.UpdateTaskCommandOutHandler = operations.UpdateTaskCommandOutHandlerFunc(UpdateTaskCommandOutHandler)
-	api.ListPlanHandler = operations.ListPlanHandlerFunc(ListPlanHandler)
-	api.GetPlanHandler = operations.GetPlanHandlerFunc(GetPlanHandler)
-	api.UpdatePlanHandler = operations.UpdatePlanHandlerFunc(UpdatePlanHandler)
-	api.DeletePlanHandler = operations.DeletePlanHandlerFunc(DeletePlanHandler)
-	api.CreatePlanHandler = operations.CreatePlanHandlerFunc(CreatePlanHandler)
-	api.DeleteTaskHandler = operations.DeleteTaskHandlerFunc(DeleteTaskHandler)
-	api.DeleteTaskCacheHandler = operations.DeleteTaskCacheHandlerFunc(DeleteTaskCacheHandler)
-	api.GetWorkerHandler = operations.GetWorkerHandlerFunc(GetWorkerHandler)
-	api.ListWorkersHandler = operations.ListWorkersHandlerFunc(ListWorkersHandler)
-	api.RegisterUserHandler = operations.RegisterUserHandlerFunc(RegisterUserHandler)
-	api.ListSvnUsernameHandler = operations.ListSvnUsernameHandlerFunc(ListSvnUsernameHandler)
-	api.UpdateSvnNamePairHandler = operations.UpdateSvnNamePairHandlerFunc(UpdateSvnNamePairHandler)
-	api.GetFrontConfigHandler = operations.GetFrontConfigHandlerFunc(GetFrontendConfig)
-	api.GetCCHistoryHandler = operations.GetCCHistoryHandlerFunc(GetCCHistory)
+	api.CreateCCHistoryHandler = operations.CreateCCHistoryHandlerFunc(CreateHistory)
+	api.GetCCHistoryHandler = operations.GetCCHistoryHandlerFunc(GetHistory)
 
 	api.PreServerShutdown = func() {}
 
 	api.ServerShutdown = func() {}
-
-	//go utils.LogHandle()
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))
 }
@@ -92,25 +60,11 @@ func configureServer(s *http.Server, scheme, addr string) {
 // The middleware configuration is for the handler executors. These do not apply to the swagger.json document.
 // The middleware executes after routing but before authentication, binding and validation.
 func setupMiddlewares(handler http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !IsExceptionURL(r.Method, r.RequestURI) {
-			token := r.Header.Get("Authorization")
-			username, _ := utils.Verify(token)
-			if username != "" {
-				r.Header.Set("username", username)
-			}
-		}
-		handler.ServeHTTP(w, r)
-	})
+	return handler
 }
 
 // The middleware configuration happens before anything, this middleware also applies to serving the swagger.json document.
 // So this is a good place to plug in a panic handling middleware, logging and metrics.
 func setupGlobalMiddleware(handler http.Handler) http.Handler {
-	defer func() {
-		if ret := recover(); ret != nil {
-			fmt.Printf("Recover From Panic. %v\n", ret)
-		}
-	}()
 	return handler
 }

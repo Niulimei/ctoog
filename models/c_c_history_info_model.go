@@ -7,7 +7,9 @@ package models
 
 import (
 	"context"
+	"strconv"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
@@ -20,41 +22,83 @@ type CCHistoryInfoModel struct {
 	// count
 	Count int64 `json:"count,omitempty"`
 
-	// create time
-	CreateTime string `json:"createTime,omitempty"`
-
-	// description
-	Description string `json:"description,omitempty"`
-
-	// history type
-	HistoryType string `json:"historyType,omitempty"`
-
-	// id
-	ID string `json:"id,omitempty"`
-
-	// key
-	Key int64 `json:"key,omitempty"`
+	// info item
+	InfoItem []*CCHistoryInfoModelItem `json:"infoItem"`
 
 	// limit
 	Limit int64 `json:"limit,omitempty"`
 
-	// name
-	Name string `json:"name,omitempty"`
-
 	// offset
 	Offset int64 `json:"offset,omitempty"`
-
-	// owner
-	Owner string `json:"owner,omitempty"`
 }
 
 // Validate validates this c c history info model
 func (m *CCHistoryInfoModel) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateInfoItem(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
 	return nil
 }
 
-// ContextValidate validates this c c history info model based on context it is used
+func (m *CCHistoryInfoModel) validateInfoItem(formats strfmt.Registry) error {
+	if swag.IsZero(m.InfoItem) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.InfoItem); i++ {
+		if swag.IsZero(m.InfoItem[i]) { // not required
+			continue
+		}
+
+		if m.InfoItem[i] != nil {
+			if err := m.InfoItem[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("infoItem" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this c c history info model based on the context it is used
 func (m *CCHistoryInfoModel) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateInfoItem(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *CCHistoryInfoModel) contextValidateInfoItem(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.InfoItem); i++ {
+
+		if m.InfoItem[i] != nil {
+			if err := m.InfoItem[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("infoItem" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

@@ -49,6 +49,10 @@ type GetCCHistoryParams struct {
 	*/
 	GitName string
 	/*
+	  In: query
+	*/
+	ID *string
+	/*
 	  Required: true
 	  In: query
 	  Default: 0
@@ -75,6 +79,11 @@ func (o *GetCCHistoryParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	qGitName, qhkGitName, _ := qs.GetOK("git_name")
 	if err := o.bindGitName(qGitName, qhkGitName, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qID, qhkID, _ := qs.GetOK("id")
+	if err := o.bindID(qID, qhkID, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -110,6 +119,24 @@ func (o *GetCCHistoryParams) bindGitName(rawData []string, hasKey bool, formats 
 		return err
 	}
 	o.GitName = raw
+
+	return nil
+}
+
+// bindID binds and validates parameter ID from query.
+func (o *GetCCHistoryParams) bindID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.ID = &raw
 
 	return nil
 }

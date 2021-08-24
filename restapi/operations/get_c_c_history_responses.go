@@ -25,7 +25,7 @@ type GetCCHistoryOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.CCHistoryInfoModel `json:"body,omitempty"`
+	Payload *models.CCHistoryInfoModel `json:"body,omitempty"`
 }
 
 // NewGetCCHistoryOK creates GetCCHistoryOK with default headers values
@@ -35,13 +35,13 @@ func NewGetCCHistoryOK() *GetCCHistoryOK {
 }
 
 // WithPayload adds the payload to the get c c history o k response
-func (o *GetCCHistoryOK) WithPayload(payload []*models.CCHistoryInfoModel) *GetCCHistoryOK {
+func (o *GetCCHistoryOK) WithPayload(payload *models.CCHistoryInfoModel) *GetCCHistoryOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get c c history o k response
-func (o *GetCCHistoryOK) SetPayload(payload []*models.CCHistoryInfoModel) {
+func (o *GetCCHistoryOK) SetPayload(payload *models.CCHistoryInfoModel) {
 	o.Payload = payload
 }
 
@@ -49,14 +49,11 @@ func (o *GetCCHistoryOK) SetPayload(payload []*models.CCHistoryInfoModel) {
 func (o *GetCCHistoryOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
-	payload := o.Payload
-	if payload == nil {
-		// return empty array
-		payload = make([]*models.CCHistoryInfoModel, 0, 50)
-	}
-
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
 }
 

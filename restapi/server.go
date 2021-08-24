@@ -6,7 +6,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"ctgb/fileapi"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -157,16 +156,14 @@ type FileServerHandler struct {
 }
 
 func (f *FileServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if strings.HasPrefix(r.URL.Path, "/export/plan") {
-		http.HandlerFunc(fileapi.PlansExportHandler).ServeHTTP(w, r)
-		return
-	} else if strings.HasPrefix(r.URL.Path, "/import/plan") {
-		http.HandlerFunc(fileapi.PlansImportHandler).ServeHTTP(w, r)
-		return
-	} else if !strings.HasPrefix(r.URL.Path, "/api") {
-		if !strings.HasPrefix(r.URL.Path, "/frontend/dist") && !strings.HasPrefix(r.URL.Path, "/gitHelper") {
+	if !strings.HasPrefix(r.URL.Path, "/gitee-cc/cc_history") {
+		fmt.Println(r.URL.Path)
+		r.URL.Path = strings.Replace(r.URL.Path, "/gitee-cc", "", 1)
+		fmt.Println(r.URL.Path)
+		if !strings.HasPrefix(r.URL.Path, "/frontend/dist") {
 			r.URL.Path = "/frontend/dist" + r.URL.Path
 		}
+		fmt.Println(r.URL.Path)
 		http.FileServer(http.Dir("./")).ServeHTTP(w, r)
 		return
 	}
