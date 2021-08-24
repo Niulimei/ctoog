@@ -22,7 +22,7 @@ func GetHistory(params operations.GetCCHistoryParams) middleware.Responder {
 		database.DB.Model(&database.History{}).Where("git_name = ?", gitName).Count(&count)
 		database.DB.Where("git_name = ?", gitName).Offset(offset).Limit(limit).Find(&historyArray)
 	} else {
-		database.DB.Where("git_name = ? AND history_id = ?", gitName, id).Count(&count)
+		database.DB.Model(&database.History{}).Where("git_name = ? AND history_id = ?", gitName, id).Count(&count)
 		database.DB.Where("git_name = ? AND history_id = ?", gitName, id).Offset(offset).Limit(limit).Find(&historyArray)
 	}
 	response := models.CCHistoryInfoModel{
