@@ -1,8 +1,10 @@
 package database
 
 import (
+	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"os"
 )
 
 //Global Var
@@ -20,7 +22,15 @@ type History struct {
 }
 
 func init() {
-	dsn := "root:12345678@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+	var mysqlHost, mysqlPort, mysqlDatabase, mysqlUsername, mysqlPassword string
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		mysqlUsername, mysqlPassword, mysqlHost, mysqlPort, mysqlDatabase)
+	mysqlHost, _ = os.LookupEnv("MYSQL_HOST")
+	mysqlPort, _ = os.LookupEnv("MYSQL_PORT")
+	mysqlDatabase, _ = os.LookupEnv("MYSQL_DATABASE")
+	mysqlUsername, _ = os.LookupEnv("MYSQL_USERNAME")
+	mysqlPassword, _ = os.LookupEnv("MYSQL_USERNAME")
+	//dsn := "root:123456@78@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
