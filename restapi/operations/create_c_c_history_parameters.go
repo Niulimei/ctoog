@@ -36,6 +36,11 @@ type CreateCCHistoryParams struct {
 	HTTPRequest *http.Request `json:"-"`
 
 	/*
+	  Required: true
+	  In: header
+	*/
+	AuthToken string
+	/*
 	  In: query
 	*/
 	Action *string
@@ -47,6 +52,10 @@ type CreateCCHistoryParams struct {
 	  In: body
 	*/
 	InfoItem *models.CCHistoryInfoModelItem
+	/*
+	  In: query
+	*/
+	OldGitName *string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -59,6 +68,10 @@ func (o *CreateCCHistoryParams) BindRequest(r *http.Request, route *middleware.M
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
+
+	if err := o.bindAuthToken(r.Header[http.CanonicalHeaderKey("AuthToken")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
 
 	qAction, qhkAction, _ := qs.GetOK("action")
 	if err := o.bindAction(qAction, qhkAction, route.Formats); err != nil {
@@ -91,9 +104,34 @@ func (o *CreateCCHistoryParams) BindRequest(r *http.Request, route *middleware.M
 			}
 		}
 	}
+
+	qOldGitName, qhkOldGitName, _ := qs.GetOK("old_git_name")
+	if err := o.bindOldGitName(qOldGitName, qhkOldGitName, route.Formats); err != nil {
+		res = append(res, err)
+	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+// bindAuthToken binds and validates parameter AuthToken from header.
+func (o *CreateCCHistoryParams) bindAuthToken(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	if !hasKey {
+		return errors.Required("AuthToken", "header", rawData)
+	}
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: true
+
+	if err := validate.RequiredString("AuthToken", "header", raw); err != nil {
+		return err
+	}
+	o.AuthToken = raw
+
 	return nil
 }
 
@@ -129,6 +167,24 @@ func (o *CreateCCHistoryParams) bindGitName(rawData []string, hasKey bool, forma
 		return nil
 	}
 	o.GitName = &raw
+
+	return nil
+}
+
+// bindOldGitName binds and validates parameter OldGitName from query.
+func (o *CreateCCHistoryParams) bindOldGitName(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.OldGitName = &raw
 
 	return nil
 }

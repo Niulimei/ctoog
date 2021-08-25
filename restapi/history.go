@@ -4,8 +4,11 @@ import (
 	"ctgb/database"
 	"ctgb/models"
 	"ctgb/restapi/operations"
+	"fmt"
 	"github.com/go-openapi/runtime/middleware"
 	"gorm.io/gorm"
+	"strings"
+	"time"
 )
 
 func GetHistory(params operations.GetCCHistoryParams) middleware.Responder {
@@ -13,7 +16,9 @@ func GetHistory(params operations.GetCCHistoryParams) middleware.Responder {
 	id := ""
 	if params.ID != nil {
 		id = *params.ID
+		id = strings.Trim(id, " ")
 	}
+	id = strings.Trim(id, " ")
 	offset := int(params.Offset)
 	limit := int(params.Limit)
 	var historyArray []database.History
@@ -22,8 +27,8 @@ func GetHistory(params operations.GetCCHistoryParams) middleware.Responder {
 		database.DB.Model(&database.History{}).Where("git_name = ?", gitName).Count(&count)
 		database.DB.Where("git_name = ?", gitName).Offset(offset).Limit(limit).Find(&historyArray)
 	} else {
-		database.DB.Model(&database.History{}).Where("git_name = ? AND history_id = ?", gitName, id).Count(&count)
-		database.DB.Where("git_name = ? AND history_id = ?", gitName, id).Offset(offset).Limit(limit).Find(&historyArray)
+		database.DB.Model(&database.History{}).Where("git_name = ? AND history_id like ?", gitName, "%"+id+"%").Count(&count)
+		database.DB.Where("git_name = ? AND history_id like ?", gitName, "%"+id+"%").Offset(offset).Limit(limit).Find(&historyArray)
 	}
 	response := models.CCHistoryInfoModel{
 		Count:  count,
@@ -32,6 +37,11 @@ func GetHistory(params operations.GetCCHistoryParams) middleware.Responder {
 	}
 	items := make([]*models.CCHistoryInfoModelItem, 0)
 	for _, i := range historyArray {
+		//20140808T10:25:39+08:00
+		createTime, err := time.Parse("20060102T15:04:05-07:00", i.CreateTime)
+		if err == nil {
+			i.CreateTime = createTime.Format("2006/1/2 15:04:05")
+		}
 		item := models.CCHistoryInfoModelItem{
 			CreateTime:  i.CreateTime,
 			Description: i.Description,
@@ -47,6 +57,10 @@ func GetHistory(params operations.GetCCHistoryParams) middleware.Responder {
 }
 
 func CreateHistory(params operations.CreateCCHistoryParams) middleware.Responder {
+	token := params.AuthToken
+	if token != "052353be3300b083408c6bb6deb2ab67" {
+		return middleware.Error(403, "token invalid")
+	}
 	gitName := *params.GitName
 	action := ""
 	if params.Action != nil {
@@ -55,6 +69,12 @@ func CreateHistory(params operations.CreateCCHistoryParams) middleware.Responder
 	var tx *gorm.DB
 	if action == "delete" {
 		tx = database.DB.Where("git_name = ?", gitName).Delete(&database.History{})
+	} else if action == "update" {
+		oldGitName := ""
+		if params.OldGitName != nil {
+			oldGitName = *params.OldGitName
+		}
+		tx = database.DB.Model(&database.History{}).Where("git_name = ?", oldGitName).Update("git_name", gitName)
 	} else {
 		id := params.InfoItem.ID
 		owner := params.InfoItem.Owner
@@ -77,4 +97,22 @@ func CreateHistory(params operations.CreateCCHistoryParams) middleware.Responder
 	} else {
 		return operations.NewCreateCCHistoryInternalServerError()
 	}
+}
+
+func GetHistoryId(params operations.SearchCCHistoryParams) middleware.Responder {
+	id := params.ID
+	id = strings.Trim(id, " ")
+	limit := int(params.Limit)
+	gitName := params.GitName
+	var ids []string
+	var count int64
+	database.DB.Model(&database.History{}).Where("git_name = ? AND history_id like ?", gitName, "%"+id+"%").Count(&count)
+	tx := database.DB.Table("histories").Select("history_id").Where("git_name = ? AND history_id like ?", gitName, "%"+id+"%").Limit(limit).Find(&ids)
+	if tx.Error != nil {
+		fmt.Println(tx.Error)
+		return operations.NewSearchCCHistoryInternalServerError()
+	} else {
+		return operations.NewSearchCCHistoryOK().WithPayload(ids)
+	}
+	return nil
 }

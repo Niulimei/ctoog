@@ -109,6 +109,17 @@ func init() {
             "in": "query"
           },
           {
+            "type": "string",
+            "name": "AuthToken",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "old_git_name",
+            "in": "query"
+          },
+          {
             "name": "infoItem",
             "in": "body",
             "schema": {
@@ -121,6 +132,56 @@ func init() {
             "description": "cc历史信息",
             "schema": {
               "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/cc_history_search": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "cc历史信息模糊搜索",
+        "operationId": "SearchCCHistory",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "git_name",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "cc历史ID",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           "500": {
@@ -292,6 +353,17 @@ func init() {
             "in": "query"
           },
           {
+            "type": "string",
+            "name": "AuthToken",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "old_git_name",
+            "in": "query"
+          },
+          {
             "name": "infoItem",
             "in": "body",
             "schema": {
@@ -304,6 +376,56 @@ func init() {
             "description": "cc历史信息",
             "schema": {
               "$ref": "#/definitions/OK"
+            }
+          },
+          "500": {
+            "description": "内部错误",
+            "schema": {
+              "$ref": "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/cc_history_search": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "cc历史信息模糊搜索",
+        "operationId": "SearchCCHistory",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 0,
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "git_name",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "cc历史ID",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           "500": {

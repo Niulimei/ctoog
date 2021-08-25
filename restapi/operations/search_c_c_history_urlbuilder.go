@@ -9,13 +9,15 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+
+	"github.com/go-openapi/swag"
 )
 
-// CreateCCHistoryURL generates an URL for the create c c history operation
-type CreateCCHistoryURL struct {
-	Action     *string
-	GitName    *string
-	OldGitName *string
+// SearchCCHistoryURL generates an URL for the search c c history operation
+type SearchCCHistoryURL struct {
+	GitName string
+	ID      string
+	Limit   int64
 
 	_basePath string
 	// avoid unkeyed usage
@@ -25,7 +27,7 @@ type CreateCCHistoryURL struct {
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *CreateCCHistoryURL) WithBasePath(bp string) *CreateCCHistoryURL {
+func (o *SearchCCHistoryURL) WithBasePath(bp string) *SearchCCHistoryURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -33,15 +35,15 @@ func (o *CreateCCHistoryURL) WithBasePath(bp string) *CreateCCHistoryURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *CreateCCHistoryURL) SetBasePath(bp string) {
+func (o *SearchCCHistoryURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *CreateCCHistoryURL) Build() (*url.URL, error) {
+func (o *SearchCCHistoryURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/cc_history"
+	var _path = "/cc_history_search"
 
 	_basePath := o._basePath
 	if _basePath == "" {
@@ -51,28 +53,19 @@ func (o *CreateCCHistoryURL) Build() (*url.URL, error) {
 
 	qs := make(url.Values)
 
-	var actionQ string
-	if o.Action != nil {
-		actionQ = *o.Action
-	}
-	if actionQ != "" {
-		qs.Set("action", actionQ)
-	}
-
-	var gitNameQ string
-	if o.GitName != nil {
-		gitNameQ = *o.GitName
-	}
+	gitNameQ := o.GitName
 	if gitNameQ != "" {
 		qs.Set("git_name", gitNameQ)
 	}
 
-	var oldGitNameQ string
-	if o.OldGitName != nil {
-		oldGitNameQ = *o.OldGitName
+	idQ := o.ID
+	if idQ != "" {
+		qs.Set("id", idQ)
 	}
-	if oldGitNameQ != "" {
-		qs.Set("old_git_name", oldGitNameQ)
+
+	limitQ := swag.FormatInt64(o.Limit)
+	if limitQ != "" {
+		qs.Set("limit", limitQ)
 	}
 
 	_result.RawQuery = qs.Encode()
@@ -81,7 +74,7 @@ func (o *CreateCCHistoryURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *CreateCCHistoryURL) Must(u *url.URL, err error) *url.URL {
+func (o *SearchCCHistoryURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -92,17 +85,17 @@ func (o *CreateCCHistoryURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *CreateCCHistoryURL) String() string {
+func (o *SearchCCHistoryURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *CreateCCHistoryURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *SearchCCHistoryURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on CreateCCHistoryURL")
+		return nil, errors.New("scheme is required for a full url on SearchCCHistoryURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on CreateCCHistoryURL")
+		return nil, errors.New("host is required for a full url on SearchCCHistoryURL")
 	}
 
 	base, err := o.Build()
@@ -116,6 +109,6 @@ func (o *CreateCCHistoryURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *CreateCCHistoryURL) StringFull(scheme, host string) string {
+func (o *SearchCCHistoryURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

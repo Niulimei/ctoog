@@ -63,6 +63,13 @@ paths:
         - name: action
           in: query
           type: string
+        - name: AuthToken
+          in: header
+          type: string
+          required: true
+        - name: old_git_name
+          type: string
+          in: query
         - name: infoItem
           in: body
           schema:
@@ -76,6 +83,41 @@ paths:
           description: 内部错误
           schema:
             $ref: '#/definitions/ErrorModel'
+  /cc_history_search:
+    get:
+      summary: cc历史信息模糊搜索
+      description: ''
+      operationId: SearchCCHistory
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: limit
+          in: query
+          required: true
+          default: 0
+          type: integer
+        - name: git_name
+          in: query
+          required: true
+          type: string
+        - name: id
+          in: query
+          type: string
+          required: true
+      responses:
+        '200':
+          description: cc历史ID
+          schema:
+            type: array
+            items:
+              type: string
+        '500':
+          description: 内部错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
 definitions:
   ErrorModel:
     type: object

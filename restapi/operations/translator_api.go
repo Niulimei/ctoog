@@ -48,6 +48,9 @@ func NewTranslatorAPI(spec *loads.Document) *TranslatorAPI {
 		GetCCHistoryHandler: GetCCHistoryHandlerFunc(func(params GetCCHistoryParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetCCHistory has not yet been implemented")
 		}),
+		SearchCCHistoryHandler: SearchCCHistoryHandlerFunc(func(params SearchCCHistoryParams) middleware.Responder {
+			return middleware.NotImplemented("operation SearchCCHistory has not yet been implemented")
+		}),
 	}
 }
 
@@ -88,6 +91,8 @@ type TranslatorAPI struct {
 	CreateCCHistoryHandler CreateCCHistoryHandler
 	// GetCCHistoryHandler sets the operation handler for the get c c history operation
 	GetCCHistoryHandler GetCCHistoryHandler
+	// SearchCCHistoryHandler sets the operation handler for the search c c history operation
+	SearchCCHistoryHandler SearchCCHistoryHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -170,6 +175,9 @@ func (o *TranslatorAPI) Validate() error {
 	}
 	if o.GetCCHistoryHandler == nil {
 		unregistered = append(unregistered, "GetCCHistoryHandler")
+	}
+	if o.SearchCCHistoryHandler == nil {
+		unregistered = append(unregistered, "SearchCCHistoryHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -267,6 +275,10 @@ func (o *TranslatorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/cc_history"] = NewGetCCHistory(o.context, o.GetCCHistoryHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/cc_history_search"] = NewSearchCCHistory(o.context, o.SearchCCHistoryHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

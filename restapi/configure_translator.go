@@ -37,6 +37,7 @@ func configureAPI(api *operations.TranslatorAPI) http.Handler {
 
 	api.CreateCCHistoryHandler = operations.CreateCCHistoryHandlerFunc(CreateHistory)
 	api.GetCCHistoryHandler = operations.GetCCHistoryHandlerFunc(GetHistory)
+	api.SearchCCHistoryHandler = operations.SearchCCHistoryHandlerFunc(GetHistoryId)
 
 	api.PreServerShutdown = func() {}
 
