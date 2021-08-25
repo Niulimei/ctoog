@@ -157,13 +157,9 @@ type FileServerHandler struct {
 
 func (f *FileServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !strings.HasPrefix(r.URL.Path, "/gitee-cc/cc_history") {
-		fmt.Println(r.URL.Path)
-		r.URL.Path = strings.Replace(r.URL.Path, "/gitee-cc", "", 1)
-		fmt.Println(r.URL.Path)
-		if !strings.HasPrefix(r.URL.Path, "/frontend/dist") {
-			r.URL.Path = "/frontend/dist" + r.URL.Path
+		if !strings.HasPrefix(r.URL.Path, "/frontend") {
+			r.URL.Path = "/frontend" + r.URL.Path
 		}
-		fmt.Println(r.URL.Path)
 		http.FileServer(http.Dir("./")).ServeHTTP(w, r)
 		return
 	}
