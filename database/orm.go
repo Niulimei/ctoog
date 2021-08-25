@@ -30,7 +30,7 @@ func init() {
 	mysqlPassword, _ = os.LookupEnv("MYSQL_PASSWORD")
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		mysqlUsername, mysqlPassword, mysqlHost, mysqlPort, mysqlDatabase)
-	dsn = "root:12345678@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+	//dsn = "root:12345678@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 	fmt.Println("database init:", dsn)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
