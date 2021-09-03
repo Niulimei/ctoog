@@ -25,7 +25,7 @@ func GetHistory(params operations.GetCCHistoryParams) middleware.Responder {
 	var count int64
 	if id == "" {
 		database.DB.Model(&database.History{}).Where("git_name = ?", gitName).Count(&count)
-		database.DB.Where("git_name = ?", gitName).Offset(offset).Limit(limit).Find(&historyArray)
+		database.DB.Where("git_name = ?", gitName).Order("create_time desc").Offset(offset).Limit(limit).Find(&historyArray)
 	} else {
 		database.DB.Model(&database.History{}).Where("git_name = ? AND history_id like ?", gitName, "%"+id+"%").Count(&count)
 		database.DB.Where("git_name = ? AND history_id like ?", gitName, "%"+id+"%").Offset(offset).Limit(limit).Find(&historyArray)
@@ -93,9 +93,11 @@ func CreateHistory(params operations.CreateCCHistoryParams) middleware.Responder
 		})
 	}
 	if tx.Error == nil {
-		return operations.NewCreateCCHistoryCreated()
+		return operations.NewCreateCCHistoryCreated().WithPayload(&models.OK{
+			Message: "ok",
+		})
 	} else {
-		return operations.NewCreateCCHistoryInternalServerError()
+		return operations.NewCreateCCHistoryInternalServerError().WithPayload(&models.ErrorModel{Message: tx.Error.Error()})
 	}
 }
 
@@ -114,5 +116,4 @@ func GetHistoryId(params operations.SearchCCHistoryParams) middleware.Responder 
 	} else {
 		return operations.NewSearchCCHistoryOK().WithPayload(ids)
 	}
-	return nil
 }
