@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import moment from 'moment';
 import { useHistory, useModel } from 'umi';
 import { Task } from '@/typings/model';
@@ -22,7 +22,7 @@ const StatusOptions = [
 
 type Actions = Record<
   'startTask' | 'gotoDetail' | 'updateTask' | 'createTask',
-  (id: number) => void
+  (id: number | string) => void
 >;
 const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
   return [
@@ -119,7 +119,7 @@ const getColumns = (actions: Actions): ProColumns<Task.Item>[] => {
   ];
 };
 
-const TaskList: React.FC = () => {
+const TaskList: React.FC = (props) => {
   const { initialState } = useModel('@@initialState');
   const tableRef = React.useRef<any>(null);
   const creatorModalRef = React.useRef<any>(null);
@@ -135,7 +135,7 @@ const TaskList: React.FC = () => {
     /** 启动任务 */
     async startTask(id) {
       try {
-        await taskService.startTask(id);
+        await taskService.startTask(id as number);
         message.success('迁移任务启动成功');
         tableRef?.current?.reload();
       } catch (err) {
@@ -148,10 +148,17 @@ const TaskList: React.FC = () => {
       creatorModalRef.current.openModal('update', id);
     },
     /** 创建任务 */
-    async createTask() {
-      creatorModalRef.current.openModal('create');
+    async createTask(gitUrl) {
+      creatorModalRef.current.openModal('create', gitUrl);
     },
   };
+
+  useEffect(() => {
+    const { query } = props.location;
+    if (query.url) {
+      actions.createTask(query.url);
+    }
+  }, []);
 
   return (
     <>
