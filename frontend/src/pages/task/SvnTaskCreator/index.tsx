@@ -383,13 +383,6 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               component: ProFormText,
               placeholder: '请输入 SVN 用户名',
             },
-            // {
-            //   name: 'gitUser',
-            //   required: true,
-            //   width: 'md',
-            //   component: ProFormText,
-            //   placeholder: '请输入 Git 用户名',
-            // },
           ],
           [
             {
@@ -400,20 +393,24 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               placeholder: '请输入 SVN 密码',
               ...DisablePasswordFieldAutocompleteProps,
             },
-            // {
-            //   name: 'gitPassword',
-            //   required: true,
-            //   width: 'md',
-            //   component: ProFormText.Password,
-            //   placeholder: '请输入 Git 密码',
-            //   ...DisablePasswordFieldAutocompleteProps,
-            // },
           ],
         ])}
         <div className={classnames(styles.ignore)}>
           <ProFormTextArea
             name="gitignore"
-            placeholder="请输入 gitignore信息"
+            placeholder="请输入gitignore信息"
+          />
+          <ProFormText
+            name="trunk"
+            placeholder="请输入trunk信息"
+          />
+          <ProFormText
+            name="branches"
+            placeholder="请输入branches信息"
+          />
+          <ProFormText
+            name="tags"
+            placeholder="请输入tags信息"
           />
         </div>
          <div className={classnames(styles.col, styles.keep)}>
