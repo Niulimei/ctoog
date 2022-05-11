@@ -45,6 +45,7 @@ pullCCAndPush(){
   gitignoreContent=$9
   svnUser="${10}"
   svnPassword="${11}"
+  branchInfo="${12}"
   combineNameAdapt=$(basename "${svnRepoUrl}")
   local tmpGitDir="${gitTmpRootPath}/${combineNameAdapt}_${taskID}"
   local tmpGitDirExist=false
@@ -54,9 +55,9 @@ pullCCAndPush(){
     tmpGitDirExist=true
   fi
   if [[ -f ${userFile} ]]; then
-    echo "${svnPassword}" | git svn clone --username "${svnUser}" --authors-file="${userFile}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
+    echo "${svnPassword}" | git svn init -s --username "${svnUser}" --authors-file="${userFile}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
   else
-    echo "${svnPassword}" | git svn clone --username "${svnUser}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
+    echo "${svnPassword}" | git svn init -s --username "${svnUser}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
   fi
   rm -rf "${userFile}"
   configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
@@ -69,7 +70,11 @@ pullCCAndPush(){
   else
     rm -rf ./.gitignore
   fi
-  git add -A .
+  echo "${branchInfo}" >> .git/config
+  for t in $(git for-each-ref --format='%(refname:short)' refs/remotes/tags); do git tag ${t/tags\//} $t && git branch -D -r $t; done
+  for b in $(git for-each-ref --format='%(refname:short)' refs/remotes); do git branch $b refs/remotes/$b && git branch -D -r $b; done
+  for p in $(git for-each-ref --format='%(refname:short)' | grep @); do git branch -D $p; done
+  git branch -d trunk
   echo "Pushing code..."
   if $tmpGitDirExist; then
     lastMessage=$(git status | tail -n 2)
@@ -77,21 +82,23 @@ pullCCAndPush(){
     noCommit='nothing to commit'
     if [[ $lastMessage =~ $noCommit ]]; then
       set +e
-      git push origin --mirror
+      git push origin --all
+      git push --tags
       set -e
     else
       git commit --allow-empty -m "sync from svn, update commit $(date '+%Y%m%d%H%M%S')" >/dev/null
-      git push origin --mirror
+      git push origin --all
+      git push origin --tags
     fi
   else
-    git commit --allow-empty -m "sync from svn, first commit $(date '+%Y%m%d%H%M%S')" >/dev/null
-    git push origin --mirror
+    git push origin --all
+    git push --tags
   fi
 }
 
 main(){
   mkdir -p "${gitTmpRootPath}" -m 777
-  pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}"
+  pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" "${12}"
 }
 
-main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}"
+main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" "${12}"
