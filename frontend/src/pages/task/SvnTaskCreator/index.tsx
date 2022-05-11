@@ -401,16 +401,8 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             placeholder="请输入gitignore信息"
           />
           <ProFormText
-            name="trunk"
-            placeholder="请输入trunk信息"
-          />
-          <ProFormText
-            name="branches"
-            placeholder="请输入branches信息"
-          />
-          <ProFormText
-            name="tags"
-            placeholder="请输入tags信息"
+            name="branches_info"
+            placeholder="请输入branches_info信息"
           />
         </div>
          <div className={classnames(styles.col, styles.keep)}>
