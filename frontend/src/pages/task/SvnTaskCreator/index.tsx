@@ -182,6 +182,9 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             toggleVisible(true);
           }
         } else {
+          form.setFieldsValue({
+            gitURL: id
+          });
           toggleVisible(true);
         }
       },
@@ -258,9 +261,9 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   };
 
   const closeModal = () => {
-    
     toggleVisible(false);
     setCurrentNum(0);
+    return false;
   }
 
   const runScript = useCallback(
@@ -293,6 +296,16 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   );
 
   return (
+    <Modal
+      title={`${actionText}迁移任务`}
+      width={850}
+      centered
+      wrapClassName={styles.svnModal}
+      onCancel={closeModal}
+      visible={visible}
+      destroyOnClose
+      footer={null}
+    >
     <StepsForm
       current={currentNum}
       containerStyle={{
@@ -305,23 +318,6 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       onFinish={closeModal}
       onCurrentChange={num => setCurrentNum(num)}
       title={`${actionText}迁移任务`}
-      stepsFormRender={(dom, submitter) => {
-        return (
-          <Modal
-            title={`${actionText}迁移任务`}
-            width={850}
-            centered
-            wrapClassName={styles.svnModal}
-            onCancel={closeModal}
-            visible={visible}
-            footer={submitter}
-            destroyOnClose
-          >
-            {dom}
-          </Modal>
-          );
-        }
-      }
       submitter={{
         render: (props) => {
           if (props.step === 0) {
@@ -387,13 +383,6 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               component: ProFormText,
               placeholder: '请输入 SVN 用户名',
             },
-            {
-              name: 'gitUser',
-              required: true,
-              width: 'md',
-              component: ProFormText,
-              placeholder: '请输入 Git 用户名',
-            },
           ],
           [
             {
@@ -404,20 +393,24 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               placeholder: '请输入 SVN 密码',
               ...DisablePasswordFieldAutocompleteProps,
             },
-            {
-              name: 'gitPassword',
-              required: true,
-              width: 'md',
-              component: ProFormText.Password,
-              placeholder: '请输入 Git 密码',
-              ...DisablePasswordFieldAutocompleteProps,
-            },
           ],
         ])}
         <div className={classnames(styles.ignore)}>
           <ProFormTextArea
             name="gitignore"
-            placeholder="请输入 gitignore信息"
+            placeholder="请输入gitignore信息"
+          />
+          <ProFormText
+            name="trunk"
+            placeholder="请输入trunk信息"
+          />
+          <ProFormText
+            name="branches"
+            placeholder="请输入branches信息"
+          />
+          <ProFormText
+            name="tags"
+            placeholder="请输入tags信息"
           />
         </div>
          <div className={classnames(styles.col, styles.keep)}>
@@ -543,6 +536,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
         </StepsForm.StepForm>
       )}
     </StepsForm>
+    </Modal>
   );
 };
 
