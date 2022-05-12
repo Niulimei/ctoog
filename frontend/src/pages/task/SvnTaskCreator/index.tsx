@@ -400,7 +400,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
             name="gitignore"
             placeholder="请输入gitignore信息"
           />
-          <ProFormText
+          <ProFormTextArea
             name="branches_info"
             placeholder="请输入branches_info信息"
           />
