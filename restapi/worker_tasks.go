@@ -463,11 +463,11 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	tmpCmdOutFile := fmt.Sprintf("%s/tmpCmdOut/%d_%d.log", cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)
 	exec.Command("/bin/bash", "-c", fmt.Sprintf("mkdir -p %s/tmpCmdOut;touch %s/tmpCmdOut/%d_%d.log", cwd, cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)).Output()
 	userFile := geneUsersFile(workerTaskModel)
-	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" "%s" "%s" &> %s`,
+	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" &> %s`,
 		cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
 		workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail,
 		workerTaskModel.Keep, userFile, strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""),
-		workerTaskModel.CcUser, workerTaskModel.CcPassword, tmpCmdOutFile)
+		workerTaskModel.CcUser, workerTaskModel.CcPassword, workerTaskModel.BranchesInfo, tmpCmdOutFile)
 	log.Infoln(cmdStr)
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	cmds = append(cmds, cmd)

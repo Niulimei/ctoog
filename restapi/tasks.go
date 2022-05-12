@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -53,7 +54,7 @@ func startTask(taskId int64) {
 	task := &database.TaskModel{}
 	err := database.DB.Get(task, "SELECT cc_password,"+
 		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty, dir, keep, worker_id, "+
-		" svn_url, model_type, gitignore FROM task WHERE id = $1", taskId)
+		" svn_url, model_type, gitignore, branches_info FROM task WHERE id = $1", taskId)
 	startTime := time.Now().Format("2006-01-02 15:04:05")
 	if err != nil {
 		log.Error("start task but db err:", err)
@@ -119,6 +120,19 @@ func startTask(taskId int64) {
 			ModelType    string
 			NamePair     []*models.NamePairInfo
 			Gitignore    string
+			BranchesInfo string
+		}
+		gitUser := task.GitUser.String
+		if gitUser == "" {
+			gitUser = os.Getenv("GIT_USER")
+		}
+		gitEmail := task.GitEmail.String
+		if gitEmail == "" {
+			gitEmail = os.Getenv("GIT_EMAIL")
+		}
+		gitPassword := task.GitPassword.String
+		if gitPassword == "" {
+			gitPassword = os.Getenv("GIT_PASSWORD")
 		}
 		workerTaskModel := InnerTask{
 			TaskId:       taskId,
@@ -126,16 +140,17 @@ func startTask(taskId int64) {
 			CcPassword:   task.CcPassword.String,
 			CcUser:       task.CcUser.String,
 			Component:    component,
-			GitPassword:  task.GitPassword.String,
+			GitPassword:  gitPassword,
 			GitURL:       task.GitURL.String,
-			GitUser:      task.GitUser.String,
-			GitEmail:     task.GitEmail.String,
+			GitUser:      gitUser,
+			GitEmail:     gitEmail,
 			Pvob:         task.Pvob.String,
 			IncludeEmpty: task.IncludeEmpty.Bool,
 			Keep:         task.Keep.String,
 			SvnUrl:       task.SvnURL.String,
 			ModelType:    task.ModelType.String,
 			Gitignore:    task.Gitignore.String,
+			BranchesInfo: task.BranchesInfo.String,
 		}
 		for _, match := range matchInfo {
 			workerTaskModel.Matches =
@@ -237,9 +252,9 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		tx.Commit()
 	} else if modelType == "svn" {
 		r := database.DB.MustExec("INSERT INTO task (cc_user, cc_password, git_url,"+
-			"git_user, git_password, status, last_completed_date_time, creator, worker_id, model_type, include_empty, keep, svn_url, gitignore)"+
+			"git_user, git_password, status, last_completed_date_time, creator, worker_id, model_type, include_empty, keep, svn_url, gitignore, branches_info)"+
 			" VALUES ($1, $2, $3, $4, $5, 'pending', '', $6, 0, 'svn', $7, $8, $9, $10)",
-			taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL, taskInfo.GitUser, taskInfo.GitPassword, username, taskInfo.IncludeEmpty, taskInfo.Keep, taskInfo.SvnURL, taskInfo.Gitignore)
+			taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL, taskInfo.GitUser, taskInfo.GitPassword, username, taskInfo.IncludeEmpty, taskInfo.Keep, taskInfo.SvnURL, taskInfo.Gitignore, taskInfo.BranchesInfo)
 		taskId, err = r.LastInsertId()
 		if err != nil {
 			return operations.NewCreateTaskInternalServerError().WithPayload(

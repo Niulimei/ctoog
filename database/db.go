@@ -70,6 +70,9 @@ type TaskModel struct {
 
 	// gitignore
 	Gitignore models.JsonNullString `json:"gitignore,omitempty"`
+
+	// branches_info
+	BranchesInfo models.JsonNullString `json:"branches_info,omitempty"`
 }
 
 type WorkerModel struct {

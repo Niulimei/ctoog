@@ -70,6 +70,8 @@ pullCCAndPush(){
   else
     rm -rf ./.gitignore
   fi
+  sed -i '$d' .git/config
+  sed -i '$d' .git/config
   echo "${branchInfo}" >> .git/config
   for t in $(git for-each-ref --format='%(refname:short)' refs/remotes/tags); do git tag ${t/tags\//} $t && git branch -D -r $t; done
   for b in $(git for-each-ref --format='%(refname:short)' refs/remotes); do git branch $b refs/remotes/$b && git branch -D -r $b; done

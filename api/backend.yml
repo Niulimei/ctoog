@@ -1248,6 +1248,8 @@ definitions:
           $ref: '#/definitions/NamePairInfo'
       workerUrl:
         type: string
+      branches_info:
+        type: string
   TaskRestart:
     type: object
     properties:

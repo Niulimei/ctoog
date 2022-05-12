@@ -1947,6 +1947,9 @@ func init() {
     "TaskModel": {
       "type": "object",
       "properties": {
+        "branches_info": {
+          "type": "string"
+        },
         "ccPassword": {
           "type": "string"
         },
@@ -4103,6 +4106,9 @@ func init() {
     "TaskModel": {
       "type": "object",
       "properties": {
+        "branches_info": {
+          "type": "string"
+        },
         "ccPassword": {
           "type": "string"
         },

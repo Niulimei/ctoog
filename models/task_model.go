@@ -102,6 +102,9 @@ func (v *JsonNullBool) UnmarshalJSON(data []byte) error {
 // swagger:model TaskModel
 type TaskModel struct {
 
+	// branches info
+	BranchesInfo string `json:"branches_info,omitempty"`
+
 	// cc password
 	CcPassword JsonNullString `json:"ccPassword,omitempty" db:"cc_password"`
 
