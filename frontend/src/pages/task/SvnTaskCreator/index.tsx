@@ -157,7 +157,15 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
 
   // 两个脚本域的变量
   const [gitScript, setGitScript] = useState('function main(user) { return user }');
-  const [gitEmailScript, setGitEmailScript] = useState('function main(user) { return user + "@example.com" }');
+  const [gitEmailScript, setGitEmailScript] = useState(`function main(user) { 
+    if(user.indexOf('mskj-') === 0) {
+      return user + '@mskj.com'
+    } 
+    if (user.indexOf('-') === -1 && user.indexOf('_') === -1) {
+      return user + '@cmbc.com.cn'
+    } 
+    return user + '@escmbc.com.cn'
+  }`);
 
   /** 更新模式
    * 1. 回填表单数据
@@ -298,7 +306,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   return (
     <Modal
       title={`${actionText}迁移任务`}
-      width={850}
+      width={1050}
       centered
       wrapClassName={styles.svnModal}
       onCancel={closeModal}
