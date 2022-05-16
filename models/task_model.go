@@ -103,7 +103,7 @@ func (v *JsonNullBool) UnmarshalJSON(data []byte) error {
 type TaskModel struct {
 
 	// branches info
-	BranchesInfo string `json:"branches_info,omitempty"`
+	BranchesInfo string `json:"branches_info,omitempty" db:"branches_info"`
 
 	// cc password
 	CcPassword JsonNullString `json:"ccPassword,omitempty" db:"cc_password"`

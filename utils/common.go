@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/PuerkitoBio/urlesc"
@@ -32,6 +33,12 @@ func Iconv(src string, srcCode string, targetCode string) string {
 
 func ParseGitURL(user, passwd, gitUrl string) string {
 	user = urlesc.QueryEscape(user)
+	if user == "" {
+		user = os.Getenv("GIT_USER")
+	}
+	if passwd == "" {
+		passwd = os.Getenv("GIT_PASSWORD")
+	}
 	passwd = urlesc.QueryEscape(passwd)
 	if strings.HasPrefix(gitUrl, "http://") {
 		gitUrl = strings.Replace(gitUrl, "http://", "", 1)

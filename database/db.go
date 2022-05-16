@@ -72,7 +72,7 @@ type TaskModel struct {
 	Gitignore models.JsonNullString `json:"gitignore,omitempty"`
 
 	// branches_info
-	BranchesInfo models.JsonNullString `json:"branches_info,omitempty"`
+	BranchesInfo models.JsonNullString `json:"branches_info,omitempty" db:"branches_info"`
 }
 
 type WorkerModel struct {
@@ -144,7 +144,7 @@ func InitializeDataBase() {
 	go func() {
 		for {
 			startTime := time.Now().Format("2006.01.02-15:04:05")
-			cmd := exec.Command("cp", "translator.db", "backup/translator-"+startTime+".back")
+			cmd := exec.Command("cp", "store/translator.db", "backup/translator-"+startTime+".back")
 			cmd.Run()
 			time.Sleep(time.Hour * 24)
 		}
@@ -178,13 +178,13 @@ func InitializeDataBase() {
 func initDB() {
 	var err error
 	var isInitAlready = true
-	_, err = os.Stat("translator.db") //os.Stat获取文件信息
+	_, err = os.Stat("store/translator.db") //os.Stat获取文件信息
 	if err != nil {
 		if os.IsNotExist(err) {
 			isInitAlready = false
 		}
 	}
-	DB, err = sqlx.Connect("sqlite3", "file:translator.db?cache=private&mode=rwc")
+	DB, err = sqlx.Connect("sqlite3", "file:store/translator.db?cache=private&mode=rwc")
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -253,7 +253,7 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 	} else if modelType == "svn" {
 		r := database.DB.MustExec("INSERT INTO task (cc_user, cc_password, git_url,"+
 			"git_user, git_password, status, last_completed_date_time, creator, worker_id, model_type, include_empty, keep, svn_url, gitignore, branches_info)"+
-			" VALUES ($1, $2, $3, $4, $5, 'pending', '', $6, 0, 'svn', $7, $8, $9, $10)",
+			" VALUES ($1, $2, $3, $4, $5, 'pending', '', $6, 0, 'svn', $7, $8, $9, $10, $11)",
 			taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL, taskInfo.GitUser, taskInfo.GitPassword, username, taskInfo.IncludeEmpty, taskInfo.Keep, taskInfo.SvnURL, taskInfo.Gitignore, taskInfo.BranchesInfo)
 		taskId, err = r.LastInsertId()
 		if err != nil {
@@ -281,7 +281,7 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	taskID := params.ID
 	task := &models.TaskModel{}
 	log.Debug(database.DB.Get(task, "SELECT status, cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep, model_type, svn_url, gitignore, worker_id"+
+		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep, model_type, svn_url, gitignore, branches_info, worker_id"+
 		" FROM task WHERE id = $1", taskID))
 	if task.ModelType.String == "clearcase" || task.ModelType.String == "" {
 		var matchInfo []*models.TaskMatchInfo

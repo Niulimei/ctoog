@@ -4,7 +4,7 @@ worker
 server
 vendor
 *.sw*
-translator.db
+store/translator.db
 
 
 ###### ** ######

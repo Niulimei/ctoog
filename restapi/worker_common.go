@@ -52,7 +52,7 @@ type Task struct {
 	NamePair     []*NamePairInfo `json:"namePair"`
 	SvnURL       string          `json:"svnUrl,omitempty"`
 	Gitignore    string          `json:"gitignore"`
-	BranchesInfo string          `json:"branches_info"`
+	BranchesInfo string          `json:"BranchesInfo"`
 }
 
 type WorkerTaskDelInfo struct {

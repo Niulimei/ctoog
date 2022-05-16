@@ -19,7 +19,6 @@ configGitRepo(){
   tmpGitDir=$2
   username=$3
   email=$4
-  cd "${tmpGitDir}"
   git config --local core.longpaths true
   git config user.name "${username}"
   git config user.email "${email}"
@@ -54,13 +53,8 @@ pullCCAndPush(){
     rm -rf "${tmpGitDir}"
     tmpGitDirExist=true
   fi
-  if [[ -f ${userFile} ]]; then
-    echo "${svnPassword}" | git svn init -s --username "${svnUser}" --authors-file="${userFile}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
-  else
-    echo "${svnPassword}" | git svn init -s --username "${svnUser}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
-  fi
-  rm -rf "${userFile}"
-  configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
+  echo "${svnPassword}" | git svn init -s --username "${svnUser}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
+  cd "${tmpGitDir}"
   if [[ ${containEmptyDir} == "true" ]]; then
     find "${tmpGitDir}" -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
   fi
@@ -70,14 +64,24 @@ pullCCAndPush(){
   else
     rm -rf ./.gitignore
   fi
+  if [[ ! -z ${branchInfo} ]];then
+  sed -i '$d' .git/config
   sed -i '$d' .git/config
   sed -i '$d' .git/config
   echo "${branchInfo}" >> .git/config
+  fi
+  if [[ -f ${userFile} ]]; then
+    git svn fetch --authors-file="${userFile}"
+  else
+    git svn fetch
+  fi
   for t in $(git for-each-ref --format='%(refname:short)' refs/remotes/tags); do git tag ${t/tags\//} $t && git branch -D -r $t; done
   for b in $(git for-each-ref --format='%(refname:short)' refs/remotes); do git branch $b refs/remotes/$b && git branch -D -r $b; done
   for p in $(git for-each-ref --format='%(refname:short)' | grep @); do git branch -D $p; done
-  git branch -d trunk
+  git branch -d trunk || true
+  git branch -d origin/trunk || true
   echo "Pushing code..."
+  configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
   if $tmpGitDirExist; then
     lastMessage=$(git status | tail -n 2)
     #nothing to commit, working tree clean
@@ -88,7 +92,6 @@ pullCCAndPush(){
       git push --tags
       set -e
     else
-      git commit --allow-empty -m "sync from svn, update commit $(date '+%Y%m%d%H%M%S')" >/dev/null
       git push origin --all
       git push origin --tags
     fi
