@@ -34,16 +34,12 @@ const renderCardTitle = (title: string) => {
   return <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>{title}</h3>;
 };
 
-const renderSvnTitle = (title: string) => {
-  return <h4 style={{ textAlign: 'left'}}>{title}</h4>;
-};
 
 /** pro compoent 禁用提交 */
 const DisablePasswordFieldAutocompleteProps = {
   fieldProps: { autoComplete: 'new-password' },
 };
 
-const { TextArea } = Input;
 
 /** 生成表单项 */
 const formFieldsGenerator = (fields: any) => {
@@ -83,7 +79,6 @@ const formFieldsGenerator = (fields: any) => {
     const [leftNode, rightNode, actionNode] = nodes.map((node: any) =>
       node.component ? renderFieldComponent(node) : node,
     );
-    // console.log(leftNode);
 
     return (
       <div className={styles.col} key={key}>
@@ -105,7 +100,7 @@ const formTreeFieldsGenerator = (fields: any) => {
     ];
     // eslint-disable-next-line no-param-reassign
     rules = (rules || []).concat(required && requiredRules).filter(Boolean);
-
+    console.log(restProps);
     return React.createElement(component, {
       key: name,
       required,
@@ -478,11 +473,11 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
              </div>
              <div className={styles.secondNodes}>
                 <div className={classnames([styles.innerRun, styles.innerRunLeft])}>
-                  <ProFormTextArea fieldProps={{value: gitScript, onChange: e => throttle(() => setGitScript(e?.target?.value), 1000)()}} />
+                  <ProFormTextArea fieldProps={{value: gitScript, rows: 12, onChange: e => throttle(() => setGitScript(e?.target?.value), 1000)()}} />
                   <Button type="primary" size="small" onClick={() => runScript('git')}>执行</Button>
                 </div>
                 <div className={styles.innerRun}>
-                  <ProFormTextArea fieldProps={{value: gitEmailScript, onChange: e => setGitEmailScript(e?.target?.value)}} />
+                  <ProFormTextArea fieldProps={{value: gitEmailScript, rows: 12, onChange: e => setGitEmailScript(e?.target?.value)}} />
                   <Button type="primary" size="small" onClick={() => runScript('email')}>执行</Button>
                 </div>
              </div>

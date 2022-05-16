@@ -23,13 +23,20 @@
     overflow: hidden;
   }
 
-  .leftTitles {
+ .firstNode .leftTitles {
     width: 100px;
     flex: none;
     overflow: hidden;
     margin-right: 50px;
     border-right: 1px solid #d9d9d9;
   }
+  .leftTitles {
+    :global .ant-form-item {
+      width: 100px;
+      margin-right: 50px;
+      border-right: 1px solid #d9d9d9;
+    }
+  } 
 
   .rightNodes {
     display: flex;
@@ -106,6 +113,10 @@
   }
 }
 
+:global .ant-pro-steps-form-container {
+  width: 100% !important;
+}
+
 .emptyCol {
   height: 32px;
   margin-bottom: @field-margin-bottom;
@@ -142,7 +153,7 @@
     display: flex;
     .innerRun {
       display: flex;
-      width: 47%;
+      width: 50%;
       margin-bottom: 20px;
       gap: 6px;
       :global {
@@ -153,7 +164,7 @@
       }
     }
     .innerRunLeft {
-      margin-right: 20px;
+      margin-right: 30px;
     }
     .gitTitle {
       flex: 1;
