@@ -53,7 +53,7 @@ pullCCAndPush(){
     rm -rf "${tmpGitDir}"
     tmpGitDirExist=true
   fi
-  echo "${svnPassword}" | git svn init -s --username "${svnUser}" --no-metadata --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
+  echo "${svnPassword}" | git svn init -s --username "${svnUser}" --no-metadata --no-minimize-url --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
   cd "${tmpGitDir}"
   if [[ ${containEmptyDir} == "true" ]]; then
     find "${tmpGitDir}" -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
