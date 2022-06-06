@@ -100,7 +100,6 @@ const formTreeFieldsGenerator = (fields: any) => {
     ];
     // eslint-disable-next-line no-param-reassign
     rules = (rules || []).concat(required && requiredRules).filter(Boolean);
-    console.log(restProps);
     return React.createElement(component, {
       key: name,
       required,
@@ -154,7 +153,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   const [gitScript, setGitScript] = useState('function main(user) { return user }');
   const [gitEmailScript, setGitEmailScript] = useState(`function main(user) { 
     if(user.indexOf('mskj-') === 0) {
-      return user + '@mskj.com'
+      return user.substr(5) + '@mskj.com'
     } 
     if (user.indexOf('-') === -1 && user.indexOf('_') === -1) {
       return user + '@cmbc.com.cn'
@@ -237,23 +236,16 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
         svn_user: ccUser,
       });
       setSvnList(list || []);
-      const preNamesPair = form.getFieldValue('namePair');
-      if (preNamesPair) {
-        let nameGroupBy = groupBy(preNamesPair, 'svnUserName');
-        let newNamePair = list.map(item => {
-          const namePairItem = nameGroupBy[item];
-          if (nameGroupBy[item]) {
-            return namePairItem[0];
-          } else {
-            return {'svnUserName': item, 'gitUserName': item, 'gitEmail': `${item}@example.com`};
-          }
-        })
-        formUser.setFieldsValue({'namePair': newNamePair});
-        setPreSvnLIst(newNamePair);
-      } else {
-        formUser.setFieldsValue({'namePair': list.map(item => {return {'svnUserName': item, 'gitUserName': item, 'gitEmail': `${item}@example.com`}})})
-        setPreSvnLIst(list.map(item => {return {'svnUserName': item, 'gitUserName': item, 'gitEmail': `${item}@example.com`}}));
-      }
+      let newNamePair = list.map(item => {
+        return {
+          'svnUserName': item,
+          'gitUserName': eval(gitScript + 'main("'+item+'")'),
+          'gitEmail':  eval(gitEmailScript + 'main("'+item+'")'),
+        };
+      })
+      console.log(newNamePair);
+      formUser.setFieldsValue({'namePair': newNamePair});
+      setPreSvnLIst(newNamePair);
       setCurrentNum(1);
       return true;
     } catch (err) {
@@ -274,20 +266,19 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
       const { namePair } = formUser.getFieldsValue(['namePair']);
       try {
         if (type === 'git') {
-          const gitOutPut = map(preSvnLIst, item => {
+          const gitOutPut = map(namePair, item => {
             return {
-              gitEmail: item?.gitEmail,
+              ...item,
               gitUserName: eval(gitScript + 'main("'+item?.gitUserName+'")'),
-              svnUserName: item?.svnUserName
             }
           })
           formUser.setFieldsValue({'namePair': gitOutPut});
         } else {
           const gitEmailOutPut = map(namePair, item => {
             return {
+              ...item,
               gitEmail: eval(gitEmailScript + 'main("'+item?.gitUserName+'")'),
-              gitUserName: item?.gitUserName,
-              svnUserName: item?.svnUserName
+              
             }
           })
           formUser.setFieldsValue({'namePair': gitEmailOutPut});
