@@ -37,7 +37,7 @@ const renderCardTitle = (title: string) => {
 
 /** pro compoent 禁用提交 */
 const DisablePasswordFieldAutocompleteProps = {
-  fieldProps: { autoComplete: 'new-password' },
+  fieldProps: { autoComplete: 'new-password', visibilityToggle: false },
 };
 
 
@@ -385,6 +385,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
               width: 'md',
               component: ProFormText.Password,
               placeholder: '请输入 SVN 密码',
+              // fieldProps: {visibilityToggle: false },
               ...DisablePasswordFieldAutocompleteProps,
             },
           ],

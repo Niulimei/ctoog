@@ -5,20 +5,15 @@ import { useToggle } from 'react-use';
 import type { Task } from '@/typings/model';
 import ProTable from '@ant-design/pro-table';
 import type { ProColumns } from '@ant-design/pro-table';
-import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 import styles from './style.less';
 
 const PrivacyPassword: React.FC<{ value: string }> = ({ value }) => {
-  const [isHidden, toggleHidden] = useToggle(true);
   if (!value) return <span>-</span>;
   return (
     <p className={styles.passwordField}>
       <span className={styles.value}>
-        {isHidden ? Array.from(Array(value.length), () => '* ') : value}
-      </span>
-      <span className={styles.btn} onClick={toggleHidden}>
-        {isHidden ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+        {Array.from(Array(value.length), () => '* ')}
       </span>
     </p>
   );

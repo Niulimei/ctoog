@@ -478,6 +478,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                     label="CC密码"
                     rules={[{ required: true, message: '请填写 CC 密码' }]}
                     placeholder="请输入 CC 密码"
+                    fieldProps={{visibilityToggle:false}}
                   />
                 </>
               )}
@@ -497,6 +498,7 @@ const PlanCreator: React.FC<IPlanCreatorProps> = ({ actionRef, onSuccess }) => {
                     rules={[{ required: true, message: '请输入 SVN 用户名' }]}
                   />
                   <ProFormText.Password
+                    fieldProps={{visibilityToggle:false}}
                     name="ccPassword"
                     label="SVN 密码"
                     placeholder="请输入 SVN 密码"
