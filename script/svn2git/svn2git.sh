@@ -71,13 +71,13 @@ pullCCAndPush(){
   echo "${branchInfo}" >> .git/config
   fi
   if [[ -f ${userFile} ]]; then
-    git svn fetch --authors-file="${userFile}"
+    git svn fetch --authors-file="${userFile}" --authors-prog=/app/parse.sh
   else
     git svn fetch
   fi
-  for t in $(git for-each-ref --format='%(refname:short)' refs/remotes/tags); do git tag ${t/tags\//} $t && git branch -D -r $t; done
-  for b in $(git for-each-ref --format='%(refname:short)' refs/remotes); do git branch $b refs/remotes/$b && git branch -D -r $b; done
-  for p in $(git for-each-ref --format='%(refname:short)' | grep @); do git branch -D $p; done
+  for t in $(git for-each-ref --format='%(refname:short)' refs/remotes/tags); do git tag ${t/tags\//} $t && git branch -D -r $t || true; done
+  for b in $(git for-each-ref --format='%(refname:short)' refs/remotes); do git branch $b refs/remotes/$b && git branch -D -r $b || true; done
+  for p in $(git for-each-ref --format='%(refname:short)' | grep @); do git branch -D $p || true; done
   git branch -d trunk || true
   git branch -d origin/trunk || true
   echo "Pushing code..."
