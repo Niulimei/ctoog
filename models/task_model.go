@@ -132,6 +132,9 @@ type TaskModel struct {
 	// gitee group
 	GiteeGroup JsonNullString `json:"giteeGroup,omitempty" db:"gitee_group"`
 
+	// gitee project
+	GiteeProject JsonNullString `json:"giteeProject,omitempty" db:"gitee_project"`
+
 	// gitee token
 	GiteeToken JsonNullString `json:"giteeToken,omitempty" db:"gitee_token"`
 
@@ -140,6 +143,9 @@ type TaskModel struct {
 
 	// gitlab group
 	GitlabGroup JsonNullString `json:"gitlabGroup,omitempty" db:"gitlab_group"`
+
+	// gitlab project
+	GitlabProject JsonNullString `json:"gitlabProject,omitempty" db:"gitlab_project"`
 
 	// gitlab token
 	GitlabToken JsonNullString `json:"gitlabToken,omitempty" db:"gitlab_token"`

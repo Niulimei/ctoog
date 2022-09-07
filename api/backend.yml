@@ -1138,6 +1138,18 @@ definitions:
         type: string
       gitignore:
         type: string
+      gitlabGroup:
+        type: string
+      gitlabProject:
+        type: string
+      gitlabToken:
+        type: string
+      giteeGroup:
+        type: string
+      giteeToken:
+        type: string
+      giteeProject:
+        type: string
   TaskInfoUpdateModel:
     type: object
     properties:
@@ -1189,6 +1201,18 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/NamePairInfo'
+      gitlabGroup:
+        type: string
+      gitlabProject:
+        type: string
+      gitlabToken:
+        type: string
+      giteeGroup:
+        type: string
+      giteeToken:
+        type: string
+      giteeProject:
+        type: string
   TaskMatchInfo:
     type: object
     properties:
@@ -1252,11 +1276,15 @@ definitions:
         type: string
       gitlabGroup:
         type: string
+      gitlabProject:
+        type: string
       gitlabToken:
         type: string
       giteeGroup:
         type: string
       giteeToken:
+        type: string
+      giteeProject:
         type: string
   TaskRestart:
     type: object

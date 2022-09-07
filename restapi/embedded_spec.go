@@ -1807,7 +1807,25 @@ func init() {
         "gitRepo": {
           "type": "string"
         },
+        "giteeGroup": {
+          "type": "string"
+        },
+        "giteeProject": {
+          "type": "string"
+        },
+        "giteeToken": {
+          "type": "string"
+        },
         "gitignore": {
+          "type": "string"
+        },
+        "gitlabGroup": {
+          "type": "string"
+        },
+        "gitlabProject": {
+          "type": "string"
+        },
+        "gitlabToken": {
           "type": "string"
         },
         "id": {
@@ -1869,7 +1887,25 @@ func init() {
         "gitUser": {
           "type": "string"
         },
+        "giteeGroup": {
+          "type": "string"
+        },
+        "giteeProject": {
+          "type": "string"
+        },
+        "giteeToken": {
+          "type": "string"
+        },
         "gitignore": {
+          "type": "string"
+        },
+        "gitlabGroup": {
+          "type": "string"
+        },
+        "gitlabProject": {
+          "type": "string"
+        },
+        "gitlabToken": {
           "type": "string"
         },
         "includeEmpty": {
@@ -1977,6 +2013,9 @@ func init() {
         "giteeGroup": {
           "type": "string"
         },
+        "giteeProject": {
+          "type": "string"
+        },
         "giteeToken": {
           "type": "string"
         },
@@ -1984,6 +2023,9 @@ func init() {
           "type": "string"
         },
         "gitlabGroup": {
+          "type": "string"
+        },
+        "gitlabProject": {
           "type": "string"
         },
         "gitlabToken": {
@@ -3978,7 +4020,25 @@ func init() {
         "gitRepo": {
           "type": "string"
         },
+        "giteeGroup": {
+          "type": "string"
+        },
+        "giteeProject": {
+          "type": "string"
+        },
+        "giteeToken": {
+          "type": "string"
+        },
         "gitignore": {
+          "type": "string"
+        },
+        "gitlabGroup": {
+          "type": "string"
+        },
+        "gitlabProject": {
+          "type": "string"
+        },
+        "gitlabToken": {
           "type": "string"
         },
         "id": {
@@ -4040,7 +4100,25 @@ func init() {
         "gitUser": {
           "type": "string"
         },
+        "giteeGroup": {
+          "type": "string"
+        },
+        "giteeProject": {
+          "type": "string"
+        },
+        "giteeToken": {
+          "type": "string"
+        },
         "gitignore": {
+          "type": "string"
+        },
+        "gitlabGroup": {
+          "type": "string"
+        },
+        "gitlabProject": {
+          "type": "string"
+        },
+        "gitlabToken": {
           "type": "string"
         },
         "includeEmpty": {
@@ -4148,6 +4226,9 @@ func init() {
         "giteeGroup": {
           "type": "string"
         },
+        "giteeProject": {
+          "type": "string"
+        },
         "giteeToken": {
           "type": "string"
         },
@@ -4155,6 +4236,9 @@ func init() {
           "type": "string"
         },
         "gitlabGroup": {
+          "type": "string"
+        },
+        "gitlabProject": {
           "type": "string"
         },
         "gitlabToken": {

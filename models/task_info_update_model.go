@@ -49,8 +49,26 @@ type TaskInfoUpdateModel struct {
 	// git user
 	GitUser string `json:"gitUser,omitempty"`
 
+	// gitee group
+	GiteeGroup string `json:"giteeGroup,omitempty"`
+
+	// gitee project
+	GiteeProject string `json:"giteeProject,omitempty"`
+
+	// gitee token
+	GiteeToken string `json:"giteeToken,omitempty"`
+
 	// gitignore
 	Gitignore string `json:"gitignore,omitempty"`
+
+	// gitlab group
+	GitlabGroup string `json:"gitlabGroup,omitempty"`
+
+	// gitlab project
+	GitlabProject string `json:"gitlabProject,omitempty"`
+
+	// gitlab token
+	GitlabToken string `json:"gitlabToken,omitempty"`
 
 	// include empty
 	IncludeEmpty bool `json:"includeEmpty,omitempty"`

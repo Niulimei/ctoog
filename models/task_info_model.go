@@ -29,8 +29,26 @@ type TaskInfoModel struct {
 	// git repo
 	GitRepo JsonNullString `json:"gitRepo,omitempty" db:"git_url"`
 
+	// gitee group
+	GiteeGroup JsonNullString `json:"giteeGroup,omitempty" db:"gitee_group"`
+
+	// gitee project
+	GiteeProject JsonNullString `json:"giteeProject,omitempty" db:"gitee_project"`
+
+	// gitee token
+	GiteeToken JsonNullString `json:"giteeToken,omitempty" db:"gitee_token"`
+
 	// gitignore
 	Gitignore JsonNullString `json:"gitignore,omitempty"`
+
+	// gitlab group
+	GitlabGroup JsonNullString `json:"gitlabGroup,omitempty" db:"gitlab_group"`
+
+	// gitlab project
+	GitlabProject JsonNullString `json:"gitlabProject,omitempty" db:"gitlab_project"`
+
+	// gitlab token
+	GitlabToken JsonNullString `json:"gitlabToken,omitempty" db:"gitlab_token"`
 
 	// id
 	ID JsonNullInt64 `json:"id,omitempty"`
