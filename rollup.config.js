@@ -1,6 +1,6 @@
 import pkg from './package.json'
 
-export default {
+export default { ff
   input: 'dist/index.js',
   output: [
     {
