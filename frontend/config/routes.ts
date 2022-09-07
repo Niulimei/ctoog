@@ -46,6 +46,18 @@
         component: './task/Node',
         exact: true,
       },
+      {
+        name: 'Gitlab迁移任务',
+        path: '/task/gitlab',
+        component: './task/gitlab/list',
+        exact: true,
+      },
+      {
+        name: 'log',
+        path: '/task/log',
+        component: './task/gitlab/log',
+        exact: true,
+      }
     ],
   },
   {

@@ -1,0 +1,7 @@
+.terminal {
+  background: black;
+  color: white;
+  white-space: pre-line;
+  height: 100%;
+  max-height: 500px;
+}
