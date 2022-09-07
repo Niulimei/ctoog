@@ -52,12 +52,6 @@
         component: './task/gitlab/list',
         exact: true,
       },
-      {
-        name: 'log',
-        path: '/task/log',
-        component: './task/gitlab/log',
-        exact: true,
-      }
     ],
   },
   {

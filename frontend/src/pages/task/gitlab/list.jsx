@@ -1,10 +1,11 @@
 import ProTable from '@ant-design/pro-table';
 import { Button, Modal } from 'antd';
 import { StepsForm, ProFormText, ProFormTextArea, ProFormSelect, ProFormCheckbox } from '@ant-design/pro-form';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSetState } from 'ahooks';
 import { PlayCircleOutlined, CodeOutlined, DeleteOutlined } from '@ant-design/icons';
 import Log from './log';
+import { gitlab as gitlabService } from '@/services';
 
 
 const getColumns = (actions) => [
@@ -58,29 +59,6 @@ const getColumns = (actions) => [
   }
 ];
 
-const data = [
-  {
-    taskNo: '001',
-    time: '2020-01-01',
-    gitlab_group: 'gitlab_group',
-    gitlab_project: 'gitlab_project',
-    gitee_group: 'gitee_groupooo',
-    gitee_repo: 'aa',
-    status: 'running',
-    id: 0,
-  },
-  {
-    taskNo: '002',
-    time: '2022-01-01',
-    gitlab_group: 'gitlab_group',
-    gitlab_project: 'gitlab_project',
-    gitee_group: 'gitee_groupooo',
-    gitee_repo: 'aa',
-    status: 'running',
-    id: 1,
-  }
-];
-
 const GitlabTaskList = () => {
   const [visible, setVisible] = useState(false);
   const [log, setLog] = useSetState({ id: null, visible: false});
@@ -96,16 +74,24 @@ const GitlabTaskList = () => {
     },
   };
 
+  useEffect(() => {
+    gitlabService.getTasks()
+  }, []);
+
   return (
     <>
       <ProTable
+        loading={false}
         columns={getColumns(actions)}
         request={(params, sorter, filter) => {
           // 表单搜索项会从 params 传入，传递给后端接口。
           console.log(params, sorter, filter);
-          return Promise.resolve({
-            data: data,
-            success: true,
+          return gitlabService.getTasks().then((data) => {
+            console.log(data);
+            return {
+              data: data.list,
+              success: true,
+            };
           });
         }}
         rowKey="id"
