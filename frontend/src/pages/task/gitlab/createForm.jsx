@@ -1,29 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button, Modal } from 'antd';
 import { StepsForm, ProFormText, ProFormTextArea, ProFormSelect, ProFormCheckbox } from '@ant-design/pro-form';
+import { gitlab as gitlabService } from '@/services';
 
 export default ({ visible, setVisible }) => {
-  const [loading, setLoading] = useState(false);
   const [migrationType, setMigrationType] = useState('Group');
   return (
     <Modal
       title="新建Gitlab迁移任务"
       visible={visible}
-      onOk={() => {
-        setLoading(true);
-        setTimeout(() => {
-          setVisible(false);
-          setLoading(false);
-        }, 3000);
-      }}
-      confirmLoading={loading}
       onCancel={() => setVisible(false)}
       footer={null}
       width={650}
+      destroyOnClose
     >
       <StepsForm
         onFinish={(value) => {
-          console.log(value);
+          return gitlabService.createTask(value).then(() => {
+            setVisible(false)
+          })
         }}
       >
         <StepsForm.StepForm

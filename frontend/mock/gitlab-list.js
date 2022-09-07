@@ -19,4 +19,9 @@ export default {
       }))
     }, 2000);
   },
+  'POST /api/gitlab/tasks': (req, res) => {
+    setTimeout(() => {
+      res.json({success: true})
+    }, 2000);
+  }
 }
