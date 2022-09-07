@@ -1974,7 +1974,19 @@ func init() {
         "gitUser": {
           "type": "string"
         },
+        "giteeGroup": {
+          "type": "string"
+        },
+        "giteeToken": {
+          "type": "string"
+        },
         "gitignore": {
+          "type": "string"
+        },
+        "gitlabGroup": {
+          "type": "string"
+        },
+        "gitlabToken": {
           "type": "string"
         },
         "includeEmpty": {
@@ -4133,7 +4145,19 @@ func init() {
         "gitUser": {
           "type": "string"
         },
+        "giteeGroup": {
+          "type": "string"
+        },
+        "giteeToken": {
+          "type": "string"
+        },
         "gitignore": {
+          "type": "string"
+        },
+        "gitlabGroup": {
+          "type": "string"
+        },
+        "gitlabToken": {
           "type": "string"
         },
         "includeEmpty": {

@@ -129,8 +129,20 @@ type TaskModel struct {
 	// git user
 	GitUser JsonNullString `json:"gitUser,omitempty" db:"git_user"`
 
+	// gitee group
+	GiteeGroup JsonNullString `json:"giteeGroup,omitempty" db:"gitee_group"`
+
+	// gitee token
+	GiteeToken JsonNullString `json:"giteeToken,omitempty" db:"gitee_token"`
+
 	// gitignore
 	Gitignore JsonNullString `json:"gitignore,omitempty"`
+
+	// gitlab group
+	GitlabGroup JsonNullString `json:"gitlabGroup,omitempty" db:"gitlab_group"`
+
+	// gitlab token
+	GitlabToken JsonNullString `json:"gitlabToken,omitempty" db:"gitlab_token"`
 
 	// include empty
 	IncludeEmpty JsonNullBool `json:"includeEmpty,omitempty" db:"include_empty"`
