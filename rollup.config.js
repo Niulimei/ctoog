@@ -4,7 +4,7 @@ export default { ff
   input: 'dist/index.js',
   output: [
     {
-      file: pkg['module'],
+      file: spkg['module'],s
       format: 'es'
     }
   ]
