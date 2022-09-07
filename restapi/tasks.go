@@ -232,11 +232,13 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 			taskInfo.Gitignore.Scan("")
 		}
 		r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
-			"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, keep, worker_id, model_type, gitignore)"+
-			" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase', $14)",
+			"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, "+
+			"keep, worker_id, model_type, gitignore,gitlab_group,gitlab_project,gitlab_token,gitee_token,gitee_project,gitee_group)"+
+			" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase', $14,$15,$16,$17,$18,$19,$20)",
 			taskInfo.Pvob, taskInfo.Component, taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL,
 			taskInfo.GitUser, taskInfo.GitPassword, "init", username,
-			taskInfo.IncludeEmpty, taskInfo.GitEmail, taskInfo.Dir, taskInfo.Keep, taskInfo.Gitignore)
+			taskInfo.IncludeEmpty, taskInfo.GitEmail, taskInfo.Dir, taskInfo.Keep, taskInfo.Gitignore, taskInfo.GitlabGroup,
+			taskInfo.GitlabProject, taskInfo.GitlabToken, taskInfo.GiteeToken, taskInfo.GiteeProject, taskInfo.GiteeGroup)
 		taskId, err = r.LastInsertId()
 		if err != nil {
 			return operations.NewCreateTaskInternalServerError().WithPayload(
@@ -252,9 +254,12 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		tx.Commit()
 	} else if modelType == "svn" {
 		r := database.DB.MustExec("INSERT INTO task (cc_user, cc_password, git_url,"+
-			"git_user, git_password, status, last_completed_date_time, creator, worker_id, model_type, include_empty, keep, svn_url, gitignore, branches_info)"+
-			" VALUES ($1, $2, $3, $4, $5, 'pending', '', $6, 0, 'svn', $7, $8, $9, $10, $11)",
-			taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL, taskInfo.GitUser, taskInfo.GitPassword, username, taskInfo.IncludeEmpty, taskInfo.Keep, taskInfo.SvnURL, taskInfo.Gitignore, taskInfo.BranchesInfo)
+			"git_user, git_password, status, last_completed_date_time, creator, worker_id, model_type, include_empty,"+
+			" keep, svn_url, gitignore, branches_info,gitlab_group,gitlab_project,gitlab_token,gitee_token,gitee_project,gitee_group)"+
+			" VALUES ($1, $2, $3, $4, $5, 'pending', '', $6, 0, 'svn', $7, $8, $9, $10, $11,$12, $13,$14,$15,$16,$17)",
+			taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL, taskInfo.GitUser, taskInfo.GitPassword, username,
+			taskInfo.IncludeEmpty, taskInfo.Keep, taskInfo.SvnURL, taskInfo.Gitignore, taskInfo.BranchesInfo,
+			taskInfo.GitlabGroup, taskInfo.GitlabProject, taskInfo.GitlabToken, taskInfo.GiteeToken, taskInfo.GiteeProject, taskInfo.GiteeGroup)
 		taskId, err = r.LastInsertId()
 		if err != nil {
 			return operations.NewCreateTaskInternalServerError().WithPayload(
