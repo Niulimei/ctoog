@@ -327,7 +327,7 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	return operations.NewGetTaskOK().WithPayload(taskDetail)
 }
 
-var taskColumns = []string{"pvob", "component", "git_url", "id", "last_completed_date_time", "status", "include_empty", "git_email", "dir", "keep", "svn_url", "model_type"}
+var taskColumns = []string{"pvob", "component", "git_url", "id", "last_completed_date_time", "status", "include_empty", "git_email", "dir", "keep", "svn_url", "model_type", "gitlab_group", "gitlab_project", "gitlab_token", "gitee_group", "gitee_project", "gitee_token"}
 
 func buildTaskParams(params operations.ListTaskParams) map[string]string {
 	ret := map[string]string{}
