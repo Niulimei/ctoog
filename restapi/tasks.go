@@ -272,6 +272,19 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		//}
 		//tx.Commit()
 		go ProcessSvnUserName(taskInfo.SvnURL.String, taskInfo.CcUser.String, taskInfo.CcPassword.String, taskId)
+	} else if modelType == "gitlab" {
+		r := database.DB.MustExec("INSERT INTO task (cc_user, cc_password, git_url,"+
+			"git_user, git_password, status, last_completed_date_time, creator, worker_id, model_type, include_empty,"+
+			" keep, svn_url, gitignore, branches_info,gitlab_group,gitlab_project,gitlab_token,gitee_token,gitee_project,gitee_group)"+
+			" VALUES ($1, $2, $3, $4, $5, 'pending', '', $6, 0, 'svn', $7, $8, $9, $10, $11,$12, $13,$14,$15,$16,$17)",
+			taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL, taskInfo.GitUser, taskInfo.GitPassword, username,
+			taskInfo.IncludeEmpty, taskInfo.Keep, taskInfo.SvnURL, taskInfo.Gitignore, taskInfo.BranchesInfo,
+			taskInfo.GitlabGroup, taskInfo.GitlabProject, taskInfo.GitlabToken, taskInfo.GiteeToken, taskInfo.GiteeProject, taskInfo.GiteeGroup)
+		taskId, err = r.LastInsertId()
+		if err != nil {
+			return operations.NewCreateTaskInternalServerError().WithPayload(
+				&models.ErrorModel{Message: fmt.Sprintf("Insert into db error: %+v", err), Code: 500})
+		}
 	} else {
 		log.Error("not supporrt type:", taskInfo.ModelType.String)
 		return operations.NewCreateTaskInternalServerError().WithPayload(
