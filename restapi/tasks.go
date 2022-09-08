@@ -233,7 +233,7 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		}
 		r := database.DB.MustExec("INSERT INTO task (pvob, component, cc_user, cc_password, git_url,"+
 			"git_user, git_password, status, last_completed_date_time, creator, include_empty, git_email, dir, "+
-			"keep, worker_id, model_type, gitignore,gitlab_group,gitlab_project,gitlab_token,gitee_token,gitee_project,gitee_group)"+
+			"keep, worker_id, model_type, gitignore,gitlab_group, gitlab_project, gitlab_token, gitee_token, gitee_project, gitee_group)"+
 			" VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '', $9, $10, $11, $12, $13, 0, 'clearcase', $14,$15,$16,$17,$18,$19,$20)",
 			taskInfo.Pvob, taskInfo.Component, taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL,
 			taskInfo.GitUser, taskInfo.GitPassword, "init", username,
@@ -286,7 +286,8 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 	taskID := params.ID
 	task := &models.TaskModel{}
 	log.Debug(database.DB.Get(task, "SELECT status, cc_password,"+
-		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep, model_type, svn_url, gitignore, branches_info, worker_id"+
+		" cc_user, component, git_password, git_url, git_user, pvob, include_empty, git_email, dir, keep, model_type, svn_url, gitignore, branches_info, worker_id,"+
+		" gitlab_group, gitlab_project, gitlab_token, gitee_token, gitee_project, gitee_group"+
 		" FROM task WHERE id = $1", taskID))
 	if task.ModelType.String == "clearcase" || task.ModelType.String == "" {
 		var matchInfo []*models.TaskMatchInfo
@@ -296,6 +297,9 @@ func GetTaskHandler(params operations.GetTaskParams) middleware.Responder {
 		var namePairInfo []*models.NamePairInfo
 		database.DB.Select(&namePairInfo, "SELECT git_username, git_email, svn_username FROM svn_name_pair WHERE task_id = ?", taskID)
 		task.NamePair = namePairInfo
+	} else if task.ModelType.String == "gitlab" {
+		// TODO 增加gitlab处理逻辑
+
 	} else {
 		log.Error("not supporrt type:", task.ModelType.String)
 		return operations.NewCreateTaskInternalServerError().WithPayload(
