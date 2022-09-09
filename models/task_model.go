@@ -150,6 +150,12 @@ type TaskModel struct {
 	// gitlab token
 	GitlabToken JsonNullString `json:"gitlabToken,omitempty" db:"gitlab_token"`
 
+	// gitlab source
+	SourceURL JsonNullString `json:"sourceURL,omitempty" db:"source_url"`
+
+	// gitlab target
+	TargetURL JsonNullString `json:"targetURL,omitempty" db:"target_url"`
+
 	// include empty
 	IncludeEmpty JsonNullBool `json:"includeEmpty,omitempty" db:"include_empty"`
 
