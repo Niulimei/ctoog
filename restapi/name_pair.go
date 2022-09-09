@@ -36,7 +36,7 @@ func ProcessSvnUserName(svnUrl, svnUser, svnPassword string, taskId int64) {
 
 	}
 	if len(checkedNames) > 0 {
-		SvnUserName[svnUrl + svnUser + svnPassword] = checkedNames
+		SvnUserName[svnUrl+svnUser+svnPassword] = checkedNames
 		if taskId != 0 {
 			database.DB.Exec("UPDATE task SET status = 'init' WHERE id = ? and status = 'pending'", taskId)
 		}
