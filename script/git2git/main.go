@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"moul.io/http2curl"
 	"net/http"
 	"os"
 	"time"
@@ -51,6 +52,8 @@ func (gls *GitlabService) Get(url, queryStrings string) *http.Response {
 		url = url + "&" + queryStrings
 	}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
+	command, _ := http2curl.GetCurlCommand(req)
+	fmt.Printf("gitlab api\n%s\n", command)
 	if err != nil {
 		fmt.Println("create gitlab service request failed:", err)
 		return nil
@@ -105,6 +108,7 @@ func (gls *GitlabService) TranslateGroupByName() {
 			gls.GroupID = info.ID
 			GTS.CreateGroupWithPath(GLS.GroupPath, info.Name)
 			gls.TranslateMemberPermissionByGroupOrProject("group")
+			return
 		}
 	}
 	panic("no group found")
@@ -140,11 +144,9 @@ func (gls *GitlabService) TranslateProjectsByGroup() {
 	}
 	for _, info := range ret {
 		if gls.ProjectPath == "" || (gls.ProjectPath != "" && info.Path == gls.ProjectPath) {
-			if gls.ProjectPath != "" {
-				gls.ProjectID = info.ID
-				GTS.CreateProjectWithName(info.Name, info.Path)
-				GLS.TranslateMemberPermissionByGroupOrProject("project")
-			}
+			gls.ProjectID = info.ID
+			GTS.CreateProjectWithName(info.Name, info.Path)
+			GLS.TranslateMemberPermissionByGroupOrProject("project")
 		}
 	}
 }
@@ -227,6 +229,8 @@ func (gts *GiteeService) PostOrGet(url, method string, body io.Reader) *http.Res
 	}
 	cookie := http.Cookie{Name: "PRE-GW-SESSION", Value: gts.Token, Path: "/"}
 	req.AddCookie(&cookie)
+	command, _ := http2curl.GetCurlCommand(req)
+	fmt.Printf("gitee api invoke\n%s\n", command)
 	r, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("connect gitee failed", err)
@@ -415,8 +419,8 @@ func (gts *GiteeService) CreateGroupOrProjectMember(username, targetType string,
 	if userID, ok := UserMap[username]; !ok {
 		panic("no user found" + username)
 	} else {
-		if gts.ProjectID == 0 || gts.GroupID == 0 {
-			panic(fmt.Sprintf("no valid project or group: %d %d", gts.ProjectID, gts.GroupID))
+		if (gts.GroupID == 0 && targetType == "group") || (gts.ProjectID == 0 && targetType == "project") {
+			panic(fmt.Sprintf("no valid group or project: %d %d %s", gts.GroupID, gts.ProjectID, targetType))
 		}
 		codePermission := GiteeVisitor
 		if accessLevel == GitlabOwner || accessLevel == GitlabMaintainer {
@@ -435,7 +439,7 @@ func (gts *GiteeService) CreateGroupOrProjectMember(username, targetType string,
 			postBodyByte, _ := json.Marshal(postBody)
 			url := fmt.Sprintf("/programs/%s/projects/%s/members", gts.GroupPath, gts.ProjectPath)
 			resp := gts.PostOrGet(url, http.MethodPost, bytes.NewBuffer(postBodyByte))
-			if resp == nil || resp.StatusCode != http.StatusCreated {
+			if resp == nil || (resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK) {
 				panic("create project member failed " + gts.ProjectPath + " " + username)
 			}
 		} else {
