@@ -365,12 +365,15 @@ func WorkerTaskHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Json marshal fail"))
 		return
 	}
-	gitUrl := utils.ParseGitURL(workerTaskModel.GitUser, workerTaskModel.GitPassword, workerTaskModel.GitURL)
 	switch workerTaskModel.ModelType {
 	case "clearcase":
+		gitUrl := utils.ParseGitURL(workerTaskModel.GitUser, workerTaskModel.GitPassword, workerTaskModel.GitURL)
 		cc2Git(workerTaskModel, gitUrl)
 	case "svn":
+		gitUrl := utils.ParseGitURL(workerTaskModel.GitUser, workerTaskModel.GitPassword, workerTaskModel.GitURL)
 		svn2Git(workerTaskModel, gitUrl)
+	case "gitlab":
+		git2Git(workerTaskModel)
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Not Support"))
@@ -476,6 +479,21 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 		<-endSignal
 		os.RemoveAll(userFile)
 	}()
+	return http.StatusOK
+}
+
+func git2Git(workerTaskModel Task) int {
+	var endSignal = make(chan struct{})
+	cwd, _ := os.Getwd()
+	var cmds []*exec.Cmd
+	tmpCmdOutFile := fmt.Sprintf("%s/tmpCmdOut/%d_%d.log", cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)
+	exec.Command("/bin/bash", "-c", fmt.Sprintf("mkdir -p %s/tmpCmdOut;touch %s/tmpCmdOut/%d_%d.log", cwd, cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)).Output()
+	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/git2git/git2git_cli -gitlab_group_path "%s" -gitlab_project_path "%s" -gitee_group_path "%s" &> %s`,
+		cwd, workerTaskModel.GitlabGroup, workerTaskModel.GitlabProject, workerTaskModel.GiteeGroup, tmpCmdOutFile)
+	log.Infoln(cmdStr)
+	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	cmds = append(cmds, cmd)
+	go startTaskAndInfoServer(&workerTaskModel, ServerFlag, cmds, tmpCmdOutFile, endSignal)
 	return http.StatusOK
 }
 

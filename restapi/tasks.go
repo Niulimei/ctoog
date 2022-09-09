@@ -103,24 +103,28 @@ func startTask(taskId int64) {
 		}
 
 		type InnerTask struct {
-			TaskId       int64
-			TaskLogId    int64
-			CcPassword   string
-			CcUser       string
-			Component    string
-			GitPassword  string
-			GitURL       string
-			GitUser      string
-			GitEmail     string
-			Pvob         string
-			IncludeEmpty bool
-			Matches      []InnerMatchInfo
-			Keep         string
-			SvnUrl       string
-			ModelType    string
-			NamePair     []*models.NamePairInfo
-			Gitignore    string
-			BranchesInfo string
+			TaskId        int64
+			TaskLogId     int64
+			CcPassword    string
+			CcUser        string
+			Component     string
+			GitPassword   string
+			GitURL        string
+			GitUser       string
+			GitEmail      string
+			Pvob          string
+			IncludeEmpty  bool
+			Matches       []InnerMatchInfo
+			Keep          string
+			SvnUrl        string
+			ModelType     string
+			NamePair      []*models.NamePairInfo
+			Gitignore     string
+			BranchesInfo  string
+			GitlabGroup   string
+			GitlabProject string
+			GitlabToken   string
+			GiteeGroup    string
 		}
 		gitUser := task.GitUser.String
 		if gitUser == "" {
@@ -135,22 +139,26 @@ func startTask(taskId int64) {
 			gitPassword = os.Getenv("GIT_PASSWORD")
 		}
 		workerTaskModel := InnerTask{
-			TaskId:       taskId,
-			TaskLogId:    taskLogId,
-			CcPassword:   task.CcPassword.String,
-			CcUser:       task.CcUser.String,
-			Component:    component,
-			GitPassword:  gitPassword,
-			GitURL:       task.GitURL.String,
-			GitUser:      gitUser,
-			GitEmail:     gitEmail,
-			Pvob:         task.Pvob.String,
-			IncludeEmpty: task.IncludeEmpty.Bool,
-			Keep:         task.Keep.String,
-			SvnUrl:       task.SvnURL.String,
-			ModelType:    task.ModelType.String,
-			Gitignore:    task.Gitignore.String,
-			BranchesInfo: task.BranchesInfo.String,
+			TaskId:        taskId,
+			TaskLogId:     taskLogId,
+			CcPassword:    task.CcPassword.String,
+			CcUser:        task.CcUser.String,
+			Component:     component,
+			GitPassword:   gitPassword,
+			GitURL:        task.GitURL.String,
+			GitUser:       gitUser,
+			GitEmail:      gitEmail,
+			Pvob:          task.Pvob.String,
+			IncludeEmpty:  task.IncludeEmpty.Bool,
+			Keep:          task.Keep.String,
+			SvnUrl:        task.SvnURL.String,
+			ModelType:     task.ModelType.String,
+			Gitignore:     task.Gitignore.String,
+			BranchesInfo:  task.BranchesInfo.String,
+			GitlabGroup:   task.GitlabGroup.String,
+			GitlabProject: task.GitlabProject.String,
+			GitlabToken: task.GitlabToken.String,
+			GiteeGroup: task.GiteeGroup.String,
 		}
 		for _, match := range matchInfo {
 			workerTaskModel.Matches =

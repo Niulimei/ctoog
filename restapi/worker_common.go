@@ -35,24 +35,27 @@ type NamePairInfo struct {
 }
 
 type Task struct {
-	TaskId       int64
-	TaskLogId    int64
-	CcPassword   string
-	CcUser       string
-	Component    string
-	GitPassword  string
-	GitURL       string
-	GitUser      string
-	GitEmail     string
-	Pvob         string
-	IncludeEmpty bool
-	Matches      []MatchInfo
-	Keep         string
-	ModelType    string          `json:"modelType,omitempty"`
-	NamePair     []*NamePairInfo `json:"namePair"`
-	SvnURL       string          `json:"svnUrl,omitempty"`
-	Gitignore    string          `json:"gitignore"`
-	BranchesInfo string          `json:"BranchesInfo"`
+	TaskId        int64
+	TaskLogId     int64
+	CcPassword    string
+	CcUser        string
+	Component     string
+	GitPassword   string
+	GitURL        string
+	GitUser       string
+	GitEmail      string
+	Pvob          string
+	IncludeEmpty  bool
+	Matches       []MatchInfo
+	Keep          string
+	ModelType     string          `json:"modelType,omitempty"`
+	NamePair      []*NamePairInfo `json:"namePair"`
+	SvnURL        string          `json:"svnUrl,omitempty"`
+	Gitignore     string          `json:"gitignore"`
+	BranchesInfo  string          `json:"BranchesInfo"`
+	GitlabGroup   string
+	GitlabProject string
+	GiteeGroup    string
 }
 
 type WorkerTaskDelInfo struct {

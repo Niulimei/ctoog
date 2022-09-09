@@ -73,6 +73,24 @@ type TaskModel struct {
 
 	// branches_info
 	BranchesInfo models.JsonNullString `json:"branches_info,omitempty" db:"branches_info"`
+
+	// gitlab group
+	GitlabGroup models.JsonNullString `json:"gitlab_group" db:"gitlab_group"`
+
+	// gitlab project
+	GitlabProject models.JsonNullString `json:"gitlab_project" db:"gitlab_project"`
+
+	// gitlab token
+	GitlabToken models.JsonNullString `json:"gitlab_token" db:"gitlab_token"`
+
+	// gitee group
+	GiteeGroup models.JsonNullString `json:"gitee_group" db:"gitee_group"`
+
+	// gitee project
+	GiteeProject models.JsonNullString `json:"gitee_project" db:"gitee_project"`
+
+	// gitee token
+	GiteeToken models.JsonNullString `json:"gitee_token" db:"gitee_token"`
 }
 
 type WorkerModel struct {
