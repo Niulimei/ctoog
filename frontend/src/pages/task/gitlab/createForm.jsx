@@ -16,7 +16,11 @@ export default ({ visible, setVisible }) => {
     >
       <StepsForm
         onFinish={(value) => {
-          return gitlabService.createTask(value).then(() => {
+          const params = {
+            ...value,
+            modelType: "gitlab"
+          };
+          return gitlabService.createTask(params).then(() => {
             setVisible(false)
           })
         }}
@@ -33,7 +37,7 @@ export default ({ visible, setVisible }) => {
           }}
         >
           <ProFormText
-            name="url"
+            name="sourceURL"
             width="md"
             label="原平台地址"
             tooltip="最长为 24 位，用于标定的唯一 id"
@@ -41,7 +45,7 @@ export default ({ visible, setVisible }) => {
             rules={[{ required: true }]}
           />
           <ProFormText
-            name="token"
+            name="gitlabToken"
             width="md"
             label="原平台令牌"
             tooltip="最长为 24 位，用于标定的唯一 id"
@@ -76,7 +80,7 @@ export default ({ visible, setVisible }) => {
             initialValue={"Group"}
           />
           <ProFormText
-            name="path"
+            name={`gitlab${migrationType}`}
             label={migrationType + ' path'}
             placeholder="请输入path"
             rules={[{ required: true }]}
@@ -100,16 +104,16 @@ export default ({ visible, setVisible }) => {
           }}
         >
           <ProFormText
-            name="target_url"
+            name="targetURL"
             label="目标平台地址"
             rules={[{ required: true }]}
           />
           <ProFormText
-            name="target_token"
+            name="giteeToken"
             label="目标平台令牌"
           />
           <ProFormText
-            name="target_group"
+            name={`gitee${migrationType}`}
             label="放置在目标组"
             tooltip="为空则放在企业根目录下"
             rules={[{ required: true }]}

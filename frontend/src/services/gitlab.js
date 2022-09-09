@@ -7,7 +7,7 @@ export const getTasks = (params) => {
   });
 };
 export const createTask = (data) => {
-  return request.post('/gitlab/tasks', {
+  return request.post('/tasks', {
     data,
   });
 };
