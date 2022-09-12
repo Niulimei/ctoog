@@ -284,7 +284,7 @@ func CreateTaskHandler(params operations.CreateTaskParams) middleware.Responder 
 		r := database.DB.MustExec("INSERT INTO task (cc_user, cc_password, git_url,"+
 			"git_user, git_password, status, last_completed_date_time, creator, worker_id, model_type, include_empty,"+
 			" keep, svn_url, gitignore, branches_info,gitlab_group,gitlab_project,gitlab_token,gitee_token,gitee_project,gitee_group,source_url,target_url)"+
-			" VALUES ($1, $2, $3, $4, $5, 'pending', '', $6, 0, 'gitlab', $7, $8, $9, $10, $11,$12, $13,$14,$15,$16,$17,$18,$19)",
+			" VALUES ($1, $2, $3, $4, $5, 'init', '', $6, 0, 'gitlab', $7, $8, $9, $10, $11,$12, $13,$14,$15,$16,$17,$18,$19)",
 			taskInfo.CcUser, taskInfo.CcPassword, taskInfo.GitURL, taskInfo.GitUser, taskInfo.GitPassword, username,
 			taskInfo.IncludeEmpty, taskInfo.Keep, taskInfo.SvnURL, taskInfo.Gitignore, taskInfo.BranchesInfo,
 			taskInfo.GitlabGroup, taskInfo.GitlabProject, taskInfo.GitlabToken, taskInfo.GiteeToken, taskInfo.GiteeProject, taskInfo.GiteeGroup, taskInfo.SourceURL, taskInfo.TargetURL)
