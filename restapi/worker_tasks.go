@@ -264,6 +264,10 @@ func checkInfo(w http.ResponseWriter, info utils.CheckTaskInfo) {
 	case "svn":
 		checkInfoCmdStr = fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/checkInfo.sh "%s" "%s" "%s" "%s"`,
 			cwd, info.CCUser, info.CCPassword, info.SvnURL, info.GitRepoURL)
+	case "gitlab":
+		w.WriteHeader(200)
+		w.Write([]byte("success"))
+		return
 	default:
 		w.WriteHeader(500)
 		w.Write([]byte("Not Support"))
