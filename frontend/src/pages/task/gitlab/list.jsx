@@ -91,11 +91,11 @@ const GitlabTaskList = () => {
           console.log(params, sorter, filter);
           setTrue();
           return gitlabService.getTasks({limit: 20, offset: 0, modelType: 'gitlab'}).then((data) => {
-            console.log(data);
             setFalse();
               return {
-                data: data.list,
+                data: data.taskInfo,
                 success: true,
+                total: data.total,
               };
           });
         }}
