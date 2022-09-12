@@ -569,7 +569,7 @@ func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middlew
 	database.DB.Select(&logList, "SELECT duration, end_time, log_id, start_time, status FROM task_log WHERE task_id = $1 ORDER BY log_id DESC", params.LogID)
 	out := &models.TaskCommandOut{}
 	if len(logList) == 0 {
-		return operations.NewGetTaskCommandOutOK().WithPayload(out))
+		return operations.NewGetTaskCommandOutOK().WithPayload(out)
 	}
 	row := database.DB.QueryRow("select log_id, content from task_command_out where log_id = ?", logList[0].LogID)
 	err := row.Scan(&out.LogID, &out.Content)
