@@ -116,7 +116,7 @@ export default ({ visible, setVisible }) => {
             name={`gitee${migrationType}`}
             label="放置在目标组"
             tooltip="为空则放在企业根目录下"
-            rules={[{ required: true }]}
+            rules={[{ required: false }]}
           />
         </StepsForm.StepForm>
       </StepsForm>
