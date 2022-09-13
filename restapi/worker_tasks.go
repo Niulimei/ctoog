@@ -306,6 +306,7 @@ func delCache(w http.ResponseWriter, workerTaskModel WorkerTaskDelInfo) {
 	case "svn":
 		checkCacheCmdStr = fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/checkCache.sh %d`, cwd, workerTaskModel.TaskId)
 		cleanCacheCmdStr = fmt.Sprintf(`/usr/bin/bash %s/script/svn2git/cleanCache.sh %d`, cwd, workerTaskModel.TaskId)
+	case "gitlab":
 	default:
 		w.WriteHeader(500)
 		w.Write([]byte("Not Support"))
