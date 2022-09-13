@@ -1,47 +1,48 @@
 import ProTable from '@ant-design/pro-table';
-import { Button, Modal, Popconfirm } from 'antd';
+import { Button, message, Modal, Popconfirm } from 'antd';
 import { StepsForm, ProFormText, ProFormTextArea, ProFormSelect, ProFormCheckbox } from '@ant-design/pro-form';
 import { useEffect, useRef, useState } from 'react';
 import { useBoolean, useSetState } from 'ahooks';
 import { PlayCircleOutlined, CodeOutlined, DeleteOutlined } from '@ant-design/icons';
 import Log from './log';
 import CreateForm from './createForm';
-import { gitlab as gitlabService } from '@/services';
+import { task as taskService, gitlab as gitlabService } from '@/services';
 
 
 const getColumns = (actions) => [
   {
     title: '任务编号',
-    dataIndex: 'taskNo',
+    dataIndex: 'id',
     hideInSearch: true,
   },
   {
     title: 'Gitlab Group',
-    dataIndex: 'gitlab_group',
+    dataIndex: 'gitlabGroup',
     hideInSearch: true,
   },
   {
     title: 'Gitlab Project',
-    dataIndex: 'gitlab_project',
+    dataIndex: 'gitlabProject',
     hideInSearch: true,
   },
   {
     title: 'Gitee Group',
-    dataIndex: 'gitee_group',
+    dataIndex: 'giteeGroup',
     hideInSearch: true,
   },
   {
     title: 'Gitee Repo',
-    dataIndex: 'gitee_repo',
+    dataIndex: 'gitRepo',
     hideInSearch: true,
   },
   {
     title: '当前状态',
     dataIndex: 'status',
+    valueEnum: {pending: 'pending', success: 'success', failed: 'failed', init: 'init'},
   },
   {
     title: '最后一次完成时间',
-    dataIndex: 'time',
+    dataIndex: 'lastCompleteDateTime',
     hideInSearch: true,
   },
   {
@@ -51,11 +52,22 @@ const getColumns = (actions) => [
     render(item) {
       return (
         <div style={{'display': 'flex', gap: '6px'}}>
-          <PlayCircleOutlined onClick={() => { console.log(item) }} />
+          <PlayCircleOutlined onClick={() => {
+            const { status, id } = item.props.record;
+            if (status === 'pending') {
+              message.error('任务pending中');
+              return;
+            }
+            taskService.startTask(id);
+          }} />
           <CodeOutlined onClick={() => actions.checkLog(item.props.record.id)} />
           <Popconfirm
             title="删除吗"
-            onConfirm={() => console.log('delete')}
+            onConfirm={() => {
+              taskService.deleteTask(item.props.record.id).then(() => {
+                message.success('删除成功');
+              });
+            }}
             okText="yes"
             cancelText="no"
           >
@@ -86,11 +98,17 @@ const GitlabTaskList = () => {
       <ProTable
         loading={loading}
         columns={getColumns(actions)}
-        request={(params, sorter, filter) => {
+        request={({ current, pageSize, status, ...params }, sorter, filter) => {
           // 表单搜索项会从 params 传入，传递给后端接口。
           console.log(params, sorter, filter);
           setTrue();
-          return gitlabService.getTasks({limit: 20, offset: 0, modelType: 'gitlab'}).then((data) => {
+          const offset = (current - 1) * pageSize;
+          return gitlabService.getTasks({
+            limit: pageSize,
+            offset,
+            status,
+            modelType: 'gitlab'
+          }).then((data) => {
             setFalse();
               return {
                 data: data.taskInfo,
