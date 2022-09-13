@@ -3,13 +3,13 @@ import { Button, message, Modal, Popconfirm } from 'antd';
 import { StepsForm, ProFormText, ProFormTextArea, ProFormSelect, ProFormCheckbox } from '@ant-design/pro-form';
 import { useEffect, useRef, useState } from 'react';
 import { useBoolean, useSetState } from 'ahooks';
-import { PlayCircleOutlined, CodeOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlayCircleOutlined, CodeOutlined, DeleteOutlined, LoadingOutlined } from '@ant-design/icons';
 import Log from './log';
 import CreateForm from './createForm';
 import { task as taskService, gitlab as gitlabService } from '@/services';
 
 
-const getColumns = (actions) => [
+const getColumns = (actions, allLoad) => [
   {
     title: '任务编号',
     dataIndex: 'id',
@@ -49,29 +49,39 @@ const getColumns = (actions) => [
     title: '操作',
     valueType: 'action',
     hideInSearch: true,
-    render(item) {
+    render(item, record, _, action) {
       return (
         <div style={{'display': 'flex', gap: '6px'}}>
-          <PlayCircleOutlined onClick={() => {
-            const { status, id } = item.props.record;
-            if (status === 'pending') {
-              message.error('任务pending中');
-              return;
-            }
-            taskService.startTask(id);
-          }} />
+          { 
+            allLoad.startLoading.id === record.id && allLoad.startLoading.status ? <LoadingOutlined /> : <PlayCircleOutlined onClick={() => {
+              const { status, id } = item.props.record;
+              if (status === 'pending') {
+                message.error('任务pending中');
+                return;
+              }
+              actions.startStatus(record.id, true);
+              taskService.startTask(id).then(() => {
+                actions.startStatus(record.id, false);
+              });;
+            }} />
+          }
           <CodeOutlined onClick={() => actions.checkLog(item.props.record.id)} />
           <Popconfirm
             title="删除吗"
             onConfirm={() => {
+              actions.delLoad(record.id, true);
               taskService.deleteTask(item.props.record.id).then(() => {
                 message.success('删除成功');
+                actions.delLoad(record.id, false);
+                action?.reload();
               });
             }}
             okText="yes"
             cancelText="no"
           >
-            <DeleteOutlined />
+            {
+              allLoad.delLoading.id === record.id && allLoad.delLoading.status ? <LoadingOutlined /> : <DeleteOutlined />
+            }
           </Popconfirm>
         </div>
       );
@@ -84,6 +94,9 @@ const GitlabTaskList = () => {
   const [loading, { toggle, setTrue, setFalse }] = useBoolean(false);
   const [log, setLog] = useSetState({ id: null, visible: false});
   const formRef = useRef(null);
+  const [delLoading, setDelLoading] = useSetState({ id: null, status: false });
+  const [startLoading, setStartLoading] = useSetState({ id: null, status: false });
+  
   const actions = {
     checkLog(id) {
       setLog({
@@ -91,13 +104,29 @@ const GitlabTaskList = () => {
         visible: true,
       });
     },
+    delLoad(id, status) {
+      setDelLoading({
+        id,
+        status,
+      })
+    },
+    startStatus(id, status) {
+      setStartLoading({
+        id,
+        status,
+      })
+    },
+  };
+  const allLoad = {
+    delLoading,
+    startLoading,
   };
 
   return (
     <>
       <ProTable
         loading={loading}
-        columns={getColumns(actions)}
+        columns={getColumns(actions, allLoad)}
         request={({ current, pageSize, status, ...params }, sorter, filter) => {
           // 表单搜索项会从 params 传入，传递给后端接口。
           console.log(params, sorter, filter);
