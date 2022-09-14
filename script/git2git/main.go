@@ -538,7 +538,7 @@ func main() {
 	lenGitlabProjectPaths := len(gitlabProjectPaths)
 	if lenGitlabProjectPaths > 1 {
 		gitlabGroupPath = gitlabGroupPath + "/" + strings.Join(gitlabProjectPaths[:lenGitlabProjectPaths-1], "/")
-		gitlabProjectPath = gitlabProjectPaths[lenGitlabProjectPaths]
+		gitlabProjectPath = gitlabProjectPaths[lenGitlabProjectPaths-1]
 	}
 
 	GLS = GitlabService{
