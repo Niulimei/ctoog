@@ -370,7 +370,7 @@ func WorkerTaskHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Json marshal fail"))
 		return
 	}
-	log.Info("input body:%+v", workerTaskModel)
+	log.Info("input body:%+v", fmt.Sprintf("%+v\n", workerTaskModel))
 	switch workerTaskModel.ModelType {
 	case "clearcase":
 		gitUrl := utils.ParseGitURL(workerTaskModel.GitUser, workerTaskModel.GitPassword, workerTaskModel.GitURL)

@@ -161,7 +161,7 @@ func startTask(taskId int64) {
 			GitlabGroup:   task.GitlabGroup.String,
 			GitlabProject: task.GitlabProject.String,
 			GitlabToken:   task.GitlabToken.String,
-			GitlabHost:    task.TargetURL.String,
+			GitlabHost:    task.SourceURL.String,
 			GiteeGroup:    task.GiteeGroup.String,
 			GiteeToken:    task.GiteeToken.String,
 			GiteeHost:     task.TargetURL.String,
