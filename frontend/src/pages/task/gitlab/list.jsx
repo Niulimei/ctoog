@@ -8,94 +8,12 @@ import Log from './log';
 import CreateForm from './createForm';
 import { task as taskService, gitlab as gitlabService } from '@/services';
 
-
-const getColumns = (actions, allLoad) => [
-  {
-    title: '任务编号',
-    dataIndex: 'id',
-    hideInSearch: true,
-  },
-  {
-    title: 'Gitlab Group',
-    dataIndex: 'gitlabGroup',
-    hideInSearch: true,
-  },
-  {
-    title: 'Gitlab Project',
-    dataIndex: 'gitlabProject',
-    hideInSearch: true,
-  },
-  {
-    title: 'Gitee Group',
-    dataIndex: 'giteeGroup',
-    hideInSearch: true,
-  },
-  {
-    title: 'Gitee Repo',
-    dataIndex: 'gitRepo',
-    hideInSearch: true,
-  },
-  {
-    title: '当前状态',
-    dataIndex: 'status',
-    valueEnum: {pending: 'pending', success: 'success', failed: 'failed', init: 'init'},
-  },
-  {
-    title: '最后一次完成时间',
-    dataIndex: 'lastCompleteDateTime',
-    hideInSearch: true,
-  },
-  {
-    title: '操作',
-    valueType: 'action',
-    hideInSearch: true,
-    render(item, record, _, action) {
-      return (
-        <div style={{'display': 'flex', gap: '6px'}}>
-          { 
-            allLoad.startLoading.id === record.id && allLoad.startLoading.status ? <LoadingOutlined /> : <PlayCircleOutlined onClick={() => {
-              const { status, id } = item.props.record;
-              if (status === 'pending') {
-                message.error('任务pending中');
-                return;
-              }
-              actions.startStatus(record.id, true);
-              taskService.startTask(id).then(() => {
-                actions.startStatus(record.id, false);
-              });;
-            }} />
-          }
-          <CodeOutlined onClick={() => actions.checkLog(item.props.record.id)} />
-          <Popconfirm
-            title="删除吗"
-            onConfirm={() => {
-              actions.delLoad(record.id, true);
-              taskService.deleteTask(item.props.record.id).then(() => {
-                message.success('删除成功');
-                actions.delLoad(record.id, false);
-                action?.reload();
-              });
-            }}
-            okText="yes"
-            cancelText="no"
-          >
-            {
-              allLoad.delLoading.id === record.id && allLoad.delLoading.status ? <LoadingOutlined /> : <DeleteOutlined />
-            }
-          </Popconfirm>
-        </div>
-      );
-    }
-  }
-];
-
 const GitlabTaskList = () => {
   const [visible, setVisible] = useState(false);
   const [loading, { toggle, setTrue, setFalse }] = useBoolean(false);
   const [log, setLog] = useSetState({ id: null, visible: false});
   const formRef = useRef(null);
-  const [delLoading, setDelLoading] = useSetState({ id: null, status: false });
-  const [startLoading, setStartLoading] = useSetState({ id: null, status: false });
+  const [loadState, setloadStatus] = useSetState({ id: null });
   
   const actions = {
     checkLog(id) {
@@ -104,29 +22,98 @@ const GitlabTaskList = () => {
         visible: true,
       });
     },
-    delLoad(id, status) {
-      setDelLoading({
+    loadStatus(id, type, status) {
+      setloadStatus({
         id,
-        status,
-      })
-    },
-    startStatus(id, status) {
-      setStartLoading({
-        id,
-        status,
+        [type]: status,
       })
     },
   };
-  const allLoad = {
-    delLoading,
-    startLoading,
-  };
+  const getColumns = () => [
+    {
+      title: '任务编号',
+      dataIndex: 'id',
+      hideInSearch: true,
+    },
+    {
+      title: 'Gitlab Group',
+      dataIndex: 'gitlabGroup',
+      hideInSearch: true,
+    },
+    {
+      title: 'Gitlab Project',
+      dataIndex: 'gitlabProject',
+      hideInSearch: true,
+    },
+    {
+      title: 'Gitee Group',
+      dataIndex: 'giteeGroup',
+      hideInSearch: true,
+    },
+    {
+      title: 'Gitee Repo',
+      dataIndex: 'gitRepo',
+      hideInSearch: true,
+    },
+    {
+      title: '当前状态',
+      dataIndex: 'status',
+      valueEnum: { pending: 'pending', success: 'success', failed: 'failed', init: 'init' },
+    },
+    {
+      title: '最后一次完成时间',
+      dataIndex: 'lastCompleteDateTime',
+      hideInSearch: true,
+    },
+    {
+      title: '操作',
+      valueType: 'action',
+      hideInSearch: true,
+      render(item, record, _, action) {
+        return (
+          <div style={{ 'display': 'flex', gap: '6px' }}>
+            {
+              loadState.id === record.id && loadState.start ? <LoadingOutlined /> : <PlayCircleOutlined onClick={() => {
+                const { status, id } = item.props.record;
+                if (status === 'pending') {
+                  message.error('任务pending中');
+                  return;
+                }
+                actions.loadStatus(record.id, 'start', true);
+                taskService.startTask(id).then(() => {
+                  actions.loadStatus(record.id, 'start', false);
+                });;
+              }} />
+            }
+            <CodeOutlined onClick={() => actions.checkLog(item.props.record.id)} />
+            <Popconfirm
+              title="删除吗"
+              onConfirm={() => {
+                actions.loadStatus(record.id, 'delete', true);
+                taskService.deleteTask(item.props.record.id).then(() => {
+                  message.success('删除成功');
+                  actions.loadStatus(record.id, 'delete', false);
+                  action?.reload();
+                });
+              }}
+              okText="yes"
+              cancelText="no"
+            >
+              {
+                loadState.id === record.id && loadState.delete ? <LoadingOutlined /> : <DeleteOutlined />
+              }
+            </Popconfirm>
+          </div>
+        );
+      }
+    }
+  ];
 
   return (
     <>
       <ProTable
         loading={loading}
-        columns={getColumns(actions, allLoad)}
+        columns={getColumns()}
         request={({ current, pageSize, status, ...params }, sorter, filter) => {
           // 表单搜索项会从 params 传入，传递给后端接口。
           console.log(params, sorter, filter);
