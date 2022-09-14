@@ -55,7 +55,11 @@ type Task struct {
 	BranchesInfo  string          `json:"BranchesInfo"`
 	GitlabGroup   string
 	GitlabProject string
+	GitlabToken   string
+	GitlabHost    string
+	GiteeHost     string
 	GiteeGroup    string
+	GiteeToken    string
 }
 
 type WorkerTaskDelInfo struct {

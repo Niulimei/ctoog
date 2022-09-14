@@ -494,8 +494,8 @@ func git2Git(workerTaskModel Task) int {
 	var cmds []*exec.Cmd
 	tmpCmdOutFile := fmt.Sprintf("%s/tmpCmdOut/%d_%d.log", cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)
 	exec.Command("/bin/bash", "-c", fmt.Sprintf("mkdir -p %s/tmpCmdOut;touch %s/tmpCmdOut/%d_%d.log", cwd, cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)).Output()
-	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;%s/script/git2git/git2git_cli -gitlab_group_path "%s" -gitlab_project_path "%s" -gitee_group_path "%s" &> %s`,
-		cwd, workerTaskModel.GitlabGroup, workerTaskModel.GitlabProject, workerTaskModel.GiteeGroup, tmpCmdOutFile)
+	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;%s/script/git2git/git2git_cli -gitlab_group_path "%s" -gitlab_host "%s" -gitlab_token "%s" -gitlab_project_path "%s" -gitee_group_path "%s" -gitee_token "%s" &> %s`,
+		cwd, workerTaskModel.GitlabGroup, workerTaskModel.GitlabHost, workerTaskModel.GitlabToken, workerTaskModel.GitlabProject, workerTaskModel.GiteeGroup, workerTaskModel.GiteeToken, tmpCmdOutFile)
 	log.Infoln(cmdStr)
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	cmds = append(cmds, cmd)

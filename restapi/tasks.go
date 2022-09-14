@@ -54,7 +54,7 @@ func startTask(taskId int64) {
 	task := &database.TaskModel{}
 	err := database.DB.Get(task, "SELECT cc_password,"+
 		" cc_user, component, git_password, git_url, git_user, git_email, pvob, include_empty, dir, keep, worker_id, "+
-		" svn_url, model_type, gitignore, branches_info, gitlab_group, gitlab_project, gitee_group FROM task WHERE id = $1", taskId)
+		" svn_url, model_type, gitignore, branches_info, gitlab_group, gitlab_project, gitee_group, source_url, target_url, gitee_token, gitlab_token FROM task WHERE id = $1", taskId)
 	startTime := time.Now().Format("2006-01-02 15:04:05")
 	if err != nil {
 		log.Error("start task but db err:", err)
@@ -124,7 +124,10 @@ func startTask(taskId int64) {
 			GitlabGroup   string
 			GitlabProject string
 			GitlabToken   string
+			GitlabHost    string
 			GiteeGroup    string
+			GiteeToken    string
+			GiteeHost     string
 		}
 		gitUser := task.GitUser.String
 		if gitUser == "" {
@@ -157,8 +160,11 @@ func startTask(taskId int64) {
 			BranchesInfo:  task.BranchesInfo.String,
 			GitlabGroup:   task.GitlabGroup.String,
 			GitlabProject: task.GitlabProject.String,
-			GitlabToken: task.GitlabToken.String,
-			GiteeGroup: task.GiteeGroup.String,
+			GitlabToken:   task.GitlabToken.String,
+			GitlabHost:    task.TargetURL.String,
+			GiteeGroup:    task.GiteeGroup.String,
+			GiteeToken:    task.GiteeToken.String,
+			GiteeHost:     task.TargetURL.String,
 		}
 		for _, match := range matchInfo {
 			workerTaskModel.Matches =

@@ -9,6 +9,7 @@ import (
 	"moul.io/http2curl"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -24,9 +25,9 @@ const GiteeVisitor = 2
 type GitlabService struct {
 	Host        string
 	Token       string
-	Protocol    string
 	GroupPath   string
 	GroupID     int
+	ParentID    int
 	ProjectPath string
 	ProjectID   int
 }
@@ -47,7 +48,7 @@ var UserMap map[string]int
 var RoleMap map[int]int
 
 func (gls *GitlabService) Get(url, queryStrings string) *http.Response {
-	url = fmt.Sprintf("%s://%s/%s?access_token=%s", gls.Protocol, gls.Host, url, gls.Token)
+	url = fmt.Sprintf("%s/%s?access_token=%s", gls.Host, url, gls.Token)
 	if queryStrings != "" {
 		url = url + "&" + queryStrings
 	}
@@ -64,6 +65,14 @@ func (gls *GitlabService) Get(url, queryStrings string) *http.Response {
 		return nil
 	}
 	return resp
+}
+
+func (gls *GitlabService) TranslateGroupsByName() {
+	groups := strings.Split(gls.GroupPath, "/")
+	for _, group := range groups {
+		gls.GroupPath = group
+		gls.TranslateGroupByName()
+	}
 }
 
 func (gls *GitlabService) TranslateGroupByName() {
@@ -315,7 +324,8 @@ func (gts *GiteeService) CreateGroupWithPath(groupPath string, groupName string)
 	}{
 		Name:     groupName,
 		Path:     groupPath,
-		ParentID: 0,
+		// 如果此时GTS已有GroupID，说明本次迁移过程中已经有创建好了的Group且Path不等于当前需要创建的，那么这个已有的Group应该为当前创建的Group的Parent
+		ParentID: gts.GroupID,
 	}
 	postBodyByte, _ := json.Marshal(postBody)
 	resp := gts.PostOrGet(url, http.MethodPost, bytes.NewBuffer(postBodyByte))
@@ -507,20 +517,33 @@ func ParseConfig() *Config {
 func main() {
 	var gitlabGroupPath string
 	var gitlabProjectPath string
+	var gitlabToken string
+	var gitlabHost string
 	var giteeGroupPath string
-	flag.StringVar(&gitlabGroupPath, "gitlab_group_path", "", "code config file path")
-	flag.StringVar(&gitlabProjectPath, "gitlab_project_path", "", "enterprise uuid")
-	flag.StringVar(&giteeGroupPath, "gitee_group_path", "", "program uuid")
+	var giteeToken string
+	flag.StringVar(&gitlabGroupPath, "gitlab_group_path", "", "")
+	flag.StringVar(&gitlabProjectPath, "gitlab_project_path", "", "")
+	flag.StringVar(&gitlabToken, "gitlab_token", "", "")
+	flag.StringVar(&gitlabHost, "gitlab_host", "", "")
+	flag.StringVar(&giteeGroupPath, "gitee_group_path", "", "")
+	flag.StringVar(&giteeToken, "gitee_token", "", "")
 	flag.Parse()
 
 	UserMap = make(map[string]int, 0)
 	RoleMap = make(map[int]int, 0)
 	config := ParseConfig()
+	gitlabGroupPath = strings.TrimSuffix(strings.TrimPrefix(gitlabGroupPath, "/"), "/")
+	gitlabProjectPath = strings.TrimSuffix(strings.TrimPrefix(gitlabProjectPath, "/"), "/")
+	gitlabProjectPaths := strings.Split(gitlabProjectPath, "/")
+	lenGitlabProjectPaths := len(gitlabProjectPaths)
+	if lenGitlabProjectPaths > 1 {
+		gitlabGroupPath = gitlabGroupPath + "/" + strings.Join(gitlabProjectPaths[:lenGitlabProjectPaths-1], "/")
+		gitlabProjectPath = gitlabProjectPaths[lenGitlabProjectPaths]
+	}
 
 	GLS = GitlabService{
-		Host:        config.GitlabHost,
-		Token:       config.GitlabToken,
-		Protocol:    config.GitlabProtocol,
+		Host:        gitlabHost,
+		Token:       gitlabToken,
 		GroupPath:   gitlabGroupPath,
 		GroupID:     0,
 		ProjectPath: gitlabProjectPath,
@@ -528,7 +551,7 @@ func main() {
 	}
 
 	GTS = GiteeService{
-		Token:            config.GiteeToken,
+		Token:            giteeToken,
 		GroupPath:        giteeGroupPath,
 		GroupID:          0,
 		ProjectPath:      "",
@@ -538,6 +561,6 @@ func main() {
 	}
 
 	GTS.GetRoles()
-	GLS.TranslateGroupByName()
+	GLS.TranslateGroupsByName()
 	GLS.TranslateProjectsByGroup()
 }

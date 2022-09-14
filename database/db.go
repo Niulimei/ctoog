@@ -91,6 +91,12 @@ type TaskModel struct {
 
 	// gitee token
 	GiteeToken models.JsonNullString `json:"gitee_token" db:"gitee_token"`
+
+	// source url
+	SourceURL models.JsonNullString `json:"source_url" db:"source_url"`
+
+	// target url
+	TargetURL models.JsonNullString `json:"target_url" db:"target_url"`
 }
 
 type WorkerModel struct {
