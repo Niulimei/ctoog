@@ -3,13 +3,13 @@ import { Button, Modal } from 'antd';
 import { StepsForm, ProFormText, ProFormTextArea, ProFormSelect, ProFormCheckbox } from '@ant-design/pro-form';
 import { gitlab as gitlabService } from '@/services';
 
-export default ({ visible, setVisible }) => {
+export default ({ visible, onSuccess }) => {
   const [migrationType, setMigrationType] = useState('Group');
   return (
     <Modal
       title="新建Gitlab迁移任务"
       visible={visible}
-      onCancel={() => setVisible(false)}
+      onCancel={() => onSuccess({ successful: false })}
       footer={null}
       width={650}
       destroyOnClose
@@ -21,7 +21,7 @@ export default ({ visible, setVisible }) => {
             modelType: "gitlab"
           };
           return gitlabService.createTask(params).then(() => {
-            setVisible(false)
+            onSuccess({ successful: true })
           })
         }}
       >

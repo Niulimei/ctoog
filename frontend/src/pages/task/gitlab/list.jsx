@@ -12,7 +12,7 @@ const GitlabTaskList = () => {
   const [visible, setVisible] = useState(false);
   const [loading, { toggle, setTrue, setFalse }] = useBoolean(false);
   const [log, setLog] = useSetState({ id: null, visible: false});
-  const formRef = useRef(null);
+  const tableRef = useRef(null);
   const [loadState, setloadStatus] = useSetState({ id: null });
   
   const actions = {
@@ -29,7 +29,7 @@ const GitlabTaskList = () => {
       })
     },
   };
-  const getColumns = () => [
+  const columns = [
     {
       title: '任务编号',
       dataIndex: 'id',
@@ -69,7 +69,7 @@ const GitlabTaskList = () => {
       title: '操作',
       valueType: 'action',
       hideInSearch: true,
-      render(item, record, _, action) {
+      render(item, record) {
         return (
           <div style={{ 'display': 'flex', gap: '6px' }}>
             {
@@ -82,6 +82,7 @@ const GitlabTaskList = () => {
                 actions.loadStatus(record.id, 'start', true);
                 taskService.startTask(id).then(() => {
                   actions.loadStatus(record.id, 'start', false);
+                  tableRef.current.reload();
                 });;
               }} />
             }
@@ -93,7 +94,7 @@ const GitlabTaskList = () => {
                 taskService.deleteTask(item.props.record.id).then(() => {
                   message.success('删除成功');
                   actions.loadStatus(record.id, 'delete', false);
-                  action?.reload();
+                  tableRef.current.reload();
                 });
               }}
               okText="yes"
@@ -113,7 +114,8 @@ const GitlabTaskList = () => {
     <>
       <ProTable
         loading={loading}
-        columns={getColumns()}
+        columns={columns}
+        actionRef={tableRef}
         request={({ current, pageSize, status, ...params }, sorter, filter) => {
           // 表单搜索项会从 params 传入，传递给后端接口。
           console.log(params, sorter, filter);
@@ -141,7 +143,11 @@ const GitlabTaskList = () => {
         ]}
       >
       </ProTable>
-      <CreateForm visible={visible} setVisible={setVisible} />
+      <CreateForm visible={visible} onSuccess={({successful}) => {
+        setVisible(false);
+        if (!successful) return;
+        tableRef.current.reload();
+      }} />
       <Modal
         title={log.id}
         visible={log.visible}
