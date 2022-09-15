@@ -1,0 +1,36 @@
+version: "3.0"
+services:
+  server:
+    image: registry.baidubce.com/gitee-poc/code-translator:v202209151450
+    working_dir: /app
+    command: /usr/bin/bash start_server.sh
+    network_mode: "host"
+    volumes:
+      - ./translator-server.yaml:/app/translator-server.yaml
+      - ./store:/app/store
+      - ./backup:/app/backup
+  worker:
+    image: registry.baidubce.com/gitee-poc/code-translator:v202209151450
+    working_dir: /app
+    command: /usr/bin/bash start_worker.sh
+    network_mode: "host"
+    environment:
+      GIT_PASSWORD: "password123"
+      GITLAB_HOST: "192.168.80.97:18787"
+      GITLAB_TOKEN: "h1DND_m1at75QBThE4jP"
+      GITLAB_PROTOCOL: "http"
+      GITEE_TOKEN: "4988bb560bd8464bb251231c8da9c348"
+      GITEE_CODE_URL_PREFIX: "http://code.gitee.work/api/code/api/enterprises/osc"
+      GITEE_CODE_USER_QUERY_URL: "http://code.gitee.work/api/gitlab/users?search"
+    volumes:
+      - ./translator-worker.yaml:/app/translator-worker.yaml
+      - ./store:/app/store
+      - ./backup:/app/backup
+    depends_on:
+      -  server
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend/conf.d/default.conf:/etc/nginx/conf.d/default.conf
