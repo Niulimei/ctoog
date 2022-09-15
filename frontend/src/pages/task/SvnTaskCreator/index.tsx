@@ -1,12 +1,11 @@
 import React, {useCallback, useState} from 'react';
 import { observer } from 'mobx-react';
 import { useToggle } from 'react-use';
-import {throttle, map, groupBy} from 'lodash';
+import { throttle, map } from 'lodash';
 import classnames from 'classnames';
 import { guid } from '@/utils/utils';
-import type { FormInstance } from 'antd/es/form';
 import { task as taskService, svn as svnService } from '@/services';
-import { Button, message, Form, Modal, Checkbox, Input, Empty, Tooltip, Divider } from 'antd';
+import { Button, message, Form, Modal, Checkbox, Input, Empty } from 'antd';
 import { StepsForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 
 import styles from './style.less';
