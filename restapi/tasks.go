@@ -572,12 +572,13 @@ func getWorkerURLFromLogID(logID int64) string {
 
 func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middleware.Responder {
 	var logList []*models.TaskLogInfo
-	database.DB.Select(&logList, "SELECT duration, end_time, log_id, start_time, status FROM task_log WHERE task_id = $1 ORDER BY log_id DESC", params.LogID)
+	database.DB.Select(&logList, "SELECT duration, end_time, log_id, start_time, status, task_id FROM task_log WHERE task_id = $1 ORDER BY log_id DESC", params.LogID)
 	out := &models.TaskCommandOut{}
 	if len(logList) == 0 {
 		return operations.NewGetTaskCommandOutOK().WithPayload(out)
 	}
-	workerUrl := getWorkerURLFromLogID(logList[0].TaskID)
+	logID, _ := strconv.ParseInt(logList[0].LogID, 10, 64)
+	workerUrl := getWorkerURLFromLogID(logID)
 	if workerUrl == "" {
 		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
