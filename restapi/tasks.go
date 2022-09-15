@@ -577,26 +577,14 @@ func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middlew
 	if len(logList) == 0 {
 		return operations.NewGetTaskCommandOutOK().WithPayload(out)
 	}
-	row := database.DB.QueryRow("select log_id, content from task_command_out where log_id = ?", logList[0].LogID)
-	err := row.Scan(&out.LogID, &out.Content)
-	if err != nil && err != sql.ErrNoRows {
-		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
-			Code:    http.StatusInternalServerError,
-			Message: "Sql Error",
-		})
-	}
-	if err != sql.ErrNoRows {
-		return operations.NewGetTaskCommandOutOK().WithPayload(out)
-	}
-
-	workerUrl := getWorkerURLFromLogID(params.LogID)
+	workerUrl := getWorkerURLFromLogID(logList[0].TaskID)
 	if workerUrl == "" {
 		return operations.NewGetTaskCommandOutInternalServerError().WithPayload(&models.ErrorModel{
 			Code:    http.StatusInternalServerError,
 			Message: "get worker url fail",
 		})
 	}
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/command_out?logID=%d", workerUrl, params.LogID), nil)
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/command_out?logID=%d", workerUrl, logList[0].LogID), nil)
 	//req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil || resp == nil {

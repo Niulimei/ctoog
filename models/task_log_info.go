@@ -31,6 +31,9 @@ type TaskLogInfo struct {
 
 	// status
 	Status string `json:"status,omitempty"`
+
+	// task id
+	TaskID int64 `json:"task_id" db:"task_id"`
 }
 
 // Validate validates this task log info
