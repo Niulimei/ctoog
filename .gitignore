@@ -26,7 +26,6 @@ store/translator.db
 **/coverage
 **/.idea
 **/yarn.lock
-**/package-lock.json
 **/*bak
 
 # visual studio code
