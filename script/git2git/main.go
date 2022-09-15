@@ -266,9 +266,9 @@ func (gts *GiteeService) PostOrGet(url, method string, body io.Reader) *http.Res
 //}
 
 func (gts *GiteeService) GetGroupInfoByPath(groupPath string) bool {
-	if gts.GroupPath != "" {
-		groupPath = gts.GroupPath
-	}
+	//if gts.GroupPath != "" {
+	//	groupPath = gts.GroupPath
+	//}
 	url := "/repo_groups/" + groupPath
 	resp := gts.PostOrGet(url, http.MethodGet, nil)
 	if resp == nil || resp.StatusCode == http.StatusInternalServerError || resp.StatusCode == http.StatusNotFound {
@@ -537,7 +537,12 @@ func main() {
 	gitlabProjectPaths := strings.Split(gitlabProjectPath, "/")
 	lenGitlabProjectPaths := len(gitlabProjectPaths)
 	if lenGitlabProjectPaths > 1 {
-		gitlabGroupPath = gitlabGroupPath + "/" + strings.Join(gitlabProjectPaths[:lenGitlabProjectPaths-1], "/")
+		tmp := strings.Join(gitlabProjectPaths[:lenGitlabProjectPaths-1], "/")
+		if len(gitlabGroupPath) > 0 {
+			gitlabGroupPath = gitlabGroupPath + "/" + tmp
+		} else {
+			gitlabGroupPath = tmp
+		}
 		gitlabProjectPath = gitlabProjectPaths[lenGitlabProjectPaths-1]
 	}
 
