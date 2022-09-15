@@ -585,7 +585,7 @@ func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middlew
 			Message: "get worker url fail",
 		})
 	}
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/command_out?logID=%d", workerUrl, logList[0].LogID), nil)
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/command_out?logID=%d", workerUrl, logID), nil)
 	//req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil || resp == nil {
