@@ -597,7 +597,6 @@ func GetTaskCommandOutHandler(params operations.GetTaskCommandOutParams) middlew
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	return operations.NewGetTaskCommandOutOK().WithPayload(&models.TaskCommandOut{LogID: params.LogID, Content: string(body)})
-
 }
 
 func UpdateTaskCommandOutHandler(params operations.UpdateTaskCommandOutParams) middleware.Responder {

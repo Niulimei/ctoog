@@ -400,6 +400,8 @@ func (gts *GiteeService) GetGiteeUserInfo(username string) bool {
 	if err != nil {
 		panic(err)
 	}
+	command, _ := http2curl.GetCurlCommand(req)
+	fmt.Printf("gitee api invoke\n%s\n", command)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		panic(err)
