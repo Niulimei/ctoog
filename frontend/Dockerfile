@@ -1,4 +1,4 @@
-FROM node:14.16.0 AS builder
+FROM node:16.0.0 AS builder
 
 COPY . .
 
@@ -8,7 +8,7 @@ RUN npm run build
 
 # -------------------------------------------------
 
-FROM nginx:1.16.1
+FROM nginx:1.19
 
 RUN mkdir -p /etc/nginx/html/gitee/
 

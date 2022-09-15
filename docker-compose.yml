@@ -32,5 +32,7 @@ services:
     build: ./frontend
     ports:
       - "8080:80"
+    environment:
+      - SERVER_IP=192.168.48.61
     volumes:
       - ./frontend/conf.d/default.conf:/etc/nginx/conf.d/default.conf
