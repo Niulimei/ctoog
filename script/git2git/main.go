@@ -30,6 +30,7 @@ type GitlabService struct {
 	ParentID    int
 	ProjectPath string
 	ProjectID   int
+	ParentPath    string
 }
 
 type GiteeService struct {
@@ -69,6 +70,27 @@ func (gls *GitlabService) Get(url, queryStrings string) *http.Response {
 
 func (gls *GitlabService) TranslateGroupsByName() {
 	groups := strings.Split(gls.GroupPath, "/")
+	parentPath := strings.Join(groups[:len(groups)-1], ",")
+	currentPath := groups[len(groups)-1]
+	url := "/repo_groups/" + currentPath + "?parent_path=" +  parentPath
+	resp := GTS.PostOrGet(url, http.MethodGet, nil)
+	if resp == nil {
+		panic("can not check group")
+	}
+	if resp.StatusCode == http.StatusInternalServerError {
+		ret := struct {
+			Message string `json:"message"`
+			Code    int    `json:"code"`
+		}{}
+		if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+			panic(err)
+		}
+		if ret.Message == "no parent found" {
+			if GTS.GetGroupInfoByPath(currentPath) {
+				panic("duplicate path")
+			}
+		}
+	}
 	for _, group := range groups {
 		gls.GroupPath = group
 		gls.TranslateGroupByName()
@@ -222,11 +244,9 @@ func (gls *GitlabService) TranslateMemberPermissionByGroupOrProject(targetType s
 		panic(err)
 	}
 	for _, info := range ret {
-		if info.State != "active" {
-			continue
-		}
 		if !GTS.GetGiteeUserInfo(info.Username) {
-			panic("no valid user found " + info.Username)
+			fmt.Println("no valid user found " + info.Username)
+			continue
 		}
 		GTS.CreateGroupOrProjectMember(info.Username, targetType, info.AccessLevel)
 	}
@@ -325,8 +345,8 @@ func (gts *GiteeService) CreateGroupWithPath(groupPath string, groupName string)
 		ParentID    int    `json:"parent_id"`
 		Description string `json:"description"`
 	}{
-		Name:     groupName,
-		Path:     groupPath,
+		Name: groupName,
+		Path: groupPath,
 		// 如果此时GTS已有GroupID，说明本次迁移过程中已经有创建好了的Group且Path不等于当前需要创建的，那么这个已有的Group应该为当前创建的Group的Parent
 		ParentID: gts.GroupID,
 	}
