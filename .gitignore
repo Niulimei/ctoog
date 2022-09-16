@@ -26,7 +26,6 @@ store/translator.db
 **/coverage
 **/.idea
 **/yarn.lock
-**/package-lock.json
 **/*bak
 
 # visual studio code
@@ -45,8 +44,8 @@ store/translator.db
 **/.eslintcache
 
 #fronted
-/fronted/dist
-/fronted/dist.tar.gz
+frontend/dist
+
 
 release/
 release.tar.gz

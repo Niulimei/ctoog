@@ -10,7 +10,7 @@ server {
         try_files $uri $uri/ /index.html;
     }
     location ~ /api/ {
-        proxy_pass  http://192.168.48.61:9090;
+        proxy_pass  http://${SERVER_IP}:9090;
     }
 
     location ~ ^/assets/gitee/(.*) {

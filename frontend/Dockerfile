@@ -1,4 +1,4 @@
-FROM node:14.16.0 AS builder
+FROM node:16.0.0 AS builder
 
 COPY . .
 
@@ -8,7 +8,7 @@ RUN npm run build
 
 # -------------------------------------------------
 
-FROM nginx:1.16.1
+FROM nginx:1.19
 
 RUN mkdir -p /etc/nginx/html/gitee/
 
@@ -16,4 +16,4 @@ COPY --from=builder dist /etc/nginx/html/gitee
 
 COPY --from=builder conf.d /etc/nginx/conf.d
 
-CMD nginx -g 'daemon off;'
+CMD envsubst '${SERVER_IP}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'
