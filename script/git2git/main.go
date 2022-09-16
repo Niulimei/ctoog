@@ -222,6 +222,9 @@ func (gls *GitlabService) TranslateMemberPermissionByGroupOrProject(targetType s
 		panic(err)
 	}
 	for _, info := range ret {
+		if info.State != "active" {
+			continue
+		}
 		if !GTS.GetGiteeUserInfo(info.Username) {
 			panic("no valid user found " + info.Username)
 		}
