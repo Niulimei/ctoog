@@ -174,6 +174,7 @@ func (gls *GitlabService) TranslateProjectsByGroup() {
 	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
 		panic(err)
 	}
+	fmt.Sprintf("get gitlab group's project list: %s", ret)
 	for _, info := range ret {
 		if gls.ProjectPath == "" || (gls.ProjectPath != "" && info.Path == gls.ProjectPath) {
 			gls.ProjectID = info.ID
@@ -408,6 +409,7 @@ func (gts *GiteeService) CreateProjectWithName(name string, path string, descrip
 		Description:     description,
 	}
 	postBodyByte, _ := json.Marshal(postBody)
+	fmt.Sprintf("create project post body: %s", postBody)
 	resp := gts.PostOrGet(url, http.MethodPost, bytes.NewBuffer(postBodyByte))
 	bytes, _ := ioutil.ReadAll(resp.Body)
 	fmt.Printf("create project response: %s", string(bytes))
