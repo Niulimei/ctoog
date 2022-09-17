@@ -174,7 +174,7 @@ func (gls *GitlabService) TranslateProjectsByGroup() {
 	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
 		panic(err)
 	}
-	fmt.Sprintf("get gitlab group's project list: %s", ret)
+	fmt.Printf("get gitlab group's project list: %s", ret)
 	for _, info := range ret {
 		if gls.ProjectPath == "" || (gls.ProjectPath != "" && info.Path == gls.ProjectPath) {
 			gls.ProjectID = info.ID
@@ -409,7 +409,7 @@ func (gts *GiteeService) CreateProjectWithName(name string, path string, descrip
 		Description:     description,
 	}
 	postBodyByte, _ := json.Marshal(postBody)
-	fmt.Sprintf("create project post body: %s", postBody)
+	fmt.Printf("create project post body: %s", postBody)
 	resp := gts.PostOrGet(url, http.MethodPost, bytes.NewBuffer(postBodyByte))
 	bytes, _ := ioutil.ReadAll(resp.Body)
 	fmt.Printf("create project response: %s", string(bytes))
@@ -430,7 +430,7 @@ func (gts *GiteeService) GetGiteeUserInfo(username string) bool {
 	if err != nil {
 		panic(err)
 	}
-	req.Header.Add("PRIVATE-TOKEN", gts.Token)
+	req.Header.Add("PRIVATE-TOKEN", os.Getenv("GITEE_TOKEN"))
 	command, _ := http2curl.GetCurlCommand(req)
 	fmt.Printf("gitee api invoke\n%s\n", command)
 	resp, err := http.DefaultClient.Do(req)
@@ -589,7 +589,7 @@ func main() {
 	}
 
 	GTS = GiteeService{
-		Token:            config.GiteeToken,
+		Token:            giteeToken,
 		GroupPath:        giteeGroupPath,
 		GroupID:          0,
 		ProjectPath:      "",
