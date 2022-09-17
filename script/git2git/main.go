@@ -412,16 +412,11 @@ func (gts *GiteeService) CreateProjectWithName(name string, path string, descrip
 	bytes, _ := ioutil.ReadAll(resp.Body)
 	fmt.Printf("create project response: %s", string(bytes))
 	if resp == nil || resp.StatusCode != http.StatusCreated {
-		fmt.Printf("create project failed %s", name)
-		//if strings.Contains(string(bytes), "rpc error: code = AlreadyExists") {
-		//	fmt.Printf("create project failed %s", name)
-		//} else {
-		//	panic("create project failed " + name)
-		//}
+		panic("create project failed " + name)
 	}
-	//if !gts.GetProjectByPath(path) {
-	//	panic("create project failed" + name)
-	//}
+	if !gts.GetProjectByPath(path) {
+		panic("create project failed" + name)
+	}
 }
 
 func (gts *GiteeService) GetGiteeUserInfo(username string) bool {
@@ -433,6 +428,7 @@ func (gts *GiteeService) GetGiteeUserInfo(username string) bool {
 	if err != nil {
 		panic(err)
 	}
+	req.Header.Add("PRIVATE-TOKEN", gts.Token)
 	command, _ := http2curl.GetCurlCommand(req)
 	fmt.Printf("gitee api invoke\n%s\n", command)
 	resp, err := http.DefaultClient.Do(req)
@@ -591,7 +587,7 @@ func main() {
 	}
 
 	GTS = GiteeService{
-		Token:            giteeToken,
+		Token:            config.GiteeToken,
 		GroupPath:        giteeGroupPath,
 		GroupID:          0,
 		ProjectPath:      "",
