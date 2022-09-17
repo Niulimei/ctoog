@@ -409,13 +409,15 @@ func (gts *GiteeService) CreateProjectWithName(name string, path string, descrip
 	}
 	postBodyByte, _ := json.Marshal(postBody)
 	resp := gts.PostOrGet(url, http.MethodPost, bytes.NewBuffer(postBodyByte))
+	bytes, _ := ioutil.ReadAll(resp.Body)
+	fmt.Printf("create project response: %s", string(bytes))
 	if resp == nil || resp.StatusCode != http.StatusCreated {
-		bytes, _ := ioutil.ReadAll(resp.Body)
-		if strings.Contains(string(bytes), "rpc error: code = AlreadyExists") {
-			fmt.Printf("create project failed %s", name)
-		} else {
-			panic("create project failed " + name)
-		}
+		fmt.Printf("create project failed %s", name)
+		//if strings.Contains(string(bytes), "rpc error: code = AlreadyExists") {
+		//	fmt.Printf("create project failed %s", name)
+		//} else {
+		//	panic("create project failed " + name)
+		//}
 	}
 	//if !gts.GetProjectByPath(path) {
 	//	panic("create project failed" + name)
