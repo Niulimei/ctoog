@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"moul.io/http2curl"
 	"net/http"
 	"os"
@@ -30,7 +31,7 @@ type GitlabService struct {
 	ParentID    int
 	ProjectPath string
 	ProjectID   int
-	ParentPath    string
+	ParentPath  string
 }
 
 type GiteeService struct {
@@ -72,7 +73,7 @@ func (gls *GitlabService) TranslateGroupsByName() {
 	groups := strings.Split(gls.GroupPath, "/")
 	parentPath := strings.Join(groups[:len(groups)-1], ",")
 	currentPath := groups[len(groups)-1]
-	url := "/repo_groups/" + currentPath + "?parent_path=" +  parentPath
+	url := "/repo_groups/" + currentPath + "?parent_path=" + parentPath
 	resp := GTS.PostOrGet(url, http.MethodGet, nil)
 	if resp == nil {
 		panic("can not check group")
@@ -176,7 +177,7 @@ func (gls *GitlabService) TranslateProjectsByGroup() {
 	for _, info := range ret {
 		if gls.ProjectPath == "" || (gls.ProjectPath != "" && info.Path == gls.ProjectPath) {
 			gls.ProjectID = info.ID
-			GTS.CreateProjectWithName(info.Name, info.Path)
+			GTS.CreateProjectWithName(info.Name, info.Path, info.Description)
 			GLS.TranslateMemberPermissionByGroupOrProject("project")
 		}
 	}
@@ -381,7 +382,7 @@ func (gts *GiteeService) GetProjectByPath(path string) bool {
 	return true
 }
 
-func (gts *GiteeService) CreateProjectWithName(name string, path string) {
+func (gts *GiteeService) CreateProjectWithName(name string, path string, description string) {
 	if gts.GetProjectByPath(path) {
 		return
 	}
@@ -395,6 +396,7 @@ func (gts *GiteeService) CreateProjectWithName(name string, path string) {
 		BranchModelName string `json:"branch_model_name"`
 		Public          bool   `json:"public"`
 		ParentID        int    `json:"parent_id"`
+		Description     string `json:"description"`
 	}{
 		Readme:          false,
 		Name:            name,
@@ -403,15 +405,21 @@ func (gts *GiteeService) CreateProjectWithName(name string, path string) {
 		Public:          false,
 		CanCreateBranch: true,
 		BranchModelName: "single_branch_model",
+		Description:     description,
 	}
 	postBodyByte, _ := json.Marshal(postBody)
 	resp := gts.PostOrGet(url, http.MethodPost, bytes.NewBuffer(postBodyByte))
 	if resp == nil || resp.StatusCode != http.StatusCreated {
-		panic("create project failed " + name)
+		bytes, _ := ioutil.ReadAll(resp.Body)
+		if strings.Contains(string(bytes), "rpc error: code = AlreadyExists") {
+			fmt.Printf("create project failed %s", name)
+		} else {
+			panic("create project failed " + name)
+		}
 	}
-	if !gts.GetProjectByPath(path) {
-		panic("create project failed" + name)
-	}
+	//if !gts.GetProjectByPath(path) {
+	//	panic("create project failed" + name)
+	//}
 }
 
 func (gts *GiteeService) GetGiteeUserInfo(username string) bool {

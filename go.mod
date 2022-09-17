@@ -23,12 +23,12 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7
-	github.com/mozillazg/go-pinyin v0.19.0
 	github.com/sevlyar/go-daemon v0.1.5
 	github.com/sirupsen/logrus v1.6.0
+	github.com/smartystreets/goconvey v1.7.2 // indirect
 	go.mongodb.org/mongo-driver v1.5.2 // indirect
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
 	golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab // indirect
 	gopkg.in/yaml.v2 v2.4.0
-	moul.io/http2curl v1.0.0 // indirect
+	moul.io/http2curl v1.0.0
 )
