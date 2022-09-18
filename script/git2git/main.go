@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"moul.io/http2curl"
 	"net/http"
+	url2 "net/url"
 	"os"
 	"strings"
 	"time"
@@ -41,7 +42,8 @@ type GiteeService struct {
 	ProjectPath      string
 	ProjectID        int
 	CodeURLPrefix    string //http://cmb-gitaly.dev.gitee.work/api/code/api/enterprises/cmbchina
-	CodeUserQueryURL string //http://code.gitee.work/api/gitlab/users?search=
+	CodeUserQueryURL string //http://code.gitee.work/api/gitlab/users?username=
+	PrivateToken     string
 }
 
 var GLS GitlabService
@@ -69,10 +71,68 @@ func (gls *GitlabService) Get(url, queryStrings string) *http.Response {
 	return resp
 }
 
+type DescendantGroupResponse struct {
+	Path     string `json:"path"`
+	FullPath string `json:"full_path"`
+}
+
+// TranslateGroupsDescendant 获取组下所有子组
+func (gls *GitlabService) TranslateGroupsDescendant() {
+	//先同步自己
+	gls.TranslateGroupsByName()
+	gls.TranslateProjectsByGroup()
+	path := url2.QueryEscape(gls.GroupPath)
+	for {
+		i := 1
+		url := fmt.Sprintf("api/v4/groups/%s/descendant_groups", path)
+		resp := gls.Get(url, fmt.Sprintf("page=%d", i))
+		ret := make([]DescendantGroupResponse, 0)
+		if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+			panic(err)
+		}
+		for _, info := range ret {
+			gls.GroupPath = info.FullPath
+			gls.TranslateGroupsByName()
+			gls.TranslateProjectsByGroup()
+		}
+		if len(ret) < 20 {
+			break
+		}
+		i++
+	}
+}
+
+type GroupResponse struct {
+	ID                             int         `json:"id"`
+	WebURL                         string      `json:"web_url"`
+	Name                           string      `json:"name"`
+	Path                           string      `json:"path"`
+	Description                    string      `json:"description"`
+	Visibility                     string      `json:"visibility"`
+	ShareWithGroupLock             bool        `json:"share_with_group_lock"`
+	RequireTwoFactorAuthentication bool        `json:"require_two_factor_authentication"`
+	TwoFactorGracePeriod           int         `json:"two_factor_grace_period"`
+	ProjectCreationLevel           string      `json:"project_creation_level"`
+	AutoDevopsEnabled              interface{} `json:"auto_devops_enabled"`
+	SubgroupCreationLevel          string      `json:"subgroup_creation_level"`
+	EmailsDisabled                 interface{} `json:"emails_disabled"`
+	MentionsDisabled               interface{} `json:"mentions_disabled"`
+	LfsEnabled                     bool        `json:"lfs_enabled"`
+	DefaultBranchProtection        int         `json:"default_branch_protection"`
+	AvatarURL                      interface{} `json:"avatar_url"`
+	RequestAccessEnabled           bool        `json:"request_access_enabled"`
+	FullName                       string      `json:"full_name"`
+	FullPath                       string      `json:"full_path"`
+	CreatedAt                      time.Time   `json:"created_at"`
+	ParentID                       interface{} `json:"parent_id"`
+	LdapCn                         interface{} `json:"ldap_cn"`
+	LdapAccess                     interface{} `json:"ldap_access"`
+}
+
 func (gls *GitlabService) TranslateGroupsByName() {
-	groups := strings.Split(gls.GroupPath, "/")
-	parentPath := strings.Join(groups[:len(groups)-1], ",")
-	currentPath := groups[len(groups)-1]
+	groupPaths := strings.Split(gls.GroupPath, "/")
+	parentPath := strings.Join(groupPaths[:len(groupPaths)-1], ",")
+	currentPath := groupPaths[len(groupPaths)-1]
 	url := "/repo_groups/" + currentPath + "?parent_path=" + parentPath
 	resp := GTS.PostOrGet(url, http.MethodGet, nil)
 	if resp == nil {
@@ -88,12 +148,15 @@ func (gls *GitlabService) TranslateGroupsByName() {
 		}
 		if ret.Message == "no parent found" {
 			if GTS.GetGroupInfoByPath(currentPath) {
-				panic("duplicate path")
+				// 适配code，不同父组相同path的组直接跳过
+				fmt.Printf("duplicate path: %s", gls.GroupPath)
+				return
+				//panic("duplicate path")
 			}
 		}
 	}
-	for _, group := range groups {
-		gls.GroupPath = group
+	for _, groupPath := range groupPaths {
+		gls.GroupPath = groupPath
 		gls.TranslateGroupByName()
 	}
 }
@@ -104,32 +167,6 @@ func (gls *GitlabService) TranslateGroupByName() {
 	resp := gls.Get(url, queryStrings)
 	if resp == nil {
 		panic("no valid group")
-	}
-	type GroupResponse struct {
-		ID                             int         `json:"id"`
-		WebURL                         string      `json:"web_url"`
-		Name                           string      `json:"name"`
-		Path                           string      `json:"path"`
-		Description                    string      `json:"description"`
-		Visibility                     string      `json:"visibility"`
-		ShareWithGroupLock             bool        `json:"share_with_group_lock"`
-		RequireTwoFactorAuthentication bool        `json:"require_two_factor_authentication"`
-		TwoFactorGracePeriod           int         `json:"two_factor_grace_period"`
-		ProjectCreationLevel           string      `json:"project_creation_level"`
-		AutoDevopsEnabled              interface{} `json:"auto_devops_enabled"`
-		SubgroupCreationLevel          string      `json:"subgroup_creation_level"`
-		EmailsDisabled                 interface{} `json:"emails_disabled"`
-		MentionsDisabled               interface{} `json:"mentions_disabled"`
-		LfsEnabled                     bool        `json:"lfs_enabled"`
-		DefaultBranchProtection        int         `json:"default_branch_protection"`
-		AvatarURL                      interface{} `json:"avatar_url"`
-		RequestAccessEnabled           bool        `json:"request_access_enabled"`
-		FullName                       string      `json:"full_name"`
-		FullPath                       string      `json:"full_path"`
-		CreatedAt                      time.Time   `json:"created_at"`
-		ParentID                       interface{} `json:"parent_id"`
-		LdapCn                         interface{} `json:"ldap_cn"`
-		LdapAccess                     interface{} `json:"ldap_access"`
 	}
 	ret := make([]GroupResponse, 0)
 	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
@@ -147,40 +184,47 @@ func (gls *GitlabService) TranslateGroupByName() {
 }
 
 func (gls *GitlabService) TranslateProjectsByGroup() {
-	url := fmt.Sprintf("api/v4/groups/%d/projects", gls.GroupID)
-	resp := gls.Get(url, "")
-	if resp == nil {
-		panic("no valid project in group")
-	}
-	type ProjectResponse struct {
-		ID                int       `json:"id"`
-		Description       string    `json:"description"`
-		Name              string    `json:"name"`
-		NameWithNamespace string    `json:"name_with_namespace"`
-		Path              string    `json:"path"`
-		PathWithNamespace string    `json:"path_with_namespace"`
-		CreatedAt         time.Time `json:"created_at"`
-		DefaultBranch     string    `json:"default_branch"`
-		SSHURLToRepo      string    `json:"ssh_url_to_repo"`
-		HTTPURLToRepo     string    `json:"http_url_to_repo"`
-		WebURL            string    `json:"web_url"`
-		ForksCount        int       `json:"forks_count"`
-		StarCount         int       `json:"star_count"`
-		EmptyRepo         bool      `json:"empty_repo"`
-		Archived          bool      `json:"archived"`
-		Visibility        string    `json:"visibility"`
-	}
-	ret := make([]ProjectResponse, 0)
-	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
-		panic(err)
-	}
-	fmt.Printf("get gitlab group's project list: %s", ret)
-	for _, info := range ret {
-		if gls.ProjectPath == "" || (gls.ProjectPath != "" && info.Path == gls.ProjectPath) {
-			gls.ProjectID = info.ID
-			GTS.CreateProjectWithName(info.Name, info.Path, info.Description)
-			GLS.TranslateMemberPermissionByGroupOrProject("project")
+	for {
+		i := 1
+		url := fmt.Sprintf("api/v4/groups/%d/projects", gls.GroupID)
+		resp := gls.Get(url, fmt.Sprintf("page=%d", i))
+		if resp == nil {
+			panic("no valid project in group")
 		}
+		type ProjectResponse struct {
+			ID                int       `json:"id"`
+			Description       string    `json:"description"`
+			Name              string    `json:"name"`
+			NameWithNamespace string    `json:"name_with_namespace"`
+			Path              string    `json:"path"`
+			PathWithNamespace string    `json:"path_with_namespace"`
+			CreatedAt         time.Time `json:"created_at"`
+			DefaultBranch     string    `json:"default_branch"`
+			SSHURLToRepo      string    `json:"ssh_url_to_repo"`
+			HTTPURLToRepo     string    `json:"http_url_to_repo"`
+			WebURL            string    `json:"web_url"`
+			ForksCount        int       `json:"forks_count"`
+			StarCount         int       `json:"star_count"`
+			EmptyRepo         bool      `json:"empty_repo"`
+			Archived          bool      `json:"archived"`
+			Visibility        string    `json:"visibility"`
+		}
+		ret := make([]ProjectResponse, 0)
+		if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+			panic(err)
+		}
+		fmt.Printf("get gitlab group's project list: %s", ret)
+		for _, info := range ret {
+			if gls.ProjectPath == "" || (gls.ProjectPath != "" && info.Path == gls.ProjectPath) {
+				gls.ProjectID = info.ID
+				GTS.CreateProjectWithName(info.Name, info.Path, info.Description)
+				GLS.TranslateMemberPermissionByGroupOrProject("project")
+			}
+		}
+		if len(ret) < 20 {
+			break
+		}
+		i++
 	}
 }
 
@@ -430,7 +474,7 @@ func (gts *GiteeService) GetGiteeUserInfo(username string) bool {
 	if err != nil {
 		panic(err)
 	}
-	req.Header.Add("PRIVATE-TOKEN", os.Getenv("GITEE_TOKEN"))
+	req.Header.Add("PRIVATE-TOKEN", gts.PrivateToken)
 	command, _ := http2curl.GetCurlCommand(req)
 	fmt.Printf("gitee api invoke\n%s\n", command)
 	resp, err := http.DefaultClient.Do(req)
@@ -449,12 +493,13 @@ func (gts *GiteeService) GetGiteeUserInfo(username string) bool {
 	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
 		panic(err)
 	}
-	for _, info := range ret {
-		if info.Username == username {
-			UserMap[username] = info.ID
+	if len(ret) == 1 {
+		if ret[0].Username == username {
+			UserMap[username] = ret[0].ID
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -533,17 +578,29 @@ type Config struct {
 	GiteeToken            string
 	GiteeCodeURLPrefix    string
 	GiteeCodeUserQueryURL string
+	GiteePrivateToken     string
+	GiteeHost             string
 }
 
 func ParseConfig() *Config {
 	config := &Config{
 		GitlabHost:            os.Getenv("GITLAB_HOST"),
 		GitlabToken:           os.Getenv("GITLAB_TOKEN"),
-		GitlabProtocol:        os.Getenv("GITLAB_PROTOCOL"),
 		GiteeToken:            os.Getenv("GITEE_TOKEN"),
 		GiteeCodeURLPrefix:    os.Getenv("GITEE_CODE_URL_PREFIX"),
 		GiteeCodeUserQueryURL: os.Getenv("GITEE_CODE_USER_QUERY_URL"),
+		GiteePrivateToken:     os.Getenv("GITEE_PRIVATE_TOKEN"),
+		GiteeHost:             os.Getenv("GITEE_HOST"),
 	}
+	//config := &Config{
+	//	GitlabHost:            "http://192.168.48.60:18787",
+	//	GitlabToken:           "yiWxjprfmdBtsZE3tfZk",
+	//	GiteeToken:            "65fb48940cce4b1684291abdcc5f3cf4",
+	//	GiteeCodeURLPrefix:    "/api/code/api/enterprises/osc",
+	//	GiteeCodeUserQueryURL: "/api/gitlab/users?username=",
+	//	GiteePrivateToken:     "c4ca4238a0b923820dcc509a6f75849b",
+	//	GiteeHost:             "http://code.gitee.work",
+	//}
 	return config
 }
 
@@ -562,9 +619,21 @@ func main() {
 	flag.StringVar(&giteeToken, "gitee_token", "", "")
 	flag.Parse()
 
+	//gitlabGroupPath = "leiaaa"
+
 	UserMap = make(map[string]int, 0)
 	RoleMap = make(map[int]int, 0)
 	config := ParseConfig()
+	if gitlabToken == "" {
+		gitlabToken = config.GitlabToken
+	}
+	if gitlabHost == "" {
+		gitlabHost = config.GitlabHost
+	}
+	if giteeToken == "" {
+		giteeToken = config.GiteeToken
+	}
+
 	gitlabGroupPath = strings.TrimSuffix(strings.TrimPrefix(gitlabGroupPath, "/"), "/")
 	gitlabProjectPath = strings.TrimSuffix(strings.TrimPrefix(gitlabProjectPath, "/"), "/")
 	gitlabProjectPaths := strings.Split(gitlabProjectPath, "/")
@@ -594,11 +663,11 @@ func main() {
 		GroupID:          0,
 		ProjectPath:      "",
 		ProjectID:        0,
-		CodeURLPrefix:    config.GiteeCodeURLPrefix,
-		CodeUserQueryURL: config.GiteeCodeUserQueryURL,
+		CodeURLPrefix:    config.GiteeHost + config.GiteeCodeURLPrefix,
+		CodeUserQueryURL: config.GiteeHost + config.GiteeCodeUserQueryURL,
 	}
 
 	GTS.GetRoles()
-	GLS.TranslateGroupsByName()
-	GLS.TranslateProjectsByGroup()
+	GLS.TranslateGroupsDescendant()
+	//GLS.TranslateProjectsByGroup()
 }

@@ -15,13 +15,13 @@ services:
     command: /usr/bin/bash start_worker.sh
     network_mode: "host"
     environment:
-      GIT_PASSWORD: "password123"
-      GITLAB_HOST: "192.168.80.97:18787"
+      GITLAB_HOST: "http://192.168.80.97:18787"
       GITLAB_TOKEN: "h1DND_m1at75QBThE4jP"
-      GITLAB_PROTOCOL: "http"
       GITEE_TOKEN: "4988bb560bd8464bb251231c8da9c348"
-      GITEE_CODE_URL_PREFIX: "http://code.gitee.work/api/code/api/enterprises/osc"
-      GITEE_CODE_USER_QUERY_URL: "http://code.gitee.work/api/gitlab/users?search"
+      GITEE_CODE_URL_PREFIX: "/api/code/api/enterprises/osc"
+      GITEE_CODE_USER_QUERY_URL: "/api/gitlab/users?username="
+      GITEE_PRIVATE_TOKEN: "c4ca4238a0b923820dcc509a6f75849b"
+      GITEE_HOST: "http://code.gitee.work"
     volumes:
       - ./translator-worker.yaml:/app/translator-worker.yaml
       - ./store:/app/store
