@@ -10,6 +10,7 @@ import (
 	"moul.io/http2curl"
 	"net/http"
 	url2 "net/url"
+	"os"
 	"strings"
 	"time"
 )
@@ -615,24 +616,24 @@ type Config struct {
 }
 
 func ParseConfig() *Config {
-	//config := &Config{
-	//	GitlabHost:            os.Getenv("GITLAB_HOST"),
-	//	GitlabToken:           os.Getenv("GITLAB_TOKEN"),
-	//	GiteeToken:            os.Getenv("GITEE_TOKEN"),
-	//	GiteeCodeURLPrefix:    os.Getenv("GITEE_CODE_URL_PREFIX"),
-	//	GiteeCodeUserQueryURL: os.Getenv("GITEE_CODE_USER_QUERY_URL"),
-	//	GiteePrivateToken:     os.Getenv("GITEE_PRIVATE_TOKEN"),
-	//	GiteeHost:             os.Getenv("GITEE_HOST"),
-	//}
 	config := &Config{
-		GitlabHost:            "http://192.168.48.60:18787",
-		GitlabToken:           "yiWxjprfmdBtsZE3tfZk",
-		GiteeToken:            "29c51ece0ddc494a9817e25f473531e1",
-		GiteeCodeURLPrefix:    "/api/code/api/enterprises/osc",
-		GiteeCodeUserQueryURL: "/api/gitlab/users?username=",
-		GiteePrivateToken:     "c4ca4238a0b923820dcc509a6f75849b",
-		GiteeHost:             "http://code.gitee.work",
+		GitlabHost:            os.Getenv("GITLAB_HOST"),
+		GitlabToken:           os.Getenv("GITLAB_TOKEN"),
+		GiteeToken:            os.Getenv("GITEE_TOKEN"),
+		GiteeCodeURLPrefix:    os.Getenv("GITEE_CODE_URL_PREFIX"),
+		GiteeCodeUserQueryURL: os.Getenv("GITEE_CODE_USER_QUERY_URL"),
+		GiteePrivateToken:     os.Getenv("GITEE_PRIVATE_TOKEN"),
+		GiteeHost:             os.Getenv("GITEE_HOST"),
 	}
+	//config := &Config{
+	//	GitlabHost:            "http://192.168.48.60:18787",
+	//	GitlabToken:           "yiWxjprfmdBtsZE3tfZk",
+	//	GiteeToken:            "29c51ece0ddc494a9817e25f473531e1",
+	//	GiteeCodeURLPrefix:    "/api/code/api/enterprises/osc",
+	//	GiteeCodeUserQueryURL: "/api/gitlab/users?username=",
+	//	GiteePrivateToken:     "c4ca4238a0b923820dcc509a6f75849b",
+	//	GiteeHost:             "http://code.gitee.work",
+	//}
 	return config
 }
 
@@ -651,7 +652,7 @@ func main() {
 	flag.StringVar(&giteeToken, "gitee_token", "", "")
 	flag.Parse()
 
-	gitlabGroupPath = "0919c"
+	//gitlabGroupPath = "0919c"
 
 	UserMap = make(map[string]int, 0)
 	RoleMap = make(map[int]int, 0)
