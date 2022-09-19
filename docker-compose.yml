@@ -1,7 +1,7 @@
 version: "3.0"
 services:
   server:
-    image: registry.baidubce.com/gitee-poc/code-translator:v202209151450
+    image: registry.baidubce.com/gitee-poc/code-translator:v202209161905
     working_dir: /app
     command: /usr/bin/bash start_server.sh
     network_mode: "host"
@@ -10,13 +10,13 @@ services:
       - ./store:/app/store
       - ./backup:/app/backup
   worker:
-    image: registry.baidubce.com/gitee-poc/code-translator:v202209151450
+    image: registry.baidubce.com/gitee-poc/code-translator:v202209161905
     working_dir: /app
     command: /usr/bin/bash start_worker.sh
     network_mode: "host"
     environment:
-      GITLAB_HOST: "http://192.168.80.97:18787"
-      GITLAB_TOKEN: "h1DND_m1at75QBThE4jP"
+      GITLAB_HOST: "http://192.168.48.60:18787"
+      GITLAB_TOKEN: "yiWxjprfmdBtsZE3tfZk"
       GITEE_TOKEN: "4988bb560bd8464bb251231c8da9c348"
       GITEE_CODE_URL_PREFIX: "/api/code/api/enterprises/osc"
       GITEE_CODE_USER_QUERY_URL: "/api/gitlab/users?username="
