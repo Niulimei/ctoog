@@ -10,7 +10,6 @@ import (
 	"moul.io/http2curl"
 	"net/http"
 	url2 "net/url"
-	"os"
 	"strings"
 	"time"
 )
@@ -25,14 +24,15 @@ const GiteeCollar = 4
 const GiteeVisitor = 2
 
 type GitlabService struct {
-	Host        string
-	Token       string
-	GroupPath   string
-	GroupID     int
-	ParentID    int
-	ProjectPath string
-	ProjectID   int
-	ParentPath  string
+	Host          string
+	Token         string
+	GroupPath     string
+	GroupID       int
+	ParentID      int
+	ProjectPath   string
+	ProjectID     int
+	ParentPath    string
+	GroupFullPath string
 }
 
 type GiteeService struct {
@@ -44,12 +44,15 @@ type GiteeService struct {
 	CodeURLPrefix    string //http://cmb-gitaly.dev.gitee.work/api/code/api/enterprises/cmbchina
 	CodeUserQueryURL string //http://code.gitee.work/api/gitlab/users?username=
 	PrivateToken     string
+	GiteeHost        string
+	GroupFullPath    string
 }
 
 var GLS GitlabService
 var GTS GiteeService
 var UserMap map[string]int
 var RoleMap map[int]int
+var envConfig Config
 
 func (gls *GitlabService) Get(url, queryStrings string) *http.Response {
 	url = fmt.Sprintf("%s/%s?access_token=%s", gls.Host, url, gls.Token)
@@ -79,8 +82,10 @@ type DescendantGroupResponse struct {
 // TranslateGroupsDescendant 获取组下所有子组
 func (gls *GitlabService) TranslateGroupsDescendant() {
 	//先同步自己
-	gls.TranslateGroupsByName()
-	gls.TranslateProjectsByGroup()
+	result := gls.TranslateGroupsByName()
+	if result {
+		gls.TranslateProjectsByGroup()
+	}
 	path := url2.QueryEscape(gls.GroupPath)
 	for {
 		i := 1
@@ -92,8 +97,11 @@ func (gls *GitlabService) TranslateGroupsDescendant() {
 		}
 		for _, info := range ret {
 			gls.GroupPath = info.FullPath
-			gls.TranslateGroupsByName()
-			gls.TranslateProjectsByGroup()
+			//gls.GroupFullPath = info.FullPath
+			result := gls.TranslateGroupsByName()
+			if result {
+				gls.TranslateProjectsByGroup()
+			}
 		}
 		if len(ret) < 20 {
 			break
@@ -129,41 +137,65 @@ type GroupResponse struct {
 	LdapAccess                     interface{} `json:"ldap_access"`
 }
 
-func (gls *GitlabService) TranslateGroupsByName() {
+func (gls *GitlabService) TranslateGroupsByName() bool {
 	groupPaths := strings.Split(gls.GroupPath, "/")
-	parentPath := strings.Join(groupPaths[:len(groupPaths)-1], ",")
-	currentPath := groupPaths[len(groupPaths)-1]
-	url := "/repo_groups/" + currentPath + "?parent_path=" + parentPath
-	resp := GTS.PostOrGet(url, http.MethodGet, nil)
-	if resp == nil {
-		panic("can not check group")
+	// 组大于5级不迁移
+	if len(groupPaths) > 5 {
+		return false
 	}
-	if resp.StatusCode == http.StatusInternalServerError {
-		ret := struct {
-			Message string `json:"message"`
-			Code    int    `json:"code"`
-		}{}
-		if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
-			panic(err)
-		}
-		if ret.Message == "no parent found" {
-			if GTS.GetGroupInfoByPath(currentPath) {
-				// 适配code，不同父组相同path的组直接跳过
-				fmt.Printf("duplicate path: %s", gls.GroupPath)
-				return
-				//panic("duplicate path")
+	//parentPath := strings.Join(groupPaths[:len(groupPaths)-1], ",")
+	//currentPath := groupPaths[len(groupPaths)-1]
+
+	//ret := make([]Group, 0)
+	//if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+	//	panic(err)
+	//}
+
+	for i, groupPath := range groupPaths {
+		gls.GroupPath = groupPath
+		fullPath := groupPaths[0]
+		if i > 0 {
+			for n := 1; n <= i; n++ {
+				fullPath = fullPath + "/" + groupPaths[n]
 			}
 		}
-	}
-	for _, groupPath := range groupPaths {
-		gls.GroupPath = groupPath
+		url := GTS.GiteeHost + fmt.Sprintf("/api/gitlab/groups/can_migrate?full_path=%s", fullPath)
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			panic(err)
+		}
+		req.Header.Add("PRIVATE-TOKEN", GTS.PrivateToken)
+		command, _ := http2curl.GetCurlCommand(req)
+		fmt.Printf("gitee api invoke\n%s\n", command)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			panic(err)
+		}
+		if resp == nil {
+			panic("can not check group")
+		}
+
+		if resp.StatusCode == http.StatusOK {
+			bytes, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				panic("can not check group")
+			}
+			if string(bytes) == "false" {
+				fmt.Printf("duplicate path %s", groupPath)
+				return false
+			}
+		} else {
+			panic("can not check group")
+		}
+		gls.GroupFullPath = fullPath
 		gls.TranslateGroupByName()
 	}
+	return true
 }
 
 func (gls *GitlabService) TranslateGroupByName() {
 	url := "api/v4/groups"
-	queryStrings := "search=" + gls.GroupPath
+	queryStrings := "search=" + gls.GroupFullPath
 	resp := gls.Get(url, queryStrings)
 	if resp == nil {
 		panic("no valid group")
@@ -583,24 +615,24 @@ type Config struct {
 }
 
 func ParseConfig() *Config {
-	config := &Config{
-		GitlabHost:            os.Getenv("GITLAB_HOST"),
-		GitlabToken:           os.Getenv("GITLAB_TOKEN"),
-		GiteeToken:            os.Getenv("GITEE_TOKEN"),
-		GiteeCodeURLPrefix:    os.Getenv("GITEE_CODE_URL_PREFIX"),
-		GiteeCodeUserQueryURL: os.Getenv("GITEE_CODE_USER_QUERY_URL"),
-		GiteePrivateToken:     os.Getenv("GITEE_PRIVATE_TOKEN"),
-		GiteeHost:             os.Getenv("GITEE_HOST"),
-	}
 	//config := &Config{
-	//	GitlabHost:            "http://192.168.48.60:18787",
-	//	GitlabToken:           "yiWxjprfmdBtsZE3tfZk",
-	//	GiteeToken:            "65fb48940cce4b1684291abdcc5f3cf4",
-	//	GiteeCodeURLPrefix:    "/api/code/api/enterprises/osc",
-	//	GiteeCodeUserQueryURL: "/api/gitlab/users?username=",
-	//	GiteePrivateToken:     "c4ca4238a0b923820dcc509a6f75849b",
-	//	GiteeHost:             "http://code.gitee.work",
+	//	GitlabHost:            os.Getenv("GITLAB_HOST"),
+	//	GitlabToken:           os.Getenv("GITLAB_TOKEN"),
+	//	GiteeToken:            os.Getenv("GITEE_TOKEN"),
+	//	GiteeCodeURLPrefix:    os.Getenv("GITEE_CODE_URL_PREFIX"),
+	//	GiteeCodeUserQueryURL: os.Getenv("GITEE_CODE_USER_QUERY_URL"),
+	//	GiteePrivateToken:     os.Getenv("GITEE_PRIVATE_TOKEN"),
+	//	GiteeHost:             os.Getenv("GITEE_HOST"),
 	//}
+	config := &Config{
+		GitlabHost:            "http://192.168.48.60:18787",
+		GitlabToken:           "yiWxjprfmdBtsZE3tfZk",
+		GiteeToken:            "29c51ece0ddc494a9817e25f473531e1",
+		GiteeCodeURLPrefix:    "/api/code/api/enterprises/osc",
+		GiteeCodeUserQueryURL: "/api/gitlab/users?username=",
+		GiteePrivateToken:     "c4ca4238a0b923820dcc509a6f75849b",
+		GiteeHost:             "http://code.gitee.work",
+	}
 	return config
 }
 
@@ -619,7 +651,7 @@ func main() {
 	flag.StringVar(&giteeToken, "gitee_token", "", "")
 	flag.Parse()
 
-	//gitlabGroupPath = "leiaaa"
+	gitlabGroupPath = "0919c"
 
 	UserMap = make(map[string]int, 0)
 	RoleMap = make(map[int]int, 0)
@@ -665,6 +697,7 @@ func main() {
 		ProjectID:        0,
 		CodeURLPrefix:    config.GiteeHost + config.GiteeCodeURLPrefix,
 		CodeUserQueryURL: config.GiteeHost + config.GiteeCodeUserQueryURL,
+		GiteeHost:        config.GiteeHost,
 	}
 
 	GTS.GetRoles()
