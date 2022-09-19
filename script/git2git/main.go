@@ -34,6 +34,7 @@ type GitlabService struct {
 	ProjectID     int
 	ParentPath    string
 	GroupFullPath string
+	GiteeHost     string
 }
 
 type GiteeService struct {
@@ -160,7 +161,7 @@ func (gls *GitlabService) TranslateGroupsByName() bool {
 				fullPath = fullPath + "/" + groupPaths[n]
 			}
 		}
-		url := GTS.GiteeHost + fmt.Sprintf("/api/gitlab/groups/can_migrate?full_path=%s", fullPath)
+		url := gls.GiteeHost + fmt.Sprintf("/api/gitlab/groups/can_migrate?full_path=%s", fullPath)
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
 			panic(err)
@@ -688,6 +689,7 @@ func main() {
 		GroupID:     0,
 		ProjectPath: gitlabProjectPath,
 		ProjectID:   0,
+		GiteeHost:   config.GiteeHost,
 	}
 
 	GTS = GiteeService{
