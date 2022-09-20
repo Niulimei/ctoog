@@ -89,8 +89,8 @@ func (gls *GitlabService) TranslateGroupsDescendant() {
 		gls.TranslateProjectsByGroup()
 	}
 	path := url2.QueryEscape(gls.GroupPath)
+	i := 1
 	for {
-		i := 1
 		url := fmt.Sprintf("api/v4/groups/%s/descendant_groups", path)
 		resp := gls.Get(url, fmt.Sprintf("page=%d", i))
 		ret := make([]DescendantGroupResponse, 0)
@@ -225,8 +225,8 @@ func (gls *GitlabService) TranslateGroupByName() {
 }
 
 func (gls *GitlabService) TranslateProjectsByGroup() {
+	i := 1
 	for {
-		i := 1
 		url := fmt.Sprintf("api/v4/groups/%d/projects", gls.GroupID)
 		resp := gls.Get(url, fmt.Sprintf("page=%d", i))
 		if resp == nil {
