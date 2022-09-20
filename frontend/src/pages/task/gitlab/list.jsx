@@ -131,7 +131,7 @@ const GitlabTaskList = () => {
               return {
                 data: data.taskInfo,
                 success: true,
-                total: data.total,
+                total: data.count,
               };
           });
         }}
