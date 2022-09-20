@@ -258,8 +258,10 @@ func (gls *GitlabService) TranslateProjectsByGroup() {
 		for _, info := range ret {
 			if gls.ProjectPath == "" || (gls.ProjectPath != "" && info.Path == gls.ProjectPath) {
 				gls.ProjectID = info.ID
-				GTS.CreateProjectWithName(info.Name, info.Path, info.Description)
-				GLS.TranslateMemberPermissionByGroupOrProject("project")
+				result := GTS.CreateProjectWithName(info.Name, info.Path, info.Description)
+				if result {
+					GLS.TranslateMemberPermissionByGroupOrProject("project")
+				}
 			}
 		}
 		if len(ret) < 20 {
@@ -316,15 +318,15 @@ func (gls *GitlabService) TranslateMemberPermissionByGroupOrProject(targetType s
 		panic("no valid project in group")
 	}
 	type UserPermissionResponse struct {
-		ID          int        `json:"id"`
-		Name        string     `json:"name"`
-		Username    string     `json:"username"`
-		State       string     `json:"state"`
-		AvatarURL   string     `json:"avatar_url"`
-		WebURL      string     `json:"web_url"`
-		AccessLevel int        `json:"access_level"`
-		CreatedAt   time.Time  `json:"created_at"`
-		ExpiresAt   *time.Time `json:"expires_at"`
+		ID          int       `json:"id"`
+		Name        string    `json:"name"`
+		Username    string    `json:"username"`
+		State       string    `json:"state"`
+		AvatarURL   string    `json:"avatar_url"`
+		WebURL      string    `json:"web_url"`
+		AccessLevel int       `json:"access_level"`
+		CreatedAt   time.Time `json:"created_at"`
+		//ExpiresAt   *time.Time `json:"expires_at"`
 	}
 	ret := make([]UserPermissionResponse, 0)
 	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
@@ -468,9 +470,9 @@ func (gts *GiteeService) GetProjectByPath(path string) bool {
 	return true
 }
 
-func (gts *GiteeService) CreateProjectWithName(name string, path string, description string) {
+func (gts *GiteeService) CreateProjectWithName(name string, path string, description string) bool {
 	if gts.GetProjectByPath(path) {
-		return
+		return false
 	}
 	fmt.Println("create new project", path)
 	url := "/inner_source/projects"
@@ -499,11 +501,14 @@ func (gts *GiteeService) CreateProjectWithName(name string, path string, descrip
 	bytes, _ := ioutil.ReadAll(resp.Body)
 	fmt.Printf("create project response: %s", string(bytes))
 	if resp == nil || resp.StatusCode != http.StatusCreated {
-		panic("create project failed " + name)
+		fmt.Println("create project failed " + name)
+		return false
 	}
 	if !gts.GetProjectByPath(path) {
-		panic("create project failed" + name)
+		fmt.Println("create project failed " + name)
+		return false
 	}
+	return true
 }
 
 func (gts *GiteeService) GetGiteeUserInfo(username string) bool {
@@ -569,7 +574,10 @@ func (gts *GiteeService) CreateGroupOrProjectMember(username, targetType string,
 			url := fmt.Sprintf("/programs/%s/projects/%s/members", gts.GroupPath, gts.ProjectPath)
 			resp := gts.PostOrGet(url, http.MethodPost, bytes.NewBuffer(postBodyByte))
 			if resp == nil || (resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK) {
-				panic("create project member failed " + gts.ProjectPath + " " + username)
+				// todo 迁移时会报错
+				fmt.Println("create project member failed " + gts.ProjectPath + " " + username)
+				return
+				//panic("create project member failed " + gts.ProjectPath + " " + username)
 			}
 		} else {
 			postBody := struct {
@@ -587,7 +595,10 @@ func (gts *GiteeService) CreateGroupOrProjectMember(username, targetType string,
 			url := "/repo_groups/members"
 			resp := gts.PostOrGet(url, http.MethodPost, bytes.NewBuffer(postBodyByte))
 			if resp == nil || (resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK) {
-				panic("create group member failed " + gts.GroupPath + " " + username)
+				// todo 迁移时会panic
+				fmt.Println("create group member failed " + gts.GroupPath + " " + username)
+				return
+				//panic("create group member failed " + gts.GroupPath + " " + username)
 			}
 		}
 	}
@@ -636,7 +647,7 @@ func ParseConfig() *Config {
 	//config := &Config{
 	//	GitlabHost:            "http://192.168.48.60:18787",
 	//	GitlabToken:           "yiWxjprfmdBtsZE3tfZk",
-	//	GiteeToken:            "29c51ece0ddc494a9817e25f473531e1",
+	//	GiteeToken:            "79e3b5b3ff3e481c912ccfce15cc5d33",
 	//	GiteeCodeURLPrefix:    "/api/code/api/enterprises/osc",
 	//	GiteeCodeUserQueryURL: "/api/gitlab/users?username=",
 	//	GiteePrivateToken:     "c4ca4238a0b923820dcc509a6f75849b",
