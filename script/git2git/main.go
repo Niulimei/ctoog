@@ -537,7 +537,11 @@ func (gts *GiteeService) GetGiteeUserInfo(username string) bool {
 	}
 	ret := make([]UserResponse, 0)
 	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
-		panic(err)
+		bytes, _ := ioutil.ReadAll(resp.Body)
+		fmt.Printf("GetGiteeUserInfo resp: %s", string(bytes))
+		println(err)
+		return false
+		//panic(err)
 	}
 	if len(ret) == 1 {
 		if ret[0].Username == username {
