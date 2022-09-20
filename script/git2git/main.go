@@ -187,7 +187,10 @@ func (gls *GitlabService) TranslateGroupsByName() bool {
 				return false
 			}
 		} else {
-			panic("can not check group")
+			// todo
+			println("can not check group")
+			return false
+			//panic("can not check group")
 		}
 		gls.GroupFullPath = fullPath
 		gls.TranslateGroupByName()
