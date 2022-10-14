@@ -19,6 +19,13 @@ configGitRepo(){
   tmpGitDir=$2
   username=$3
   email=$4
+  git config --global http.postBuffer 2048M
+  git config --global http.maxRequestBuffer 1024M
+  git config --global core.compression 9
+  git config --global ssh.postBuffer 2048M
+  git config --global ssh.maxRequestBuffer 1024M
+  git config --global pack.windowMemory 256m
+  git config --global pack.packSizeLimit 256m
   git config --local core.longpaths true
   git config user.name "${username}"
   git config user.email "${email}"
@@ -53,6 +60,7 @@ pullCCAndPush(){
     rm -rf "${tmpGitDir}"
     tmpGitDirExist=true
   fi
+  rm -rf /root/.subversion/auth
   echo "${svnPassword}" | git svn init -s --username "${svnUser}" --no-metadata --no-minimize-url --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
   cd "${tmpGitDir}"
   if [[ ${containEmptyDir} == "true" ]]; then
@@ -70,10 +78,11 @@ pullCCAndPush(){
   sed -i '$d' .git/config
   echo "${branchInfo}" >> .git/config
   fi
+  rm -rf /root/.subversion/auth
   if [[ -f ${userFile} ]]; then
-    git svn fetch --authors-file="${userFile}" --authors-prog=/app/parse.sh
+    echo "${svnPassword}" | git svn fetch --authors-file="${userFile}" --username "${svnUser}"
   else
-    git svn fetch
+    echo "${svnPassword}" | git svn fetch --username "${svnUser}"
   fi
   for t in $(git for-each-ref --format='%(refname:short)' refs/remotes/tags); do git tag ${t/tags\//} $t && git branch -D -r $t || true; done
   for b in $(git for-each-ref --format='%(refname:short)' refs/remotes); do git branch $b refs/remotes/$b && git branch -D -r $b || true; done
