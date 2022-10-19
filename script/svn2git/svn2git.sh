@@ -101,27 +101,23 @@ END
   --data "$CONFIGURE" \
   'http://'$BITBUCKET_HOST'/rest/svn/1.0/projects/'$PROJECT_KEY'/repos/'$tmpGitSlug'/configure?start=import&async=false'
 
-  git clone 'http://'$BITBUCKET_GIT_USER':'$BITBUCKET_GIT_PASSWORD'@'$BITBUCKET_GIT_HOST'/scm/'$tmpGitProj'/'$tmpGitSlug'.git' "$tmpGitDir"
+  rm -rf "$tmpGitDir"
+  git clone --mirror 'http://'$BITBUCKET_GIT_USER':'$BITBUCKET_GIT_PASSWORD'@'$BITBUCKET_GIT_HOST'/scm/'$tmpGitProj'/'$tmpGitSlug'.git' "$tmpGitDir"
   cd "${tmpGitDir}"
+  git fetch -p origin
+  gitInfo=`cat FETCH_HEAD`
+  while ([[ -z ${gitInfo} ]])
+  do
+    git fetch -p origin
+    gitInfo=`cat FETCH_HEAD`
+    echo "sleep 10 seconds because bitbucket no content..."
+    sleep 10
+  done
   echo "Pushing code..."
-  configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
-  if $tmpGitDirExist; then
-    lastMessage=$(git status | tail -n 2)
-    #nothing to commit, working tree clean
-    noCommit='nothing to commit'
-    if [[ $lastMessage =~ $noCommit ]]; then
-      set +e
-      git push origin --all
-      git push --tags
-      set -e
-    else
-      git push origin --all
-      git push origin --tags
-    fi
-  else
-    git push origin --all
-    git push --tags
-  fi
+  git remote set-url --push origin "${gitRepoUrl}"
+  git fetch -p origin
+  git push --mirror
+  #configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
   curl --request DELETE -v -u ""${BITBUCKET_USERNAME}":"${BITBUCKET_PASSWORD}"" \
   --url 'http://'$BITBUCKET_HOST'/rest/api/latest/projects/'$PROJECT_KEY'/repos/'$tmpGitSlug'' \
   --header 'Accept: application/json'
