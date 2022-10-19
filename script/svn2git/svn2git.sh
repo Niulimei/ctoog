@@ -123,6 +123,9 @@ END
     git push origin --all
     git push --tags
   fi
+  curl --request DELETE -v -u "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD" \
+  --url 'http://$BITBUCKET_HOST/rest/api/latest/projects/$PROJECT_KEY/repos/$tmpGitSlug' \
+  --header 'Accept: application/json'
 }
 
 main(){
