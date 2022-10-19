@@ -30,6 +30,7 @@ configGitRepo(){
   git config user.name "${username}"
   git config user.email "${email}"
   git config push.default simple
+  git remote remove origin
   git remote add origin "${repoUrl}"
   git remote update
   git fetch --all
@@ -55,40 +56,54 @@ pullCCAndPush(){
   combineNameAdapt=$(basename "${svnRepoUrl}")
   local tmpGitDir="${gitTmpRootPath}/${combineNameAdapt}_${taskID}"
   local tmpGitDirExist=false
+  local tmpGitProj=`echo $PROJECT_KEY | awk '{print tolower($0)}'`
+  local tmpGitSlug=`echo ${combineNameAdapt}_${taskID} | awk '{print tolower($0)}'`
+  echo $tmpGitProj
+  echo $tmpGitSlug
+  curl -v --request POST \
+  --url 'http://{baseurl}/rest/api/latest/projects/{projectKey}/repos' \
+  --header 'Accept: application/json' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "name": "Tmp svn repo",
+  "scmId": "scm",
+  "slug": $tmpGitSlug,
+}'
   echo "Cloning code..."
   if [[ -d ${tmpGitDir} ]]; then
     rm -rf "${tmpGitDir}"
     tmpGitDirExist=true
   fi
   rm -rf /root/.subversion/auth
-  echo "${svnPassword}" | git svn init -s --username "${svnUser}" --no-metadata --no-minimize-url --prefix "" "${svnRepoUrl}" "${tmpGitDir}" >/dev/null
+  userFileInfo = `cat "${userFile}"`
+  CONFIGURE=$(cat <<END
+   {
+     "url" : "${svnRepoUrl}",
+     "credentials" : {
+         "username" : "${svnUser}",
+         "password" : "${svnPassword}"
+     },
+     "layout" : {
+         "type" : "MANUAL",
+         "branches" : ["${branchInfo}"]
+     },
+     "config" : {
+         "svn.fetchInterval" : 0
+     },
+     "authors" : "${userFileInfo}"
+   }
+END
+)
+  echo "$CONFIGURE"
+  curl -v -u "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD" \
+  -H "Content-Type: application/json" \
+  -H "X-Atlassian-Token:no-check" \
+  -X POST \
+  --data "$CONFIGURE" \
+  "http://$BITBUCKET_HOST/rest/svn/1.0/projects/$PROJECT_KEY/repos/$tmpGitSlug/configure?start=import&async=false"
+
+  echo $BITBUCKET_GIT_PASSWORD | git clone http://$BITBUCKET_GIT_USER@$BITBUCKET_GIT_HOST/scm/$tmpGitProj/$tmpGitSlug.git "$tmpGitDir"
   cd "${tmpGitDir}"
-  if [[ ${containEmptyDir} == "true" ]]; then
-    find "${tmpGitDir}" -type d -empty -not -path "./.git/*" -exec touch {}/"${emptyFileName}" \;
-  fi
-#  bash "${workdir}"/changeCharSet.sh "${tmpGitDir}" &>/dev/null
-  if [[ -n "${gitignoreContent}" ]]; then
-    echo -e "${gitignoreContent}" >./.gitignore
-  else
-    rm -rf ./.gitignore
-  fi
-  if [[ ! -z ${branchInfo} ]];then
-  sed -i '$d' .git/config
-  sed -i '$d' .git/config
-  sed -i '$d' .git/config
-  echo "${branchInfo}" >> .git/config
-  fi
-  rm -rf /root/.subversion/auth
-  if [[ -f ${userFile} ]]; then
-    echo "${svnPassword}" | git svn fetch --authors-file="${userFile}" --username "${svnUser}"
-  else
-    echo "${svnPassword}" | git svn fetch --username "${svnUser}"
-  fi
-  for t in $(git for-each-ref --format='%(refname:short)' refs/remotes/tags); do git tag ${t/tags\//} $t && git branch -D -r $t || true; done
-  for b in $(git for-each-ref --format='%(refname:short)' refs/remotes); do git branch $b refs/remotes/$b && git branch -D -r $b || true; done
-  for p in $(git for-each-ref --format='%(refname:short)' | grep @); do git branch -D $p || true; done
-  git branch -d trunk || true
-  git branch -d origin/trunk || true
   echo "Pushing code..."
   configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
   if $tmpGitDirExist; then
