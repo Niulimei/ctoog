@@ -449,9 +449,9 @@ func geneUsersFile(workerTaskModel Task) string {
 	buffer.WriteString("{")
 	userInfo := ""
 	for _, pi := range workerTaskModel.NamePair {
-		userInfo += fmt.Sprintf(`"%s" : ["%s" : "<%s>"],`, pi.SnvUserName, pi.GitUserName, pi.GitEmail)
+		userInfo += fmt.Sprintf(`"%s" , ["%s" , "%s"],`, pi.SnvUserName, pi.GitUserName, pi.GitEmail)
 	}
-	strings.TrimSuffix(userInfo, ",")
+	userInfo = strings.TrimSuffix(userInfo, ",")
 	buffer.WriteString(userInfo+"}")
 	fp := filepath.Join(cwd, "tmpCmdOut", filepath.Base(workerTaskModel.SvnURL)+"_"+strconv.Itoa(int(workerTaskModel.TaskId))+".txt")
 	if len(workerTaskModel.NamePair) != 0 {
@@ -467,7 +467,7 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	tmpCmdOutFile := fmt.Sprintf("%s/tmpCmdOut/%d_%d.log", cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)
 	exec.Command("/bin/bash", "-c", fmt.Sprintf("mkdir -p %s/tmpCmdOut;touch %s/tmpCmdOut/%d_%d.log", cwd, cwd, workerTaskModel.TaskId, workerTaskModel.TaskLogId)).Output()
 	userFile := geneUsersFile(workerTaskModel)
-	workerTaskModel.BranchesInfo = strings.Replace(strings.Replace(strings.Replace(strings.Replace(workerTaskModel.BranchesInfo, "fetch =", "branches : ", -1), "refs/remotes/tags", "refs/tags", -1), "refs/remotes/origin", "refs/heads", -1), "refs/remotes", "refs/heads", -1)
+	workerTaskModel.BranchesInfo = strings.Replace(strings.Replace(strings.Replace(strings.Replace(workerTaskModel.BranchesInfo, "fetch =", "", -1), "refs/remotes/tags", "refs/tags", -1), "refs/remotes/origin", "refs/heads", -1), "refs/remotes", "refs/heads", -1)
 	workerTaskModel.BranchesInfo = strings.Join(strings.Split(workerTaskModel.BranchesInfo, "\n"), ",")
 	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" &> %s`,
 		cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
