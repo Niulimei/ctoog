@@ -89,7 +89,7 @@ pullCCAndPush(){
      "config" : {
          "svn.fetchInterval" : 0
      },
-     "authors" : "${userFileInfo}"
+     "authors" : ${userFileInfo}
    }
 END
 )
