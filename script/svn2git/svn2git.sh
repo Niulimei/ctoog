@@ -61,7 +61,7 @@ pullCCAndPush(){
   echo $tmpGitProj
   echo $tmpGitSlug
   curl -v --request POST \
-  --url 'http://{baseurl}/rest/api/latest/projects/{projectKey}/repos' \
+  --url 'http://$BITBUCKET_HOST/rest/api/latest/projects/{projectKey}/repos' \
   --header 'Accept: application/json' \
   --header 'Content-Type: application/json' \
   --data '{
