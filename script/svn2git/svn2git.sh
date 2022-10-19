@@ -60,14 +60,13 @@ pullCCAndPush(){
   local tmpGitSlug=`echo ${combineNameAdapt}_${taskID} | awk '{print tolower($0)}'`
   echo $tmpGitProj
   echo $tmpGitSlug
-  curl -v --request POST \
-  --url 'http://$BITBUCKET_HOST/rest/api/latest/projects/{projectKey}/repos' \
+  curl -v -u "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD" --request POST \
+  --url 'http://'$BITBUCKET_HOST'/rest/api/latest/projects/'$PROJECT_KEY'/repos' \
   --header 'Accept: application/json' \
   --header 'Content-Type: application/json' \
   --data '{
-  "name": "Tmp svn repo",
-  "scmId": "scm",
-  "slug": $tmpGitSlug,
+  "name": "'$tmpGitSlug'",
+  "slug": "'$tmpGitSlug'"
 }'
   echo "Cloning code..."
   if [[ -d ${tmpGitDir} ]]; then
@@ -75,7 +74,7 @@ pullCCAndPush(){
     tmpGitDirExist=true
   fi
   rm -rf /root/.subversion/auth
-  userFileInfo = `cat "${userFile}"`
+  userFileInfo=`cat "${userFile}"`
   CONFIGURE=$(cat <<END
    {
      "url" : "${svnRepoUrl}",
@@ -100,9 +99,9 @@ END
   -H "X-Atlassian-Token:no-check" \
   -X POST \
   --data "$CONFIGURE" \
-  "http://$BITBUCKET_HOST/rest/svn/1.0/projects/$PROJECT_KEY/repos/$tmpGitSlug/configure?start=import&async=false"
+  'http://'$BITBUCKET_HOST'/rest/svn/1.0/projects/'$PROJECT_KEY'/repos/'$tmpGitSlug'/configure?start=import&async=false'
 
-  echo $BITBUCKET_GIT_PASSWORD | git clone http://$BITBUCKET_GIT_USER@$BITBUCKET_GIT_HOST/scm/$tmpGitProj/$tmpGitSlug.git "$tmpGitDir"
+  git clone 'http://'$BITBUCKET_GIT_USER':'$BITBUCKET_GIT_PASSWORD'@'$BITBUCKET_GIT_HOST'/scm/'$tmpGitProj'/'$tmpGitSlug'.git' "$tmpGitDir"
   cd "${tmpGitDir}"
   echo "Pushing code..."
   configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
@@ -123,8 +122,8 @@ END
     git push origin --all
     git push --tags
   fi
-  curl --request DELETE -v -u "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD" \
-  --url 'http://$BITBUCKET_HOST/rest/api/latest/projects/$PROJECT_KEY/repos/$tmpGitSlug' \
+  curl --request DELETE -v -u ""${BITBUCKET_USERNAME}":"${BITBUCKET_PASSWORD}"" \
+  --url 'http://'$BITBUCKET_HOST'/rest/api/latest/projects/'$PROJECT_KEY'/repos/'$tmpGitSlug'' \
   --header 'Accept: application/json'
 }
 
