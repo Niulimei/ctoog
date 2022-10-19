@@ -449,7 +449,7 @@ func geneUsersFile(workerTaskModel Task) string {
 	buffer.WriteString("{")
 	userInfo := ""
 	for _, pi := range workerTaskModel.NamePair {
-		userInfo += fmt.Sprintf(`"%s" , ["%s" , "%s"],`, pi.SnvUserName, pi.GitUserName, pi.GitEmail)
+		userInfo += fmt.Sprintf(`"%s" : ["%s" , "%s"],`, pi.SnvUserName, pi.GitUserName, pi.GitEmail)
 	}
 	userInfo = strings.TrimSuffix(userInfo, ",")
 	buffer.WriteString(userInfo+"}")
