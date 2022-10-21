@@ -452,7 +452,7 @@ func geneUsersFile(workerTaskModel Task) string {
 		userInfo += fmt.Sprintf(`"%s" : ["%s" , "%s"],`, pi.SnvUserName, pi.GitUserName, pi.GitEmail)
 	}
 	userInfo = strings.TrimSuffix(userInfo, ",")
-	buffer.WriteString(userInfo+"}")
+	buffer.WriteString(userInfo + "}")
 	fp := filepath.Join(cwd, "tmpCmdOut", filepath.Base(workerTaskModel.SvnURL)+"_"+strconv.Itoa(int(workerTaskModel.TaskId))+".txt")
 	if len(workerTaskModel.NamePair) != 0 {
 		ioutil.WriteFile(fp, []byte(buffer.String()), 0644)
@@ -474,7 +474,7 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	workerTaskModel.BranchesInfo = strings.Replace(workerTaskModel.BranchesInfo, "refs/remotes/tags", "refs/tags", -1)
 	workerTaskModel.BranchesInfo = strings.Replace(workerTaskModel.BranchesInfo, "refs/remotes/origin", "refs/heads", -1)
 	workerTaskModel.BranchesInfo = strings.Replace(workerTaskModel.BranchesInfo, "refs/remotes", "refs/heads", -1)
-	workerTaskModel.BranchesInfo = strings.Join(strings.Split(workerTaskModel.BranchesInfo, "\n"), ",")
+	workerTaskModel.BranchesInfo = "\"" + strings.Join(strings.Split(workerTaskModel.BranchesInfo, "\n"), "\",\"") + "\""
 	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" &> %s`,
 		cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
 		workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail,
