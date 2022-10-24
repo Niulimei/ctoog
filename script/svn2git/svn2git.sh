@@ -53,6 +53,7 @@ pullCCAndPush(){
   svnUser="${10}"
   svnPassword="${11}"
   branchInfo="${12}"
+  tagsInfo="${13}"
   combineNameAdapt=$(basename "${svnRepoUrl}")
   local tmpGitDir="${gitTmpRootPath}/${combineNameAdapt}_${taskID}"
   local tmpGitDirExist=false
@@ -84,7 +85,8 @@ pullCCAndPush(){
      },
      "layout" : {
          "type" : "MANUAL",
-         "branches" : ["${branchInfo}"]
+         "branches" : ["${branchInfo}"],
+         "tags" : ["${tagsInfo}"]
      },
      "config" : {
          "svn.fetchInterval" : 0

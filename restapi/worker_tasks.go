@@ -474,12 +474,24 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	workerTaskModel.BranchesInfo = strings.Replace(workerTaskModel.BranchesInfo, "refs/remotes/tags", "refs/tags", -1)
 	workerTaskModel.BranchesInfo = strings.Replace(workerTaskModel.BranchesInfo, "refs/remotes/origin", "refs/heads", -1)
 	workerTaskModel.BranchesInfo = strings.Replace(workerTaskModel.BranchesInfo, "refs/remotes", "refs/heads", -1)
-	workerTaskModel.BranchesInfo = "\"" + strings.Join(strings.Split(workerTaskModel.BranchesInfo, "\n"), "\",\"") + "\""
-	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" &> %s`,
+	branchesInfo := strings.Split(workerTaskModel.BranchesInfo, "\n")
+	branches := make([]string, 0)
+	tags := make([]string, 0)
+	for _, info := range branchesInfo {
+		if strings.Contains(info, "refs/tags") {
+			tags = append(tags, info)
+		} else {
+			branches = append(branches, info)
+		}
+	}
+	workerTaskModel.BranchesInfo = "\"" + strings.Join(branches, "\",\"") + "\""
+	tagsInfo := "\"" + strings.Join(tags, "\",\"") + "\""
+
+	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" &> %s`,
 		cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
 		workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail,
 		workerTaskModel.Keep, userFile, strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""),
-		workerTaskModel.CcUser, workerTaskModel.CcPassword, workerTaskModel.BranchesInfo, tmpCmdOutFile)
+		workerTaskModel.CcUser, workerTaskModel.CcPassword, workerTaskModel.BranchesInfo, tagsInfo, tmpCmdOutFile)
 	log.Infoln(cmdStr)
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	cmds = append(cmds, cmd)
