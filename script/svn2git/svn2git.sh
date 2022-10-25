@@ -76,6 +76,7 @@ pullCCAndPush(){
   fi
   rm -rf /root/.subversion/auth
   userFileInfo=`cat "${userFile}"`
+  if [[ -z ${tagsInfo} ]];then
   CONFIGURE=$(cat <<END
    {
      "url" : "${svnRepoUrl}",
@@ -95,6 +96,26 @@ pullCCAndPush(){
    }
 END
 )
+  else
+  CONFIGURE=$(cat <<END
+   {
+     "url" : "${svnRepoUrl}",
+     "credentials" : {
+         "username" : "${svnUser}",
+         "password" : "${svnPassword}"
+     },
+     "layout" : {
+         "type" : "MANUAL",
+         "branches" : ["${branchInfo}"]
+     },
+     "config" : {
+         "svn.fetchInterval" : 0
+     },
+     "authors" : ${userFileInfo}
+   }
+END
+)
+  fi
   echo "$CONFIGURE"
   curl -v -u "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD" \
   -H "Content-Type: application/json" \
