@@ -86,8 +86,7 @@ pullCCAndPush(){
      },
      "layout" : {
          "type" : "MANUAL",
-         "branches" : ["${branchInfo}"],
-         "tags" : ["${tagsInfo}"]
+         "branches" : ["${branchInfo}"]
      },
      "config" : {
          "svn.fetchInterval" : 0
@@ -106,7 +105,8 @@ END
      },
      "layout" : {
          "type" : "MANUAL",
-         "branches" : ["${branchInfo}"]
+         "branches" : ["${branchInfo}"],
+         "tags" : ["${tagsInfo}"]
      },
      "config" : {
          "svn.fetchInterval" : 0
