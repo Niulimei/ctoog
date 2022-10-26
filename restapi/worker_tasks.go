@@ -484,7 +484,7 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 			info = strings.Replace(info, "tags =", "", -1)
 			info = strings.Replace(info, "tags=", "", -1)
 			tags = append(tags, info)
-		}else if strings.Contains(info, "/refs/heads/trunk") {
+		} else if strings.Contains(info, "refs/heads/trunk") {
 			trunks = info
 		} else {
 			info = strings.Replace(info, "branches = ", "", -1)
