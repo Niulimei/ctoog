@@ -90,7 +90,7 @@ pullCCAndPush(){
          "type" : "MANUAL",
          "branches" : ["${branchInfo}"],
          "tags": [],
-         "trunk": ""
+         "trunk": null
      },
      "config" : {
          "svn.fetchInterval" : 0
@@ -134,7 +134,7 @@ END
          "type" : "MANUAL",
          "branches" : ["${branchInfo}"],
          "tags" : ["${tagsInfo}"],
-         "trunk": ""
+         "trunk": null
      },
      "config" : {
          "svn.fetchInterval" : 0

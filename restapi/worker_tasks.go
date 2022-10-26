@@ -493,10 +493,10 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 			branches = append(branches, info)
 		}
 	}
-	workerTaskModel.BranchesInfo = "\"" + strings.Join(branches, "\",\"") + "\""
-	tagsInfo := "\"" + strings.Join(tags, "\",\"") + "\""
+	workerTaskModel.BranchesInfo = strings.Join(branches, "\",\"")
+	tagsInfo := strings.Join(tags, "\",\"")
 
-	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" &> %s`,
+	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" "%s" "%s" '%s' '%s' '%s' &> %s`,
 		cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
 		workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail,
 		workerTaskModel.Keep, userFile, strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""),
