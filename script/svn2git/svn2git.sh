@@ -54,6 +54,7 @@ pullCCAndPush(){
   svnPassword="${11}"
   branchInfo="${12}"
   tagsInfo="${13}"
+  trunkInfo="${14}"
   combineNameAdapt=$(basename "${svnRepoUrl}")
   local tmpGitDir="${gitTmpRootPath}/${combineNameAdapt}_${taskID}"
   local tmpGitDirExist=false
@@ -77,25 +78,7 @@ pullCCAndPush(){
   rm -rf /root/.subversion/auth
   userFileInfo=`cat "${userFile}"`
   if [[ -z ${tagsInfo} ]];then
-  CONFIGURE=$(cat <<END
-   {
-     "url" : "${svnRepoUrl}",
-     "credentials" : {
-         "username" : "${svnUser}",
-         "password" : "${svnPassword}"
-     },
-     "layout" : {
-         "type" : "MANUAL",
-         "branches" : ["${branchInfo}"]
-     },
-     "config" : {
-         "svn.fetchInterval" : 0
-     },
-     "authors" : ${userFileInfo}
-   }
-END
-)
-  else
+    if [[ -z ${trunkInfo} ]];then
   CONFIGURE=$(cat <<END
    {
      "url" : "${svnRepoUrl}",
@@ -106,7 +89,8 @@ END
      "layout" : {
          "type" : "MANUAL",
          "branches" : ["${branchInfo}"],
-         "tags" : ["${tagsInfo}"]
+         "tags": [],
+         "trunk": ""
      },
      "config" : {
          "svn.fetchInterval" : 0
@@ -115,6 +99,72 @@ END
    }
 END
 )
+    else
+  CONFIGURE=$(cat <<END
+   {
+     "url" : "${svnRepoUrl}",
+     "credentials" : {
+         "username" : "${svnUser}",
+         "password" : "${svnPassword}"
+     },
+     "layout" : {
+         "type" : "MANUAL",
+         "branches" : ["${branchInfo}"],
+         "tags": [],
+         "trunk": "${trunkInfo}"
+     },
+     "config" : {
+         "svn.fetchInterval" : 0
+     },
+     "authors" : ${userFileInfo}
+   }
+END
+)
+    fi
+  else
+   if [[ -z ${trunkInfo} ]];then
+  CONFIGURE=$(cat <<END
+   {
+     "url" : "${svnRepoUrl}",
+     "credentials" : {
+         "username" : "${svnUser}",
+         "password" : "${svnPassword}"
+     },
+     "layout" : {
+         "type" : "MANUAL",
+         "branches" : ["${branchInfo}"],
+         "tags" : ["${tagsInfo}"],
+         "trunk": ""
+     },
+     "config" : {
+         "svn.fetchInterval" : 0
+     },
+     "authors" : ${userFileInfo}
+   }
+END
+)
+    else
+  CONFIGURE=$(cat <<END
+   {
+     "url" : "${svnRepoUrl}",
+     "credentials" : {
+         "username" : "${svnUser}",
+         "password" : "${svnPassword}"
+     },
+     "layout" : {
+         "type" : "MANUAL",
+         "branches" : ["${branchInfo}"],
+         "tags" : ["${tagsInfo}"],
+         "trunk": "${trunkInfo}"
+     },
+     "config" : {
+         "svn.fetchInterval" : 0
+     },
+     "authors" : ${userFileInfo}
+   }
+END
+)
+    fi
   fi
   echo "$CONFIGURE"
   curl -v -u "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD" \
@@ -148,7 +198,7 @@ END
 
 main(){
   mkdir -p "${gitTmpRootPath}" -m 777
-  pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" "${12}" "${13}"
+  pullCCAndPush "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" "${12}" "${13}" "${14}"
 }
 
-main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" "${12}" "${13}"
+main "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}" "${12}" "${13}" "${14}"

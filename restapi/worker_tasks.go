@@ -477,12 +477,15 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	branchesInfo := strings.Split(workerTaskModel.BranchesInfo, "\n")
 	branches := make([]string, 0)
 	tags := make([]string, 0)
+	trunks := ""
 	for _, info := range branchesInfo {
 		if strings.Contains(info, "refs/tags") {
 			info = strings.Replace(info, "tags = ", "", -1)
 			info = strings.Replace(info, "tags =", "", -1)
 			info = strings.Replace(info, "tags=", "", -1)
 			tags = append(tags, info)
+		}else if strings.Contains(info, "/refs/heads/trunk") {
+			trunks = info
 		} else {
 			info = strings.Replace(info, "branches = ", "", -1)
 			info = strings.Replace(info, "branches =", "", -1)
@@ -493,11 +496,11 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	workerTaskModel.BranchesInfo = "\"" + strings.Join(branches, "\",\"") + "\""
 	tagsInfo := "\"" + strings.Join(tags, "\",\"") + "\""
 
-	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" &> %s`,
+	cmdStr := fmt.Sprintf(`export LANG=zh_CN.UTF-8;/usr/bin/bash %s/script/svn2git/svn2git.sh "%s" "%s" "%d" "%t" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" &> %s`,
 		cwd, workerTaskModel.SvnURL, gitUrl, workerTaskModel.TaskId,
 		workerTaskModel.IncludeEmpty, workerTaskModel.GitUser, workerTaskModel.GitEmail,
 		workerTaskModel.Keep, userFile, strings.ReplaceAll(workerTaskModel.Gitignore, " ", ""),
-		workerTaskModel.CcUser, workerTaskModel.CcPassword, workerTaskModel.BranchesInfo, tagsInfo, tmpCmdOutFile)
+		workerTaskModel.CcUser, workerTaskModel.CcPassword, workerTaskModel.BranchesInfo, tagsInfo, trunks, tmpCmdOutFile)
 	log.Infoln(cmdStr)
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	cmds = append(cmds, cmd)
