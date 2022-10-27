@@ -191,7 +191,7 @@ END
   git fetch -p origin
   git push --mirror
   #configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
-  if [ ${BITBUCKET_CLEAN} == "false" ];then
+  if [ ${BITBUCKET_CLEAN} == "true" ];then
   curl --request DELETE -v -u ""${BITBUCKET_USERNAME}":"${BITBUCKET_PASSWORD}"" \
   --url 'http://'$BITBUCKET_HOST'/rest/api/latest/projects/'$PROJECT_KEY'/repos/'$tmpGitSlug'' \
   --header 'Accept: application/json'
