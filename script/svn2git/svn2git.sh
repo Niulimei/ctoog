@@ -78,7 +78,7 @@ pullCCAndPush(){
   rm -rf /root/.subversion/auth
   userFileInfo=`cat "${userFile}"`
   if [[ -z ${tagsInfo} ]];then
-    if [[ -z ${trunkInfo} ]];then
+    if [[ -z ${branchInfo} ]];then
   CONFIGURE=$(cat <<END
    {
      "url" : "${svnRepoUrl}",
@@ -88,9 +88,9 @@ pullCCAndPush(){
      },
      "layout" : {
          "type" : "MANUAL",
-         "branches" : ["${branchInfo}"],
+         "branches" : [],
          "tags": [],
-         "trunk": null
+         "trunk": "${trunkInfo}"
      },
      "config" : {
          "svn.fetchInterval" : 0
@@ -122,7 +122,7 @@ END
 )
     fi
   else
-   if [[ -z ${trunkInfo} ]];then
+   if [[ -z ${branchInfo} ]];then
   CONFIGURE=$(cat <<END
    {
      "url" : "${svnRepoUrl}",
@@ -132,9 +132,9 @@ END
      },
      "layout" : {
          "type" : "MANUAL",
-         "branches" : ["${branchInfo}"],
+         "branches" : [],
          "tags" : ["${tagsInfo}"],
-         "trunk": null
+         "trunk": "${trunkInfo}"
      },
      "config" : {
          "svn.fetchInterval" : 0
@@ -191,9 +191,11 @@ END
   git fetch -p origin
   git push --mirror
   #configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
+  if [ ${BITBUCKET_CLEAN} == "false" ];then
   curl --request DELETE -v -u ""${BITBUCKET_USERNAME}":"${BITBUCKET_PASSWORD}"" \
   --url 'http://'$BITBUCKET_HOST'/rest/api/latest/projects/'$PROJECT_KEY'/repos/'$tmpGitSlug'' \
   --header 'Accept: application/json'
+  fi
 }
 
 main(){
