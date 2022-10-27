@@ -55,6 +55,7 @@ pullCCAndPush(){
   branchInfo="${12}"
   tagsInfo="${13}"
   trunkInfo="${14}"
+  trunkInfo=`echo ${trunkInfo} |sed 's/refs\/heads\/trunk/refs\/heads\/master/g'`
   combineNameAdapt=$(basename "${svnRepoUrl}")
   local tmpGitDir="${gitTmpRootPath}/${combineNameAdapt}_${taskID}"
   local tmpGitDirExist=false
@@ -183,8 +184,8 @@ END
   do
     git fetch -p origin
     gitInfo=`cat FETCH_HEAD`
-    echo "sleep 10 seconds because bitbucket no content..."
-    sleep 10
+    echo "sleep because bitbucket no content..."
+    sleep ${BITBUCKET_SLEEP}
   done
   echo "Pushing code..."
   git remote set-url --push origin "${gitRepoUrl}"
