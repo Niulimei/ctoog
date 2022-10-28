@@ -56,6 +56,10 @@ pullCCAndPush(){
   tagsInfo="${13}"
   trunkInfo="${14}"
   trunkInfo=`echo ${trunkInfo} |sed 's/refs\/heads\/trunk/refs\/heads\/master/g'`
+  if [[ -z ${trunkInfo} ]];then
+    echo "不能没有trunk配置"
+    exit 1
+  fi
   combineNameAdapt=$(basename "${svnRepoUrl}")
   local tmpGitDir="${gitTmpRootPath}/${combineNameAdapt}_${taskID}"
   local tmpGitDirExist=false

@@ -474,6 +474,13 @@ func svn2Git(workerTaskModel Task, gitUrl string) int {
 	workerTaskModel.BranchesInfo = strings.Replace(workerTaskModel.BranchesInfo, "refs/remotes/tags", "refs/tags", -1)
 	workerTaskModel.BranchesInfo = strings.Replace(workerTaskModel.BranchesInfo, "refs/remotes/origin", "refs/heads", -1)
 	workerTaskModel.BranchesInfo = strings.Replace(workerTaskModel.BranchesInfo, "refs/remotes", "refs/heads", -1)
+	if strings.Contains(workerTaskModel.BranchesInfo, ".:refs") {
+		workerTaskModel.SvnURL = strings.TrimSuffix(workerTaskModel.SvnURL, "/")
+		svnInfo := strings.Split(workerTaskModel.SvnURL, "/")
+		workerTaskModel.SvnURL = strings.Join(svnInfo[0:len(svnInfo)-1], "/")
+		svnDir := svnInfo[len(svnInfo)-1]
+		workerTaskModel.BranchesInfo = strings.Replace(workerTaskModel.BranchesInfo, ".:refs", svnDir+":refs", -1)
+	}
 	branchesInfo := strings.Split(workerTaskModel.BranchesInfo, "\n")
 	branches := make([]string, 0)
 	tags := make([]string, 0)
