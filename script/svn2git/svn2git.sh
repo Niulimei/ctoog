@@ -190,7 +190,7 @@ END
     git fetch -p origin
     gitInfo=`cat FETCH_HEAD`
     n=$[$n+1]
-    if [ $n -gt 4 ];then
+    if [ $n -gt ${BITBUCKET_LOOP_COUNT} ];then
       exit 1
     fi
     echo "sleep because bitbucket no content..."
