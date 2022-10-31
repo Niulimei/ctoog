@@ -64,7 +64,7 @@ pullCCAndPush(){
   local tmpGitDir="${gitTmpRootPath}/${combineNameAdapt}_${taskID}"
   local tmpGitDirExist=false
   local tmpGitProj=`echo $PROJECT_KEY | awk '{print tolower($0)}'`
-  local tmpGitSlug=`echo ${combineNameAdapt}_${taskID} | awk '{print tolower($0)}'`
+  local tmpGitSlug=`echo m_gitee_svn_${taskID} | awk '{print tolower($0)}'`
   echo $tmpGitProj
   echo $tmpGitSlug
   curl -v -u "$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD" --request POST \
@@ -184,10 +184,15 @@ END
   cd "${tmpGitDir}"
   git fetch -p origin
   gitInfo=`cat FETCH_HEAD`
+  n=0
   while ([[ -z ${gitInfo} ]])
   do
     git fetch -p origin
     gitInfo=`cat FETCH_HEAD`
+    n=$[$n+1]
+    if [ $n -gt 4 ];then
+      exit 1
+    fi
     echo "sleep because bitbucket no content..."
     sleep ${BITBUCKET_SLEEP}
   done
