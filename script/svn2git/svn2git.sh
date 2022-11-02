@@ -183,12 +183,12 @@ END
   git clone --mirror 'http://'$BITBUCKET_GIT_USER':'$BITBUCKET_GIT_PASSWORD'@'$BITBUCKET_GIT_HOST'/scm/'$tmpGitProj'/'$tmpGitSlug'.git' "$tmpGitDir"
   cd "${tmpGitDir}"
   git fetch -p origin
-  gitInfo=`cat FETCH_HEAD`
+  gitInfo=`ls refs/heads/`
   n=0
   while ([[ -z ${gitInfo} ]])
   do
     git fetch -p origin
-    gitInfo=`cat FETCH_HEAD`
+    gitInfo=`ls refs/heads/`
     n=$[$n+1]
     if [ $n -gt ${BITBUCKET_LOOP_COUNT} ];then
       exit 1
