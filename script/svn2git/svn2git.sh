@@ -89,6 +89,7 @@ pullCCAndPush(){
   for p in $(git for-each-ref --format='%(refname:short)' | grep @); do git branch -D $p || true; done
   git branch -d trunk || true
   git branch -d origin/trunk || true
+  git branch -d master || true
   echo "Pushing code..."
   configGitRepo "${gitRepoUrl}" "${tmpGitDir}" "${username}" "${email}"
   if $tmpGitDirExist; then
