@@ -152,13 +152,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
   // 两个脚本域的变量
   const [gitScript, setGitScript] = useState('function main(user) { return user }');
   const [gitEmailScript, setGitEmailScript] = useState(`function main(user) { 
-    if(user.indexOf('mskj-') === 0) {
-      return user.substr(5) + '@mskj.com'
-    } 
-    if (user.indexOf('-') === -1 && user.indexOf('_') === -1) {
-      return user + '@cmbc.com.cn'
-    } 
-    return user + '@escmbc.com.cn'
+    return user + 'hzbank.com'
   }`);
 
   /** 更新模式
@@ -236,7 +230,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
         svn_user: ccUser,
       });
       setSvnList(list || []);
-      let newNamePair = list.map(item => {
+      const newNamePair = list.map(item => {
         return {
           'svnUserName': item,
           'gitUserName': eval(gitScript + 'main("'+item+'")'),
@@ -453,7 +447,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
              <p className={styles.secondNode}>Git</p>
            </div>
            <div className={styles.svnTitle}>
-             <div className={styles.firstNode}></div>
+             <div className={styles.firstNode} />
              <div className={styles.secondNodes}>
                <span className={styles.gitTitle}>Git用户名</span>
                <span className={styles.gitTitle}>Git邮箱</span>
@@ -461,7 +455,7 @@ const TaskCreator: React.FC<IModalCreatorProps> = (props) => {
            </div>
             <div className={styles.svnTitle}>
              <div className={styles.firstNode}>
-               <div className={styles.leftTitles} style={{height: '100%'}}></div>
+               <div className={styles.leftTitles} style={{height: '100%'}} />
              </div>
              <div className={styles.secondNodes}>
                 <div className={classnames([styles.innerRun, styles.innerRunLeft])}>
