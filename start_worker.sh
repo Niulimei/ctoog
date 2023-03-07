@@ -1,3 +1,3 @@
 #!/bin/bash
-./worker start
+bash -c ./worker start
 tail -f log/*

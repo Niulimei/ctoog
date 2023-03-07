@@ -1,3 +1,3 @@
 #!/bin/bash
-./server start
+bash -c ./server start
 tail -f log/*
